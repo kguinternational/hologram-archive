@@ -5,7 +5,6 @@
 ; ---------------------------------------------------------------------------------
 
 source_filename = "atlas-12288-memory.ll"
-target triple   = "x86_64-unknown-linux-gnu"
 
 ; =============================================================================
 ; Memory Metadata (strings + global counters)

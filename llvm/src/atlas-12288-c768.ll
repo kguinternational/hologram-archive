@@ -3,6 +3,8 @@
 ; (c) 2024-2025 UOR Foundation. All rights reserved.
 ; SPDX-License-Identifier: MIT
 
+source_filename = "atlas-12288-c768.ll"
+
 ; C768 Constants
 @atlas.c768.cycle_length = constant i64 768
 @atlas.c768.page_rhythm = constant i16 16   ; 16 × 48 = 768
@@ -219,3 +221,15 @@ entry:
 
 ; External dependency
 declare i7 @atlas.r96.classify(i8) nounwind readnone
+
+; =============================================================================
+; Module metadata and flags
+; =============================================================================
+
+!llvm.module.flags = !{!0, !1}
+!0 = !{i32 1, !"wchar_size", i32 4}
+!1 = !{i32 7, !"PIC Level", i32 2}
+
+; Atlas C768 metadata
+!llvm.ident = !{!2}
+!2 = !{!"Atlas-12288 C768 Module v1.0"}

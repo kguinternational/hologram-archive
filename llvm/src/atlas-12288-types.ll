@@ -12,8 +12,6 @@
 ; -----------------------------------------------------------------------------
 
 source_filename = "atlas-12288-types.ll"
-; Choose the real target triple for your deployment environment.
-target triple = "x86_64-unknown-linux-gnu"
 
 ;--- Optional module flags (harmless on most toolchains) -----------------------
 !llvm.module.flags = !{!0}

@@ -12,7 +12,6 @@
 ; ---------------------------------------------------------------------------------
 
 source_filename = "atlas-12288-simd.ll"
-target triple   = "x86_64-unknown-linux-gnu"
 
 ; =============================================================================
 ; Utility constants (vectors of splats)
@@ -487,9 +486,13 @@ check:
 ; Function attributes (target feature toggles)
 ; =============================================================================
 
+; #0: Basic SSE2 support for 128-bit vectors (x86/x86-64 baseline)
 attributes #0 = { "target-features"="+sse2" }
+; #1: Advanced Vector Extensions (AVX/AVX2) for 256-bit vectors
 attributes #1 = { "target-features"="+avx,+avx2" }
+; #2: AVX-512 support for 512-bit vectors (high-end x86-64)
 attributes #2 = { "target-features"="+avx512f,+avx512bw" }
+; #3: ARM NEON support for 128-bit vectors (AArch64/ARM64)
 attributes #3 = { "target-features"="+neon" }
 
 ; =============================================================================

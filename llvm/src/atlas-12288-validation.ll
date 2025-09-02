@@ -13,7 +13,6 @@
 ; ---------------------------------------------------------------------------------
 
 source_filename = "atlas-12288-validation.ll"
-target triple   = "x86_64-unknown-linux-gnu"
 
 ; =============================================================================
 ; Type definitions and validation structures

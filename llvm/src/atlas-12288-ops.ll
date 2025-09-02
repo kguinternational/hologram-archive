@@ -6,15 +6,20 @@
 ; ---------------------------------------------------------------------------------
 
 source_filename = "atlas-12288-ops.ll"
-target triple   = "x86_64-unknown-linux-gnu"
 
 ; =============================================================================
 ; Attributes (kept consistent with intrinsics file where applicable)
 ; =============================================================================
+
+; #0: Pure/value-only operations (no memory access, fully deterministic)
 attributes #0 = { nounwind readnone willreturn speculatable }
+; #1: Read-only memory access (no writes, cacheable)
 attributes #1 = { nounwind readonly willreturn }
+; #2: Generic nounwind for allocation/deallocation operations
 attributes #2 = { nounwind }
+; #3: Generic nounwind for structure management operations
 attributes #3 = { nounwind }
+; #4: Generic nounwind for utility/helper operations
 attributes #4 = { nounwind }
 
 ; =============================================================================

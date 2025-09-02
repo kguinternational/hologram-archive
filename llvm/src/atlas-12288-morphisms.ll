@@ -3,6 +3,8 @@
 ; (c) 2024-2025 UOR Foundation. All rights reserved.
 ; SPDX-License-Identifier: MIT
 
+source_filename = "atlas-12288-morphisms.ll"
+
 ; === Boundary Automorphisms ===
 ; Transform: (p,b) ↦ (u₄₈·p, u₂₅₆·b) with units u
 
@@ -494,3 +496,15 @@ declare ptr @atlas.alloc.aligned(i64) nounwind
 declare i32 @memcmp(ptr, ptr, i64) nounwind readonly
 declare void @llvm.memcpy.p0.p0.i64(ptr, ptr, i64, i1) nounwind
 declare void @llvm.memset.p0.i64(ptr, i8, i64, i1) nounwind
+
+; =============================================================================
+; Module metadata and flags
+; =============================================================================
+
+!llvm.module.flags = !{!0, !1}
+!0 = !{i32 1, !"wchar_size", i32 4}
+!1 = !{i32 7, !"PIC Level", i32 2}
+
+; Atlas morphisms metadata
+!llvm.ident = !{!2}
+!2 = !{!"Atlas-12288 Morphisms Module v1.0"}

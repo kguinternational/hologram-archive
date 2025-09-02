@@ -3,6 +3,8 @@
 ; (c) 2024-2025 UOR Foundation. All rights reserved.
 ; SPDX-License-Identifier: MIT
 
+source_filename = "atlas-12288-domains.ll"
+
 ; Domain type definition
 %atlas.domain = type {
   i64,        ; domain_id (unique identifier)
@@ -466,3 +468,15 @@ declare i1 @atlas.witness.verify(ptr, ptr, i64) nounwind readonly
 declare i1 @atlas.conserved.check(ptr, i64) nounwind readonly
 declare i64 @atlas._sum_bytes(ptr, i64) nounwind readonly
 declare void @llvm.memcpy.p0.p0.i64(ptr, ptr, i64, i1) nounwind
+
+; =============================================================================
+; Module metadata and flags
+; =============================================================================
+
+!llvm.module.flags = !{!0, !1}
+!0 = !{i32 1, !"wchar_size", i32 4}
+!1 = !{i32 7, !"PIC Level", i32 2}
+
+; Atlas domains metadata
+!llvm.ident = !{!2}
+!2 = !{!"Atlas-12288 Domains Module v1.0"}

@@ -14,7 +14,6 @@
 ; =============================================================================
 
 source_filename = "atlas-12288-acceptance.ll"
-target triple = "x86_64-unknown-linux-gnu"
 
 ; Import type definitions
 %atlas.byte = type i8
@@ -42,8 +41,8 @@ target triple = "x86_64-unknown-linux-gnu"
 %atlas.klein.coset = type { [4 x i7], i1 }    ; V₄ coset with validity flag
 
 ; Φ round-trip structures
-%atlas.phi.encode = type { i32, %atlas.coordinate }
-%atlas.phi.decode = type { %atlas.coordinate, i1 }  ; coordinate + valid flag
+%atlas.boundary.encode = type { i32, %atlas.coordinate }
+%atlas.boundary.decode = type { %atlas.coordinate, i1 }  ; coordinate + valid flag
 
 ; Budget conservation structures  
 %atlas.rl.budget = type { %atlas.budget, %atlas.budget, %atlas.budget }  ; (initial, current, final)
@@ -70,8 +69,8 @@ declare %atlas.klein.coset @atlas.klein.v4_coset(i7) nounwind readnone
 declare i1 @atlas.klein.canonicalize_check(%atlas.klein.coset) nounwind readnone
 
 ; From atlas-12288-morphisms.ll (assumed)
-declare %atlas.phi.encode @atlas.phi.encode(%atlas.coordinate) nounwind readnone
-declare %atlas.phi.decode @atlas.phi.decode(i32) nounwind readnone
+declare %atlas.boundary.encode @atlas.boundary.encode(%atlas.coordinate) nounwind readnone
+declare %atlas.boundary.decode @atlas.boundary.decode(i32) nounwind readnone
 
 ; From atlas-12288-domains.ll (assumed)
 declare %atlas.rl.proof @atlas.rl.compose_proof(ptr, ptr) nounwind readonly
@@ -460,11 +459,11 @@ test_body:
   %coord2 = insertvalue %atlas.coordinate %coord, i8 %byte_idx, 1
   
   ; Encode then decode
-  %encoded = call %atlas.phi.encode @atlas.phi.encode(%atlas.coordinate %coord2)
-  %encoded_val = extractvalue %atlas.phi.encode %encoded, 0
-  %decoded = call %atlas.phi.decode @atlas.phi.decode(i32 %encoded_val)
-  %decoded_coord = extractvalue %atlas.phi.decode %decoded, 0
-  %decode_valid = extractvalue %atlas.phi.decode %decoded, 1
+  %encoded = call %atlas.boundary.encode @atlas.boundary.encode(%atlas.coordinate %coord2)
+  %encoded_val = extractvalue %atlas.boundary.encode %encoded, 0
+  %decoded = call %atlas.boundary.decode @atlas.boundary.decode(i32 %encoded_val)
+  %decoded_coord = extractvalue %atlas.boundary.decode %decoded, 0
+  %decode_valid = extractvalue %atlas.boundary.decode %decoded, 1
   
   ; Check if round-trip preserves coordinate
   %decoded_page = extractvalue %atlas.coordinate %decoded_coord, 0

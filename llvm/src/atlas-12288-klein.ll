@@ -3,6 +3,8 @@
 ; (c) 2024-2025 UOR Foundation. All rights reserved.
 ; SPDX-License-Identifier: MIT
 
+source_filename = "atlas-12288-klein.ll"
+
 ; Klein orbit constants - privileged orbits
 @atlas.klein.orbit_0 = constant i32 0
 @atlas.klein.orbit_1 = constant i32 1
@@ -486,3 +488,15 @@ done:
 declare i7 @atlas.r96.classify(i8) nounwind readnone
 declare void @llvm.memcpy.p0.p0.i64(ptr, ptr, i64, i1) nounwind
 declare void @llvm.memset.p0.i64(ptr, i8, i64, i1) nounwind
+
+; =============================================================================
+; Module metadata and flags
+; =============================================================================
+
+!llvm.module.flags = !{!0, !1}
+!0 = !{i32 1, !"wchar_size", i32 4}
+!1 = !{i32 7, !"PIC Level", i32 2}
+
+; Atlas Klein orbit metadata
+!llvm.ident = !{!2}
+!2 = !{!"Atlas-12288 Klein Module v1.0"}
