@@ -34,7 +34,27 @@ ATLAS_SOURCES := \
 	$(SRC_DIR)/atlas-12288-ops.ll \
 	$(SRC_DIR)/atlas-12288-simd.ll \
 	$(SRC_DIR)/atlas-12288-memory.ll \
-	$(SRC_DIR)/atlas-12288-module.ll
+	$(SRC_DIR)/atlas-12288-module.ll \
+	$(SRC_DIR)/atlas-12288-c768.ll \
+	$(SRC_DIR)/atlas-12288-morphisms.ll \
+	$(SRC_DIR)/atlas-12288-klein.ll \
+	$(SRC_DIR)/atlas-12288-domains.ll \
+	$(SRC_DIR)/atlas-12288-acceptance.ll \
+	$(SRC_DIR)/atlas-12288-harmonic.ll \
+	$(SRC_DIR)/atlas-12288-validation.ll
+
+# Test files (LLVM IR)
+ATLAS_TESTS := \
+	$(TEST_DIR)/test-r96.ll \
+	$(TEST_DIR)/test-conservation.ll \
+	$(TEST_DIR)/test-witness.ll \
+	$(TEST_DIR)/test-simd.ll \
+	$(TEST_DIR)/test-c768.ll \
+	$(TEST_DIR)/test-morphisms.ll \
+	$(TEST_DIR)/test-klein.ll \
+	$(TEST_DIR)/test-domains.ll \
+	$(TEST_DIR)/test-acceptance.ll \
+	$(TEST_DIR)/test-harmonic.ll
 
 # Output files
 ATLAS_LINKED   := $(BUILD_DIR)/atlas-12288.linked.bc
@@ -200,7 +220,7 @@ $(TOOLS_DIR)/atlas-jit: $(TOOLS_DIR)/atlas-jit.cpp $(ATLAS_STATIC)
 # Testing
 # =============================================================================
 
-.PHONY: test-r96 test-conservation test-witness test-simd test-memory benchmark
+.PHONY: test-r96 test-conservation test-witness test-simd test-c768 test-morphisms test-klein test-domains test-acceptance test-harmonic test-memory benchmark
 
 test: $(ATLAS_MODULE)
 	@echo "[TEST] Running tests..."
@@ -211,7 +231,7 @@ test: $(ATLAS_MODULE)
 	fi
 
 # Lightweight smoke tests: link + verify each test file if present
-smoke-tests: test-r96 test-conservation test-witness test-simd
+smoke-tests: test-r96 test-conservation test-witness test-simd test-c768 test-morphisms test-klein test-domains test-acceptance test-harmonic
 
 define _link_verify
 	@t="$1"; \
@@ -235,6 +255,24 @@ test-witness: $(ATLAS_MODULE) | $(BUILD_DIR)
 
 test-simd: $(ATLAS_MODULE) | $(BUILD_DIR)
 	$(call _link_verify,test-simd)
+
+test-c768: $(ATLAS_MODULE) | $(BUILD_DIR)
+	$(call _link_verify,test-c768)
+
+test-morphisms: $(ATLAS_MODULE) | $(BUILD_DIR)
+	$(call _link_verify,test-morphisms)
+
+test-klein: $(ATLAS_MODULE) | $(BUILD_DIR)
+	$(call _link_verify,test-klein)
+
+test-domains: $(ATLAS_MODULE) | $(BUILD_DIR)
+	$(call _link_verify,test-domains)
+
+test-acceptance: $(ATLAS_MODULE) | $(BUILD_DIR)
+	$(call _link_verify,test-acceptance)
+
+test-harmonic: $(ATLAS_MODULE) | $(BUILD_DIR)
+	$(call _link_verify,test-harmonic)
 
 # Memory tests & benchmarks are external scripts/binaries
 
