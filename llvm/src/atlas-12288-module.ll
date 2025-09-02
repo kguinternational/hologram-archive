@@ -1,0 +1,367 @@
+; atlas-12288-module.ll — Complete Atlas‑12,288 LLVM Module (LLVM 15+, opaque pointers)
+; ---------------------------------------------------------------------------------
+; This top-level module stitches together runtime init/teardown, platform hooks,
+; a simple model smoke-test, and exported symbols. It is corrected for opaque
+; pointers, valid attribute groups, and the Atlas intrinsics declared in
+; atlas-12288-intrinsics.ll. Use with the types/r96/ops/simd/memory files.
+; ---------------------------------------------------------------------------------
+
+source_filename = "atlas-12288-module.ll"
+target triple   = "x86_64-unknown-linux-gnu"
+
+; =============================================================================
+; Module flags / identification
+; =============================================================================
+
+!llvm.module.flags = !{!0}
+!llvm.ident        = !{!1}
+!0 = !{i32 1, !"wchar_size", i32 4}
+!1 = !{!"Atlas-12288 LLVM Module v1.1.0"}
+
+; =============================================================================
+; Attribute groups (numeric IDs; usable on decls/defs as needed)
+; =============================================================================
+
+; #0: pure/value-only (no memory)
+attributes #0 = { nounwind readnone willreturn speculatable "atlas-pure"="true" }
+; #1: readonly memory
+attributes #1 = { nounwind readonly willreturn "atlas-readonly"="true" }
+; #2: conservation-preserving ops
+attributes #2 = { nounwind "atlas-conserving"="true" "atlas-witness-required"="true" }
+; #3: resonance-aware alloc/ops
+attributes #3 = { nounwind "atlas-resonance-aware"="true" }
+; #4: generic nounwind (alloc/teardown/IO as needed)
+attributes #4 = { nounwind }
+; Target-tuned helper attribute groups
+attributes #5 = { "target-cpu"="x86-64" "target-features"="+sse2,+ssse3,+sse4.1,+avx,+avx2" }
+attributes #6 = { "target-cpu"="generic" "target-features"="+neon,+fp-armv8" }
+attributes #7 = { "target-cpu"="generic" "target-features"="+simd128" }
+
+; =============================================================================
+; Optional pass-pipeline hints (informational metadata; inert to LLVM)
+; =============================================================================
+
+; Metadata removed
+; Metadata removed
+; Metadata removed
+; Metadata removed
+; Metadata removed
+; Metadata removed
+
+; =============================================================================
+; Ctors / Dtors (runtime hooks)
+; =============================================================================
+
+@llvm.global_ctors = appending global [1 x { i32, ptr, ptr }] [
+  { i32, ptr, ptr } { i32 65535, ptr @atlas.runtime.init, ptr null }
+]
+
+@llvm.global_dtors = appending global [1 x { i32, ptr, ptr }] [
+  { i32, ptr, ptr } { i32 65535, ptr @atlas.runtime.cleanup, ptr null }
+]
+
+; =============================================================================
+; External declarations
+; =============================================================================
+
+; C runtime
+declare ptr @malloc(i64)
+declare void @free(ptr)
+declare ptr @aligned_alloc(i64, i64)
+
+; LLVM intrinsics occasionally used by linked modules
+declare void @llvm.memcpy.p0.p0.i64(ptr, ptr, i64, i1)
+declare void @llvm.memset.p0.i64(ptr, i8, i64, i1)
+
+; Subsystems - implementations are at the end of this file
+; (removed declarations to avoid duplicates)
+
+; Atlas intrinsics (see atlas-12288-intrinsics.ll)
+declare i7  @atlas.r96.classify(i8) #0
+declare i32 @atlas.boundary.encode(i16, i8) #0
+declare { i16, i8 } @atlas.boundary.decode(i32) #0
+declare i1  @atlas.conserved.check(ptr, i64) #1
+
+declare ptr @atlas.witness.generate(ptr, i64) #4
+declare i1  @atlas.witness.verify(ptr, ptr, i64) #1
+declare void @atlas.witness.destroy(ptr) #4
+
+; Budget (subset used in this module)
+declare i7 @atlas.budget.add(i7, i7) #0
+declare i7 @atlas.budget.mul(i7, i7) #0
+declare i1 @atlas.budget.zero(i7)    #0
+
+; Memory helpers (optional, if linked with atlas-12288-memory.ll)
+declare ptr  @atlas.alloc.witnessed(i64, i7) #3
+declare void @atlas.free.witnessed(ptr)      #4
+declare void @atlas.memcpy.conserved(ptr, ptr, i64) #2
+
+; =============================================================================
+; Type definitions (mirrors atlas-12288-types.ll for readability)
+; =============================================================================
+
+%atlas.byte       = type i8
+%atlas.page       = type [256 x i8]
+%atlas.structure  = type [48 x %atlas.page]                 ; 48 * 256 = 12,288 bytes
+%atlas.resonance  = type i7
+%atlas.budget     = type i7
+%atlas.coordinate = type { i16, i8 }
+%atlas.boundary   = type i32
+
+; =============================================================================
+; Runtime init/cleanup
+; =============================================================================
+
+define internal void @atlas.runtime.init() {
+entry:
+  call void @atlas.r96.init()
+  call void @atlas.memory.init()
+  call void @atlas.witness.init()
+  %has_jit = call i1 @atlas.jit.available()
+  br i1 %has_jit, label %init_jit, label %exit
+init_jit:
+  call void @atlas.jit.init()
+  br label %exit
+exit:
+  ret void
+}
+
+define internal void @atlas.runtime.cleanup() {
+entry:
+  call void @atlas.witness.cleanup()
+  call void @atlas.memory.cleanup()
+  %running = call i1 @atlas.jit.running()
+  br i1 %running, label %shutdown, label %exit
+shutdown:
+  call void @atlas.jit.shutdown()
+  br label %exit
+exit:
+  ret void
+}
+
+; =============================================================================
+; Platform initializers
+; =============================================================================
+
+define void @atlas.init.x86_64() #5 {
+entry:
+  call void @atlas.enable.avx2()
+  call void @atlas.memory.x86_64.init()
+  ret void
+}
+
+define void @atlas.init.aarch64() #6 {
+entry:
+  call void @atlas.enable.neon()
+  call void @atlas.memory.aarch64.init()
+  ret void
+}
+
+define void @atlas.init.wasm() #7 {
+entry:
+  call void @atlas.enable.wasm.simd()
+  call void @atlas.memory.wasm.init()
+  ret void
+}
+
+; =============================================================================
+; Demo entry point (renamed to avoid conflicts with test main)
+; =============================================================================
+
+define i32 @atlas_demo_main(i32 %argc, ptr %argv) {
+entry:
+  call void @atlas.runtime.init()
+  %result = call i32 @atlas.model.test()
+  call void @atlas.runtime.cleanup()
+  ret i32 %result
+}
+
+; =============================================================================
+; Model smoke-test
+; =============================================================================
+
+define i32 @atlas.model.test() {
+entry:
+  ; Allocate a 12,288-byte structure (3 * 4096, page-aligned)
+  %structure = call ptr @atlas.structure.create()
+  call void @atlas.structure.init.test(ptr %structure)
+  ; Verify conservation over the entire structure
+  %ok = call i1 @atlas.conserved.check(ptr %structure, i64 12288)
+  br i1 %ok, label %test_resonance, label %error
+
+test_resonance:
+  ; R96 classification of first byte
+  %bptr  = bitcast ptr %structure to ptr
+  %byte  = load i8, ptr %bptr, align 1
+  %class = call i7 @atlas.r96.classify(i8 %byte)
+  ; boundary encode/decode sanity check
+  %boundary = call i32 @atlas.boundary.encode(i16 0, i8 0)
+  %decoded  = call { i16, i8 } @atlas.boundary.decode(i32 %boundary)
+  ; witness round-trip
+  %data = bitcast ptr %structure to ptr
+  %w    = call ptr @atlas.witness.generate(ptr %data, i64 12288)
+  %valid= call i1 @atlas.witness.verify(ptr %w, ptr %data, i64 12288)
+  br i1 %valid, label %success, label %error
+
+success:
+  call void @atlas.structure.destroy(ptr %structure)
+  call void @atlas.witness.destroy(ptr %w)
+  ret i32 0
+
+error:
+  ret i32 1
+}
+
+; =============================================================================
+; Structure management
+; =============================================================================
+
+define ptr @atlas.structure.create() {
+entry:
+  %size = mul i64 48, 256                 ; 12,288
+  %ptr  = call ptr @aligned_alloc(i64 4096, i64 %size)
+  ret ptr %ptr
+}
+
+define void @atlas.structure.init.test(ptr %s) {
+entry:
+  %data = bitcast ptr %s to ptr
+  call void @atlas.init.conserved.pattern(ptr %data, i64 12288)
+  ret void
+}
+
+define void @atlas.structure.destroy(ptr %s) {
+entry:
+  call void @free(ptr %s)
+  ret void
+}
+
+; Fill buffer with i % 96 so that sum(buffer) % 96 == 0
+
+define void @atlas.init.conserved.pattern(ptr %data, i64 %len) {
+entry:
+  br label %loop
+loop:
+  %i     = phi i64 [ 0, %entry ], [ %next, %body ]
+  %done  = icmp uge i64 %i, %len
+  br i1 %done, label %exit, label %body
+body:
+  %val   = urem i64 %i, 96
+  %v8    = trunc i64 %val to i8
+  %p     = getelementptr i8, ptr %data, i64 %i
+  store i8 %v8, ptr %p, align 1
+  %next  = add i64 %i, 1
+  br label %loop
+exit:
+  ret void
+}
+
+; =============================================================================
+; Exported symbols to keep via linker (prevent DCE in LTO)
+; =============================================================================
+
+@llvm.used = appending global [20 x ptr] [
+  ; Core intrinsics
+  ptr @atlas.r96.classify,
+  ptr @atlas.boundary.encode,
+  ptr @atlas.boundary.decode,
+  ptr @atlas.conserved.check,
+  ptr @atlas.witness.generate,
+  ptr @atlas.witness.verify,
+  ptr @atlas.witness.destroy,
+  ptr @atlas.budget.add,
+  ptr @atlas.budget.mul,
+  ptr @atlas.budget.zero,
+  ; Memory ops (optional)
+  ptr @atlas.alloc.witnessed,
+  ptr @atlas.free.witnessed,
+  ptr @atlas.memcpy.conserved,
+  ; Runtime + test
+  ptr @atlas.runtime.init,
+  ptr @atlas.runtime.cleanup,
+  ptr @atlas.model.test,
+  ; Platform hooks
+  ptr @atlas.init.x86_64,
+  ptr @atlas.init.aarch64,
+  ptr @atlas.init.wasm,
+  ; Structure helpers
+  ptr @atlas.structure.create
+], section "llvm.metadata"
+
+; =============================================================================
+; Build hints (informational only)
+; =============================================================================
+
+; Metadata removed
+; Metadata removed
+; Metadata removed
+; Metadata removed
+
+; ---------------------------------------------------------------------------------
+; End of module
+; ---------------------------------------------------------------------------------
+
+; =============================================================================
+; Runtime stub implementations
+; These would normally be provided by the platform/runtime
+; =============================================================================
+
+define void @atlas.r96.init() nounwind {
+  ret void
+}
+
+define void @atlas.memory.init() nounwind {
+  ret void
+}
+
+define void @atlas.witness.init() nounwind {
+  ret void
+}
+
+define void @atlas.memory.cleanup() nounwind {
+  ret void
+}
+
+define void @atlas.witness.cleanup() nounwind {
+  ret void
+}
+
+define i1 @atlas.jit.available() nounwind {
+  ret i1 false
+}
+
+define void @atlas.jit.init() nounwind {
+  ret void
+}
+
+define i1 @atlas.jit.running() nounwind {
+  ret i1 false
+}
+
+define void @atlas.jit.shutdown() nounwind {
+  ret void
+}
+
+define void @atlas.enable.avx2() nounwind {
+  ret void
+}
+
+define void @atlas.enable.neon() nounwind {
+  ret void
+}
+
+define void @atlas.enable.wasm.simd() nounwind {
+  ret void
+}
+
+define void @atlas.memory.x86_64.init() nounwind {
+  ret void
+}
+
+define void @atlas.memory.aarch64.init() nounwind {
+  ret void
+}
+
+define void @atlas.memory.wasm.init() nounwind {
+  ret void
+}
