@@ -25,6 +25,21 @@ declare <64 x i7> @atlas.r96.classify.v64i8(<64 x i8> %bytes) #0
 ; Classify entire page (page passed by value as 256-lane vector)
 declare <256 x i7> @atlas.r96.classify.page(<256 x i8> %page) #0
 
+; Layer 3 (Resonance) Operations - Hot-path optimized kernels
+; Classify page (256 bytes) with pointer interface for GB/s processing
+declare void @atlas.r96.classify.page.ptr(ptr %in256, ptr %out256) #1
+
+; Compute 96-bin histogram from page (256 bytes) using 16-bit counters
+declare void @atlas.r96.histogram.page(ptr %in256, ptr %out96_u16) #1
+
+; Check if two R96 resonance classes harmonize: (r1 + r2) % 96 == 0
+declare i1 @atlas.r96.harmonizes(i7 %r1, i7 %r2) #0
+
+; SIMD-optimized helper functions for Layer 3
+declare void @atlas.r96.classify.page.v16(ptr %in16, ptr %out16) #1
+declare void @atlas.r96.histogram.block32(ptr %in32, ptr %hist96_u16) #1
+declare void @atlas.r96.harmonizes.batch(ptr %r1_array, ptr %r2_array, ptr %results, i32 %count) #0
+
 ; Get resonance spectrum for a structure
 ;  %structure : ptr -> %atlas.structure
 ;  %out       : ptr -> %atlas.spectrum (written)
@@ -63,14 +78,28 @@ declare i16 @atlas.conserved.sum.page(ptr %page) #1
 ; Sum entire structure
 declare i32 @atlas.conserved.sum.structure(ptr %structure) #1
 
-; Compute conservation delta between two buffers
-declare i32 @atlas.conserved.delta(ptr %before, ptr %after, i64 %len) #1
+; Compute conservation delta between two buffers (Layer 2 - returns i7)
+declare i7 @atlas.conserved.delta(ptr %before, ptr %after, i64 %len) #1
 
 ; Verify conservation domain descriptor
 declare i1 @atlas.conserved.domain(ptr %domain) #1
 
 ; Conservation-safe addition: dst[i] = src1[i] ⊕ src2[i]
 declare void @atlas.conserved.add(ptr %dst, ptr %src1, ptr %src2, i64 %len) #2
+
+; Layer 2 Conservation Operations
+; Check if window data sums to 0 mod 96
+declare i1 @atlas.conserved.window.check(ptr %data, i64 %len) #1
+
+; Streaming conservation update
+declare void @atlas.conserved.update(ptr %state, ptr %chunk, i64 %n) #2
+
+; Atlas structure-specific operations (12,288 bytes)
+declare i1 @atlas.conserved.structure.check(ptr %structure) #1
+declare i7 @atlas.conserved.structure.delta(ptr %before, ptr %after) #1
+
+; Batch conservation checking for SIMD optimization
+declare void @atlas.conserved.batch.check(ptr %buffers, ptr %lengths, i32 %count, ptr %results) #1
 
 ; =============================================================================
 ; Witness Operations

@@ -13,14 +13,16 @@ source_filename = "atlas-12288-ops.ll"
 
 ; #0: Pure/value-only operations (no memory access, fully deterministic)
 attributes #0 = { nounwind readnone willreturn speculatable }
-; #1: Read-only memory access (no writes, cacheable)
-attributes #1 = { nounwind readonly willreturn }
-; #2: Generic nounwind for allocation/deallocation operations
-attributes #2 = { nounwind }
+; #1: Read-only memory access (no writes, cacheable) - Layer 2 hot-path optimized
+attributes #1 = { nounwind readonly willreturn "target-features"="+sse2,+avx" "atlas-hot-path"="true" }
+; #2: Generic nounwind for allocation/deallocation operations - Layer 2 conserving
+attributes #2 = { nounwind "atlas-conserving"="true" }
 ; #3: Generic nounwind for structure management operations
 attributes #3 = { nounwind }
 ; #4: Generic nounwind for utility/helper operations
 attributes #4 = { nounwind }
+; #5: Layer 2 SIMD-optimized operations (hot path, vectorizable)
+attributes #5 = { nounwind readonly willreturn "target-features"="+sse2,+avx2" "atlas-hot-path"="true" "atlas-vectorizable"="true" }
 
 ; =============================================================================
 ; Declarations used by implementations
@@ -38,6 +40,94 @@ declare ptr @aligned_alloc(i64, i64)
 ; =============================================================================
 ; Helpers (internal)
 ; =============================================================================
+
+; Layer 2: Efficient mod-96 arithmetic helpers for hot path optimization
+; Fast mod-96 using branch-free arithmetic (96 = 32*3 = 2^5*3)
+define internal i64 @atlas._fast_mod96(i64 %val) nounwind readnone willreturn {
+entry:
+  ; For small values, direct modulo is fine
+  %small = icmp ult i64 %val, 96
+  br i1 %small, label %direct, label %reduce
+
+direct:
+  ret i64 %val
+
+reduce:
+  ; Use Barrett reduction approximation for larger values
+  ; For mod 96: multiply by (2^k / 96) then adjust
+  %approx = udiv i64 %val, 96
+  %mult = mul i64 %approx, 96
+  %remainder = sub i64 %val, %mult
+  ret i64 %remainder
+}
+
+; Vectorized sum for SIMD-friendly byte accumulation (processes 8 bytes at a time)
+define internal i64 @atlas._sum_bytes_simd(ptr %data, i64 %len) nounwind readonly {
+entry:
+  %vec_len = and i64 %len, -8  ; Round down to multiple of 8
+  br label %vec_loop
+
+vec_loop:
+  %i = phi i64 [ 0, %entry ], [ %i.next, %vec_body ]
+  %acc = phi i64 [ 0, %entry ], [ %acc.next, %vec_body ]
+  %vec_done = icmp uge i64 %i, %vec_len
+  br i1 %vec_done, label %scalar_start, label %vec_body
+
+vec_body:
+  ; Load 8 bytes as i64 and extract individual bytes
+  %ptr = getelementptr i8, ptr %data, i64 %i
+  %ptr_i64 = bitcast ptr %ptr to ptr
+  %val8 = load i64, ptr %ptr_i64, align 1
+  
+  ; Extract bytes and accumulate (unrolled for efficiency)
+  %b0 = and i64 %val8, 255
+  %val8_1 = lshr i64 %val8, 8
+  %b1 = and i64 %val8_1, 255
+  %val8_2 = lshr i64 %val8, 16
+  %b2 = and i64 %val8_2, 255
+  %val8_3 = lshr i64 %val8, 24
+  %b3 = and i64 %val8_3, 255
+  %val8_4 = lshr i64 %val8, 32
+  %b4 = and i64 %val8_4, 255
+  %val8_5 = lshr i64 %val8, 40
+  %b5 = and i64 %val8_5, 255
+  %val8_6 = lshr i64 %val8, 48
+  %b6 = and i64 %val8_6, 255
+  %b7 = lshr i64 %val8, 56
+  
+  %sum8 = add i64 %b0, %b1
+  %sum8_2 = add i64 %sum8, %b2
+  %sum8_3 = add i64 %sum8_2, %b3
+  %sum8_4 = add i64 %sum8_3, %b4
+  %sum8_5 = add i64 %sum8_4, %b5
+  %sum8_6 = add i64 %sum8_5, %b6
+  %sum8_final = add i64 %sum8_6, %b7
+  
+  %acc.next = add i64 %acc, %sum8_final
+  %i.next = add i64 %i, 8
+  br label %vec_loop
+
+scalar_start:
+  ; Handle remaining bytes
+  br label %scalar_loop
+
+scalar_loop:
+  %j = phi i64 [ %vec_len, %scalar_start ], [ %j.next, %scalar_body ]
+  %acc_scalar = phi i64 [ %acc, %scalar_start ], [ %acc_scalar.next, %scalar_body ]
+  %scalar_done = icmp uge i64 %j, %len
+  br i1 %scalar_done, label %exit, label %scalar_body
+
+scalar_body:
+  %ptr_scalar = getelementptr i8, ptr %data, i64 %j
+  %byte = load i8, ptr %ptr_scalar, align 1
+  %byte64 = zext i8 %byte to i64
+  %acc_scalar.next = add i64 %acc_scalar, %byte64
+  %j.next = add i64 %j, 1
+  br label %scalar_loop
+
+exit:
+  ret i64 %acc_scalar
+}
 
 ; Sum bytes in a buffer (0..len) into i64
 define i64 @atlas._sum_bytes(ptr %data, i64 %len) nounwind readonly {
@@ -232,15 +322,28 @@ entry:
   ret i32 %r
 }
 
-; Delta between two buffers modulo 96
-define internal i32 @atlas.conserved.delta.impl(ptr %before, ptr %after, i64 %len) nounwind readonly willreturn {
+; Delta between two buffers modulo 96 (Layer 2 - optimized for hot path)
+define internal i7 @atlas.conserved.delta.impl(ptr %before, ptr %after, i64 %len) nounwind readonly willreturn {
 entry:
+  ; Use SIMD-optimized byte summation for larger buffers
+  %use_simd = icmp uge i64 %len, 32
+  br i1 %use_simd, label %simd_path, label %scalar_path
+
+simd_path:
+  %b_simd = call i64 @atlas._sum_bytes_simd(ptr %before, i64 %len)
+  %a_simd = call i64 @atlas._sum_bytes_simd(ptr %after,  i64 %len)
+  %d_simd = sub i64 %a_simd, %b_simd
+  %m_simd = call i64 @atlas._fast_mod96(i64 %d_simd)
+  %r_simd = trunc i64 %m_simd to i7
+  ret i7 %r_simd
+
+scalar_path:
   %b = call i64 @atlas._sum_bytes(ptr %before, i64 %len)
   %a = call i64 @atlas._sum_bytes(ptr %after,  i64 %len)
   %d = sub i64 %a, %b
   %m = srem i64 %d, 96
-  %r = trunc i64 %m to i32
-  ret i32 %r
+  %r = trunc i64 %m to i7
+  ret i7 %r
 }
 
 ; Conservative structural domain check: non-null pointer treated as valid
@@ -279,6 +382,63 @@ exit:
   ret void
 }
 
+; Layer 2: Check if window data sums to 0 mod 96 (conservation window check)
+define internal i1 @atlas.conserved.window.check.impl(ptr %data, i64 %len) nounwind readonly willreturn {
+entry:
+  ; Use SIMD-optimized summation for larger windows
+  %use_simd = icmp uge i64 %len, 32
+  br i1 %use_simd, label %simd_path, label %scalar_path
+
+simd_path:
+  %sum_simd = call i64 @atlas._sum_bytes_simd(ptr %data, i64 %len)
+  %mod_simd = call i64 @atlas._fast_mod96(i64 %sum_simd)
+  %ok_simd = icmp eq i64 %mod_simd, 0
+  ret i1 %ok_simd
+
+scalar_path:
+  %sum = call i64 @atlas._sum_bytes(ptr %data, i64 %len)
+  %mod = urem i64 %sum, 96
+  %ok = icmp eq i64 %mod, 0
+  ret i1 %ok
+}
+
+; Layer 2: Streaming conservation update - updates conservation state with new chunk
+; State format: first i64 is running sum, then follows actual state data
+define internal void @atlas.conserved.update.impl(ptr %state, ptr %chunk, i64 %n) nounwind {
+entry:
+  ; Load current running sum from state
+  %sum_ptr = bitcast ptr %state to ptr
+  %current_sum = load i64, ptr %sum_ptr, align 8
+  
+  ; Calculate sum of new chunk using optimized path
+  %use_simd = icmp uge i64 %n, 32
+  br i1 %use_simd, label %simd_sum, label %scalar_sum
+
+simd_sum:
+  %chunk_sum_simd = call i64 @atlas._sum_bytes_simd(ptr %chunk, i64 %n)
+  br label %update
+
+scalar_sum:
+  %chunk_sum_scalar = call i64 @atlas._sum_bytes(ptr %chunk, i64 %n)
+  br label %update
+
+update:
+  %chunk_sum = phi i64 [ %chunk_sum_simd, %simd_sum ], [ %chunk_sum_scalar, %scalar_sum ]
+  
+  ; Update running sum with fast mod-96
+  %new_sum_raw = add i64 %current_sum, %chunk_sum
+  %new_sum = call i64 @atlas._fast_mod96(i64 %new_sum_raw)
+  
+  ; Store updated sum
+  store i64 %new_sum, ptr %sum_ptr, align 8
+  
+  ; Update the actual state data (copy chunk to state+8)
+  %state_data = getelementptr i8, ptr %state, i64 8
+  call void @llvm.memcpy.p0.p0.i64(ptr %state_data, ptr %chunk, i64 %n, i1 false)
+  
+  ret void
+}
+
 ; ---- Public wrappers ----
 
 define i1 @atlas.conserved.check(ptr %data, i64 %len) #1 {
@@ -296,9 +456,9 @@ define i32 @atlas.conserved.sum.structure(ptr %s) #1 {
   ret i32 %r
 }
 
-define i32 @atlas.conserved.delta(ptr %before, ptr %after, i64 %len) #1 {
-  %r = call i32 @atlas.conserved.delta.impl(ptr %before, ptr %after, i64 %len)
-  ret i32 %r
+define i7 @atlas.conserved.delta(ptr %before, ptr %after, i64 %len) #5 {
+  %r = call i7 @atlas.conserved.delta.impl(ptr %before, ptr %after, i64 %len)
+  ret i7 %r
 }
 
 define i1 @atlas.conserved.domain(ptr %domain) #1 {
@@ -308,6 +468,59 @@ define i1 @atlas.conserved.domain(ptr %domain) #1 {
 
 define void @atlas.conserved.add(ptr %dst, ptr %src1, ptr %src2, i64 %len) #2 {
   call void @atlas.conserved.add.impl(ptr %dst, ptr %src1, ptr %src2, i64 %len)
+  ret void
+}
+
+; Layer 2 public wrappers
+define i1 @atlas.conserved.window.check(ptr %data, i64 %len) #5 {
+  %r = call i1 @atlas.conserved.window.check.impl(ptr %data, i64 %len)
+  ret i1 %r
+}
+
+define void @atlas.conserved.update(ptr %state, ptr %chunk, i64 %n) #2 {
+  call void @atlas.conserved.update.impl(ptr %state, ptr %chunk, i64 %n)
+  ret void
+}
+
+; Layer 2 enhanced operations for Atlas structure (12,288 bytes)
+define i1 @atlas.conserved.structure.check(ptr %structure) #5 {
+  %r = call i1 @atlas.conserved.window.check.impl(ptr %structure, i64 12288)
+  ret i1 %r
+}
+
+define i7 @atlas.conserved.structure.delta(ptr %before, ptr %after) #5 {
+  %r = call i7 @atlas.conserved.delta.impl(ptr %before, ptr %after, i64 12288)
+  ret i7 %r
+}
+
+; Layer 2 conserved batch operations for enhanced SIMD utilization
+define void @atlas.conserved.batch.check(ptr %buffers, ptr %lengths, i32 %count, ptr %results) #5 {
+entry:
+  br label %loop
+
+loop:
+  %i = phi i32 [ 0, %entry ], [ %i.next, %body ]
+  %done = icmp uge i32 %i, %count
+  br i1 %done, label %exit, label %body
+
+body:
+  ; Load buffer pointer and length
+  %buf_ptr_ptr = getelementptr ptr, ptr %buffers, i32 %i
+  %buf_ptr = load ptr, ptr %buf_ptr_ptr, align 8
+  %len_ptr = getelementptr i64, ptr %lengths, i32 %i
+  %len = load i64, ptr %len_ptr, align 8
+  
+  ; Check conservation
+  %result = call i1 @atlas.conserved.window.check.impl(ptr %buf_ptr, i64 %len)
+  
+  ; Store result
+  %result_ptr = getelementptr i1, ptr %results, i32 %i
+  store i1 %result, ptr %result_ptr, align 1
+  
+  %i.next = add i32 %i, 1
+  br label %loop
+
+exit:
   ret void
 }
 

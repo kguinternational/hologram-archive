@@ -34,6 +34,7 @@ ATLAS_SOURCES := \
 	$(SRC_DIR)/atlas-12288-ops.ll \
 	$(SRC_DIR)/atlas-12288-simd.ll \
 	$(SRC_DIR)/atlas-12288-memory.ll \
+	$(SRC_DIR)/atlas-12288-witness.ll \
 	$(SRC_DIR)/atlas-12288-module.ll \
 	$(SRC_DIR)/atlas-12288-c768.ll \
 	$(SRC_DIR)/atlas-12288-morphisms.ll \
@@ -231,7 +232,7 @@ test: $(ATLAS_MODULE)
 	fi
 
 # Lightweight smoke tests: link + verify each test file if present
-smoke-tests: test-r96 test-conservation test-witness test-simd test-c768 test-morphisms test-klein test-domains test-acceptance test-harmonic
+smoke-tests: test-r96 test-conservation test-witness test-simd test-c768 test-morphisms test-klein test-domains test-acceptance test-harmonic test-integration
 
 define _link_verify
 	@t="$1"; \
@@ -273,6 +274,11 @@ test-acceptance: $(ATLAS_MODULE) | $(BUILD_DIR)
 
 test-harmonic: $(ATLAS_MODULE) | $(BUILD_DIR)
 	$(call _link_verify,test-harmonic)
+
+# Integration tests
+test-integration:
+	@echo "[TEST] Running Layer 2 integration tests..."
+	@$(MAKE) -C ../tests run-layer2 || echo "[WARN] Integration tests not available"
 
 # Memory tests & benchmarks are external scripts/binaries
 

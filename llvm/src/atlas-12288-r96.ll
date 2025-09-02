@@ -259,8 +259,203 @@ exit:
 }
 
 ; =============================================================================
+; Layer 3 (Resonance) Operations - Hot-path optimized kernels
+; =============================================================================
+
+; Classify a page (256 bytes) to 256 classes with pointer-based interface.
+; This is the L3 pointer-based version of the existing page classifier.
+;  in256:  ptr to 256 bytes input
+;  out256: ptr to 256 bytes output (each byte = i7 class, zero-extended to i8)
+define void @atlas.r96.classify.page.ptr(ptr %in256, ptr %out256) nounwind readonly willreturn {
+entry:
+  br label %loop, !llvm.loop !1
+
+loop:
+  %i = phi i32 [ 0, %entry ], [ %next, %body ]
+  %done = icmp eq i32 %i, 256
+  br i1 %done, label %exit, label %body
+
+body:
+  ; Load input byte
+  %in_ptr = getelementptr i8, ptr %in256, i32 %i
+  %byte = load i8, ptr %in_ptr, align 1
+  
+  ; Classify using pure modulo implementation for vectorization
+  %cls = call i7 @atlas.r96.classify(i8 %byte)
+  
+  ; Store as i8 (zero-extended i7)
+  %cls_i8 = zext i7 %cls to i8
+  %out_ptr = getelementptr i8, ptr %out256, i32 %i
+  store i8 %cls_i8, ptr %out_ptr, align 1
+  
+  ; Next iteration
+  %next = add i32 %i, 1
+  br label %loop, !llvm.loop !1
+
+exit:
+  ret void
+}
+
+; Compute 96-bin histogram from a page (256 bytes) using 16-bit counters.
+; Hot-path optimized for GB/s processing speeds.
+;  in256:     ptr to 256 bytes input
+;  out96_u16: ptr to 96 x i16 histogram bins (zeroed by caller)
+define void @atlas.r96.histogram.page(ptr %in256, ptr %out96_u16) nounwind readonly willreturn {
+entry:
+  ; Zero the histogram first
+  call void @llvm.memset.p0.i64(ptr %out96_u16, i8 0, i64 192, i1 false)  ; 96 * 2 = 192 bytes
+  br label %loop, !llvm.loop !4
+
+loop:
+  %i = phi i32 [ 0, %entry ], [ %next, %body ]
+  %done = icmp eq i32 %i, 256
+  br i1 %done, label %exit, label %body
+
+body:
+  ; Load and classify byte
+  %in_ptr = getelementptr i8, ptr %in256, i32 %i
+  %byte = load i8, ptr %in_ptr, align 1
+  %cls = call i7 @atlas.r96.classify(i8 %byte)
+  
+  ; Increment histogram bin
+  %idx = zext i7 %cls to i32
+  %bin_ptr = getelementptr [96 x i16], ptr %out96_u16, i32 0, i32 %idx
+  %old_count = load i16, ptr %bin_ptr, align 2
+  %new_count = add i16 %old_count, 1
+  store i16 %new_count, ptr %bin_ptr, align 2
+  
+  ; Next iteration
+  %next = add i32 %i, 1
+  br label %loop, !llvm.loop !4
+
+exit:
+  ret void
+}
+
+; Check if two resonance classes harmonize: (r1 + r2) % 96 == 0
+; Pure computation for maximum optimization potential.
+define i1 @atlas.r96.harmonizes(i7 %r1, i7 %r2) nounwind readnone willreturn {
+entry:
+  ; Extend to avoid overflow in addition
+  %r1_ext = zext i7 %r1 to i16
+  %r2_ext = zext i7 %r2 to i16
+  
+  ; Add and check modulo 96
+  %sum = add i16 %r1_ext, %r2_ext
+  %mod = urem i16 %sum, 96
+  %harmonizes = icmp eq i16 %mod, 0
+  
+  ret i1 %harmonizes
+}
+
+; =============================================================================
+; Layer 3 SIMD-Optimized Helper Functions
+; =============================================================================
+
+; Vectorized classify for 16 bytes with explicit vectorization hints
+define void @atlas.r96.classify.page.v16(ptr %in16, ptr %out16) nounwind readonly willreturn {
+entry:
+  ; Load 16 bytes as vector
+  %vec_ptr = bitcast ptr %in16 to ptr
+  %input_vec = load <16 x i8>, ptr %vec_ptr, align 16
+  
+  ; Classify vector
+  %result_vec = call <16 x i7> @atlas.r96.classify.v16i8(<16 x i8> %input_vec)
+  
+  ; Convert to i8 and store
+  br label %store_loop
+
+store_loop:
+  %i = phi i32 [ 0, %entry ], [ %next, %store_body ]
+  %done = icmp eq i32 %i, 16
+  br i1 %done, label %exit, label %store_body
+
+store_body:
+  %cls = extractelement <16 x i7> %result_vec, i32 %i
+  %cls_i8 = zext i7 %cls to i8
+  %out_ptr = getelementptr i8, ptr %out16, i32 %i
+  store i8 %cls_i8, ptr %out_ptr, align 1
+  %next = add i32 %i, 1
+  br label %store_loop
+
+exit:
+  ret void
+}
+
+; Block-level histogram accumulator (processes 32 bytes at once)
+define void @atlas.r96.histogram.block32(ptr %in32, ptr %hist96_u16) nounwind readonly willreturn {
+entry:
+  br label %loop
+
+loop:
+  %i = phi i32 [ 0, %entry ], [ %next, %body ]
+  %done = icmp eq i32 %i, 32
+  br i1 %done, label %exit, label %body
+
+body:
+  ; Load and classify byte
+  %in_ptr = getelementptr i8, ptr %in32, i32 %i
+  %byte = load i8, ptr %in_ptr, align 1
+  %cls = call i7 @atlas.r96.classify(i8 %byte)
+  
+  ; Increment histogram (atomic-style for potential parallelization)
+  %idx = zext i7 %cls to i32
+  %bin_ptr = getelementptr [96 x i16], ptr %hist96_u16, i32 0, i32 %idx
+  %old_count = load i16, ptr %bin_ptr, align 2
+  %new_count = add i16 %old_count, 1
+  store i16 %new_count, ptr %bin_ptr, align 2
+  
+  %next = add i32 %i, 1
+  br label %loop
+
+exit:
+  ret void
+}
+
+; Batch harmonization check (useful for SIMD optimization)
+define void @atlas.r96.harmonizes.batch(ptr %r1_array, ptr %r2_array, ptr %results, i32 %count) nounwind readnone willreturn {
+entry:
+  br label %loop
+
+loop:
+  %i = phi i32 [ 0, %entry ], [ %next, %body ]
+  %done = icmp eq i32 %i, %count
+  br i1 %done, label %exit, label %body
+
+body:
+  ; Load r1 and r2
+  %r1_ptr = getelementptr i7, ptr %r1_array, i32 %i
+  %r2_ptr = getelementptr i7, ptr %r2_array, i32 %i
+  %r1 = load i7, ptr %r1_ptr, align 1
+  %r2 = load i7, ptr %r2_ptr, align 1
+  
+  ; Check harmonization
+  %harmonizes = call i1 @atlas.r96.harmonizes(i7 %r1, i7 %r2)
+  
+  ; Store result
+  %result_i8 = zext i1 %harmonizes to i8
+  %result_ptr = getelementptr i8, ptr %results, i32 %i
+  store i8 %result_i8, ptr %result_ptr, align 1
+  
+  %next = add i32 %i, 1
+  br label %loop
+
+exit:
+  ret void
+}
+
+; =============================================================================
 ; Metadata
 ; =============================================================================
 
 !0 = !{}                          ; for !invariant.load on table accesses
-; Metadata removed - not valid syntax
+
+; Loop vectorization hints for hot-path optimization
+!1 = !{!1, !2, !3}
+!2 = !{!"llvm.loop.vectorize.enable", i1 true}
+!3 = !{!"llvm.loop.vectorize.width", i32 16}
+
+; Histogram loop optimization (careful with vectorization due to data dependencies)
+!4 = !{!4, !5, !6}
+!5 = !{!"llvm.loop.vectorize.enable", i1 true}
+!6 = !{!"llvm.loop.vectorize.width", i32 8}
