@@ -10,6 +10,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <stdbool.h>
+#include <stdio.h>
 
 // =============================================================================
 // LLVM Domain Function Stubs
@@ -166,17 +167,42 @@ void atlas_witness_destroy_llvm(void* witness) {
 // LLVM Batch Processing Function Stubs
 // =============================================================================
 
-uint8_t* atlas_batch_conserved_check_llvm(const void* buffers, uint32_t count) {
-    if (!buffers || count == 0) return NULL;
+void atlas_batch_conserved_check_llvm(const void* buffers, uint32_t count, uint8_t* results) {
+    if (!buffers || count == 0 || !results) return;
     
-    // Allocate results array
-    uint8_t* results = malloc(count);
-    if (!results) return NULL;
+    // Cast to LLVM batch buffer structure (matches ABI conversion)
+    typedef struct {
+        void* data;
+        uint64_t size;      // uint64_t for LLVM ABI
+        uint32_t status;
+        uint8_t reserved[4];
+    } llvm_batch_buffer_desc;
     
-    // For testing, just mark all as conserved
-    memset(results, 1, count);
+    const llvm_batch_buffer_desc* batch_buffers = (const llvm_batch_buffer_desc*)buffers;
     
-    return results;
+    // Check each buffer individually
+    for (uint32_t i = 0; i < count; i++) {
+        if (!batch_buffers[i].data || batch_buffers[i].size == 0) {
+            results[i] = 0;
+            continue;
+        }
+        
+        // Calculate sum of bytes mod 96
+        uint32_t sum = 0;
+        const uint8_t* bytes = (const uint8_t*)batch_buffers[i].data;
+        for (uint64_t j = 0; j < batch_buffers[i].size; j++) {
+            sum += bytes[j];
+        }
+        
+        // Conservation check: sum % 96 == 0
+        results[i] = (sum % 96) == 0 ? 1 : 0;
+        
+        // Debug output
+        if (getenv("DEBUG_BATCH")) {
+            printf("   Stub: buffer[%u] ptr=%p size=%lu sum=%u mod96=%u result=%u\n", 
+                   i, batch_buffers[i].data, batch_buffers[i].size, sum, sum % 96, results[i]);
+        }
+    }
 }
 
 void* atlas_batch_delta_compute_llvm(void* deltas, uint32_t count) {

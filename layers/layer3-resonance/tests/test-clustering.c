@@ -437,7 +437,7 @@ static void test_stress_conditions(void) {
     
     // Build cluster directory for large dataset
     clock_t start_time = clock();
-    void* stress_directory = atlas_build_all_clusters(stress_memory, STRESS_PAGES);
+    atlas_cluster_directory_t* stress_directory = atlas_build_all_clusters(stress_memory, STRESS_PAGES);
     clock_t end_time = clock();
     
     double elapsed_time = ((double)(end_time - start_time)) / CLOCKS_PER_SEC;
@@ -450,9 +450,9 @@ static void test_stress_conditions(void) {
     uint32_t stress_total_pages = 0;
     
     for (uint8_t r = 0; r < 96; r++) {
-        void* cluster = atlas_get_cluster_for_resonance(stress_directory, r);
+        atlas_cluster_t* cluster = atlas_get_cluster_for_resonance(stress_directory, r);
         if (cluster != NULL) {
-            if (!atlas_cluster_validate(cluster)) {
+            if (!atlas_cluster_validate_individual(cluster)) {
                 stress_validation = false;
                 break;
             }

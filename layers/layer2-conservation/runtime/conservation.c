@@ -139,7 +139,7 @@ extern bool atlas_witness_verify_llvm(void* witness, const void* data, size_t le
 extern void atlas_witness_destroy_llvm(void* witness);
 
 // Batch processing functions
-extern uint8_t* atlas_batch_conserved_check_llvm(const void* buffers, uint32_t count);
+extern void atlas_batch_conserved_check_llvm(const void* buffers, uint32_t count, uint8_t* results);
 extern void* atlas_batch_delta_compute_llvm(void* deltas, uint32_t count);
 extern void* atlas_batch_witness_generate_llvm(void* witnesses, uint32_t count);
 extern void atlas_batch_get_statistics_llvm(uint64_t* stats);
@@ -693,19 +693,22 @@ uint8_t* atlas_batch_conserved_check(const atlas_batch_buffer_t* buffers, size_t
         return NULL;
     }
     
-    // Convert to LLVM format
-    convert_to_llvm_batch_buffers(buffers, llvm_buffers, count);
-    
-    // Call LLVM batch function
-    uint8_t* results = atlas_batch_conserved_check_llvm(llvm_buffers, (uint32_t)count);
-    
-    // Clean up temporary buffer
-    free(llvm_buffers);
-    
+    // Allocate results array
+    uint8_t* results = malloc(count * sizeof(uint8_t));
     if (!results) {
+        free(llvm_buffers);
         atlas_set_error(ATLAS_E_MEMORY);
         return NULL;
     }
+    
+    // Convert to LLVM format
+    convert_to_llvm_batch_buffers(buffers, llvm_buffers, count);
+    
+    // Call LLVM batch function with results buffer
+    atlas_batch_conserved_check_llvm(llvm_buffers, (uint32_t)count, results);
+    
+    // Clean up temporary buffer
+    free(llvm_buffers);
     
     atlas_set_error(ATLAS_OK);
     return results;
