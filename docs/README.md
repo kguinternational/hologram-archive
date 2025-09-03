@@ -7,6 +7,7 @@ Welcome to the Hologram project documentation. Hologram is a layered, verifiable
 ### 📐 [Architecture](architecture/)
 - [Layer Specification](architecture/layer-specification.md) - Detailed 7-layer architecture
 - [Design Principles](architecture/design-principles.md) - Core mathematical foundations
+- [Layer 4 Design](architecture/layer4-design.md) - Manifold layer architecture
 - [Repository Structure](architecture/repository-structure.md) - Project organization
 
 ### 📚 [Layer Documentation](layers/)
@@ -15,7 +16,7 @@ Welcome to the Hologram project documentation. Hologram is a layered, verifiable
 - [Layer 2: Conservation](layers/layer2-conservation.md) - Witness & conservation ✅
 - [Layer 2: Optimization Guide](layers/layer2-optimization.md) - Performance tuning
 - [Layer 3: Resonance](layers/layer3-resonance.md) - R96 classification ✅
-- Layer 4: Manifold - *Coming soon*
+- [Layer 4: Manifold](layers/layer4-manifold.md) - Holographic projections 📋
 - Layer 5: VPI - *Coming soon*
 - Layer 6: SDK - *Coming soon*
 - Layer 7: Applications - *Coming soon*
@@ -23,6 +24,7 @@ Welcome to the Hologram project documentation. Hologram is a layered, verifiable
 ### 🚀 [Developer Guides](guides/)
 - [Getting Started](guides/getting-started.md) - Quick start guide
 - [Contributing](guides/contributing.md) - How to contribute
+- [Layer 4 Implementation](guides/layer4-implementation.md) - Rust implementation guide
 
 ### 📊 [Benchmarks](benchmarks/)
 Performance analysis and optimization results
