@@ -1,0 +1,5 @@
+Atlas Layer 2 Runtime Test Report
+Generated: Tue Sep  2 20:45:05 UTC 2025
+=========================================
+
+✓ test-properties-asan - PASSED (0s)
