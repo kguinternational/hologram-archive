@@ -37,7 +37,7 @@ LAYER6_DIR := layers/layer6-sdk
 LAYER7_DIR := layers/layer7-apps
 
 # Active layers (implemented)
-ACTIVE_LAYERS := layer0 layer1 layer2 layer3
+ACTIVE_LAYERS := layer0 layer1 layer2 layer3 layer4
 
 # Output directories
 BUILD_DIR := build
@@ -51,7 +51,7 @@ INTEGRATION_DIR := integration
 
 .PHONY: all clean distclean test check help check-llvm install uninstall
 .PHONY: $(ACTIVE_LAYERS) integration
-.PHONY: layer0 layer1 layer2 layer3
+.PHONY: layer0 layer1 layer2 layer3 layer4
 .PHONY: bench bench-l2 bench-debug bench-release bench-thorough bench-quick bench-clean
 
 all: check-llvm $(ACTIVE_LAYERS) integration
@@ -90,9 +90,14 @@ layer3: layer2
 	@echo "[LAYER3] Building Resonance Layer..."
 	@$(MAKE) -C $(LAYER3_DIR) BUILD_TYPE=$(BUILD_TYPE) TARGET=$(TARGET)
 
-# Future layers (placeholder)
 layer4: layer3
-	@echo "[LAYER4] Manifold Layer - Not implemented yet"
+	@echo "[LAYER4] Building Manifold Layer..."
+	@$(MAKE) -C $(LAYER4_DIR) BUILD_TYPE=$(BUILD_TYPE) TARGET=$(TARGET)
+	@echo "[LAYER4] Building Rust components..."
+	@cd $(LAYER4_DIR)/rs && cargo build --release
+	@echo "[LAYER4] Copying Rust library to lib directory..."
+	@mkdir -p $(LIB_DIR)
+	@cp $(LAYER4_DIR)/rs/target/release/libatlas_manifold.a $(LIB_DIR)/libatlas-manifold-rs.a 2>/dev/null || echo "[WARN] Rust static library not found, skipping copy"
 
 layer5: layer4
 	@echo "[LAYER5] VPI Layer - Not implemented yet"
@@ -123,7 +128,8 @@ $(LIB_DIR)/libatlas.a: $(ACTIVE_LAYERS) | $(LIB_DIR)
 		$(LIB_DIR)/libatlas-core.a \
 		$(LIB_DIR)/libatlas-boundary.a \
 		$(LIB_DIR)/libatlas-conservation.a \
-		$(LIB_DIR)/libatlas-resonance.a
+		$(LIB_DIR)/libatlas-resonance.a \
+		$(LIB_DIR)/libatlas-manifold.a
 
 # Create combined shared library from all layers  
 $(LIB_DIR)/libatlas.so: $(ACTIVE_LAYERS) | $(LIB_DIR)
@@ -134,6 +140,7 @@ $(LIB_DIR)/libatlas.so: $(ACTIVE_LAYERS) | $(LIB_DIR)
 		$(LIB_DIR)/libatlas-boundary.a \
 		$(LIB_DIR)/libatlas-conservation.a \
 		$(LIB_DIR)/libatlas-resonance.a \
+		$(LIB_DIR)/libatlas-manifold.a \
 		-Wl,--no-whole-archive
 
 # =============================================================================
@@ -146,6 +153,9 @@ test: all test-integration
 	@$(MAKE) -C $(LAYER1_DIR) test
 	@$(MAKE) -C $(LAYER2_DIR) test  
 	@$(MAKE) -C $(LAYER3_DIR) test
+	@$(MAKE) -C $(LAYER4_DIR) test
+	@echo "[TEST] Running Rust tests..."
+	@cd $(LAYER4_DIR)/rs && cargo test
 	@echo "[TEST] All tests completed"
 
 # Alias for test target (common convention)
@@ -163,6 +173,10 @@ test-layer2:
 
 test-layer3:
 	@$(MAKE) -C $(LAYER3_DIR) test
+
+test-layer4:
+	@$(MAKE) -C $(LAYER4_DIR) test
+	@cd $(LAYER4_DIR)/rs && cargo test
 
 test-integration:
 	@$(MAKE) -C $(INTEGRATION_DIR) test
@@ -240,6 +254,8 @@ clean: bench-clean
 	@$(MAKE) -C $(LAYER1_DIR) clean 2>/dev/null || true
 	@$(MAKE) -C $(LAYER2_DIR) clean 2>/dev/null || true
 	@$(MAKE) -C $(LAYER3_DIR) clean 2>/dev/null || true
+	@$(MAKE) -C $(LAYER4_DIR) clean 2>/dev/null || true
+	@cd $(LAYER4_DIR)/rs && cargo clean 2>/dev/null || true
 	@$(MAKE) -C $(INTEGRATION_DIR) clean 2>/dev/null || true
 	@rm -rf $(LIB_DIR)
 
@@ -249,6 +265,8 @@ distclean: clean
 	@$(MAKE) -C $(LAYER1_DIR) distclean 2>/dev/null || true
 	@$(MAKE) -C $(LAYER2_DIR) distclean 2>/dev/null || true
 	@$(MAKE) -C $(LAYER3_DIR) distclean 2>/dev/null || true
+	@$(MAKE) -C $(LAYER4_DIR) distclean 2>/dev/null || true
+	@cd $(LAYER4_DIR)/rs && cargo clean 2>/dev/null || true
 	@$(MAKE) -C $(INTEGRATION_DIR) distclean 2>/dev/null || true
 	@find . -name "*.bc" -delete 2>/dev/null || true
 	@find . -name "*.o" -delete 2>/dev/null || true
@@ -263,15 +281,16 @@ help:
 	@echo "Usage: make [target] [options]"
 	@echo ""
 	@echo "Targets:"
-	@echo "  all              - Build all active layers (0-3) and integration"
+	@echo "  all              - Build all active layers (0-4) and integration"
 	@echo "  layer0           - Build Layer 0 (Atlas Core) only"
 	@echo "  layer1           - Build Layer 1 (Boundary) and dependencies"
 	@echo "  layer2           - Build Layer 2 (Conservation) and dependencies"
 	@echo "  layer3           - Build Layer 3 (Resonance) and dependencies"
+	@echo "  layer4           - Build Layer 4 (Manifold) and dependencies"
 	@echo "  integration      - Build integration tests"
 	@echo "  test             - Run all tests (layer + integration)"
 	@echo "  check            - Alias for 'test' target"
-	@echo "  test-layer[0-3]  - Run specific layer tests"
+	@echo "  test-layer[0-4]  - Run specific layer tests"
 	@echo "  test-integration - Run integration tests only"
 	@echo "  bench            - Run Layer 2 performance benchmarks"
 	@echo "  bench-l2         - Run Layer 2 benchmark suite"
@@ -296,7 +315,7 @@ help:
 	@echo "  Layer 1 (Boundary)       - ✅ Implemented and tested"
 	@echo "  Layer 2 (Conservation)   - ✅ Implemented and tested"  
 	@echo "  Layer 3 (Resonance)      - ✅ Implemented and tested"
-	@echo "  Layer 4 (Manifold)       - 📋 Planned (not implemented)"
+	@echo "  Layer 4 (Manifold)       - ✅ Implemented and tested"
 	@echo "  Layer 5 (VPI)            - 📋 Planned (not implemented)"
 	@echo "  Layer 6 (SDK)            - 📋 Planned (not implemented)"
 	@echo "  Layer 7 (Applications)   - 📋 Planned (not implemented)"
