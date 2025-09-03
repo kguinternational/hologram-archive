@@ -8,7 +8,7 @@
 #include <assert.h>
 #include <stdint.h>
 
-#include "atlas-runtime.h"
+#include "../include/atlas-resonance.h"
 
 // Test data: 3 pages of 256 bytes each (total 768 bytes)
 #define TEST_PAGES 3
@@ -68,7 +68,7 @@ int main() {
     
     // Build cluster view
     atlas_cluster_view cluster = atlas_cluster_by_resonance(memory, TEST_PAGES);
-    assert(cluster.data != NULL);
+    assert(cluster.offsets != NULL);
     printf("   ✓ Cluster view created successfully\n");
 
     // Validate cluster structure
@@ -80,24 +80,27 @@ int main() {
     atlas_cluster_stats(cluster, &total_pages, &non_empty_classes, &largest_class);
     printf("   Total pages: %zu\n", total_pages);
     printf("   Non-empty resonance classes: %zu\n", non_empty_classes);
-    printf("   Largest resonance class: %zu pages\n", largest_class);
+    printf("   Largest resonance class: %zu bytes\n", largest_class);
     
     assert(total_pages == TEST_PAGES);
     assert(non_empty_classes > 0 && non_empty_classes <= 96);
+    // Check that cluster.n equals total bytes (pages * 256)
+    assert(cluster.n == TEST_PAGES * 256);
 
     printf("\n4. Testing cluster access...\n");
     
-    // Test accessing pages by resonance class
+    // Test accessing bytes by resonance class
     for (uint8_t r = 0; r < 96; r++) {
         size_t count = atlas_cluster_count_for_resonance(cluster, r);
         if (count > 0) {
-            const uint32_t* page_indices = atlas_cluster_pages_for_resonance(cluster, r, &count);
-            assert(page_indices != NULL);
-            printf("   Resonance class %u: %zu pages\n", r, count);
+            const uint32_t* byte_coords = atlas_cluster_pages_for_resonance(cluster, r, &count);
+            assert(byte_coords != NULL);
+            printf("   Resonance class %u: %zu bytes\n", r, count);
             
-            // Verify all page indices are valid
+            // Verify all byte coordinates are valid (should be 0..TEST_PAGES*256-1)
+            uint32_t max_coord = TEST_PAGES * 256 - 1;
             for (size_t i = 0; i < count; i++) {
-                assert(page_indices[i] < TEST_PAGES);
+                assert(byte_coords[i] <= max_coord);
             }
         }
     }
@@ -163,7 +166,7 @@ int main() {
     
     // Clean up
     atlas_cluster_destroy(&cluster);
-    assert(cluster.data == NULL);  // Should be cleared
+    assert(cluster.offsets == NULL);  // Should be cleared
     printf("   ✓ Cluster view destroyed\n");
 
     free(memory);

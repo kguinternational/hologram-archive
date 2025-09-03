@@ -1,0 +1,657 @@
+; atlas-12288-ops.ll — Core Atlas operations (LLVM 15+, opaque pointers)
+; ---------------------------------------------------------------------------------
+; This module provides concrete implementations for Atlas operations and thin
+; wrappers matching the intrinsic signatures declared in atlas-12288-intrinsics.ll.
+; It is updated for opaque pointers (ptr) and compatible with atlas-12288-types.ll.
+; ---------------------------------------------------------------------------------
+
+source_filename = "atlas-12288-ops.ll"
+target triple   = "x86_64-unknown-linux-gnu"
+
+; =============================================================================
+; Attributes (kept consistent with intrinsics file where applicable)
+; =============================================================================
+attributes #0 = { nounwind readnone willreturn speculatable }
+attributes #1 = { nounwind readonly willreturn }
+attributes #2 = { nounwind }
+attributes #3 = { nounwind }
+attributes #4 = { nounwind }
+
+; =============================================================================
+; Declarations used by implementations
+; =============================================================================
+
+declare void @llvm.trap() noreturn nounwind
+declare void @llvm.memcpy.p0.p0.i64(ptr, ptr, i64, i1)
+declare void @llvm.memset.p0.i64(ptr, i8, i64, i1)
+
+declare ptr @malloc(i64)
+declare void @free(ptr)
+; POSIX aligned_alloc(alignment, size) — signature may vary by platform; wrapper used here.
+declare ptr @aligned_alloc(i64, i64)
+
+; =============================================================================
+; Helpers (internal)
+; =============================================================================
+
+; Sum bytes in a buffer (0..len) into i64
+define internal i64 @atlas._sum_bytes(ptr %data, i64 %len) nounwind readonly {
+entry:
+  br label %loop
+
+loop:
+  %i   = phi i64 [ 0, %entry ], [ %i.next, %loop ]
+  %acc = phi i64 [ 0, %entry ], [ %acc.next, %loop ]
+  %done = icmp uge i64 %i, %len
+  br i1 %done, label %exit, label %body
+
+body:
+  %p     = getelementptr i8, ptr %data, i64 %i
+  %byte  = load i8, ptr %p, align 1
+  %b64   = zext i8 %byte to i64
+  %acc.next = add i64 %acc, %b64
+  %i.next   = add i64 %i, 1
+  br label %loop
+
+exit:
+  ret i64 %acc
+}
+
+; Zero and fill a 96-bin histogram from a 256-byte page (for potential callers)
+; page: ptr to 256 bytes
+; histogram: ptr to [96 x i32]
+define internal void @atlas._histogram_96(ptr %page, ptr %hist) nounwind {
+entry:
+  call void @llvm.memset.p0.i64(ptr %hist, i8 0, i64 384, i1 false)
+  br label %loop
+
+loop:
+  %i = phi i32 [ 0, %entry ], [ %i.next, %loop ]
+  %bptr = getelementptr i8, ptr %page, i32 %i
+  %b    = load i8, ptr %bptr, align 1
+  %cls7 = call i7 @atlas.r96.classify(i8 %b) readnone
+  %idx  = zext i7 %cls7 to i32
+  %hptr = getelementptr [96 x i32], ptr %hist, i32 0, i32 %idx
+  %old  = load i32, ptr %hptr, align 4
+  %new  = add i32 %old, 1
+  store i32 %new, ptr %hptr, align 4
+  %i.next = add i32 %i, 1
+  %done = icmp eq i32 %i.next, 256
+  br i1 %done, label %exit, label %loop
+
+exit:
+  ret void
+}
+
+declare i7 @atlas.r96.classify(i8) #0
+
+; =============================================================================
+; Boundary Operations (Φ Isomorphism)
+; =============================================================================
+
+; ---- Implementations (internal) ----
+
+define internal i32 @atlas.boundary.encode.impl(i16 %page, i8 %offset) nounwind readnone willreturn {
+entry:
+  %valid_page = icmp ult i16 %page, 48
+  br i1 %valid_page, label %encode, label %error
+
+encode:
+  %page32   = zext i16 %page to i32
+  %offset32 = zext i8 %offset to i32
+  %shifted  = shl i32 %page32, 16
+  %with_off = or i32 %shifted, %offset32
+  ret i32 %with_off
+
+error:
+  ret i32 -1
+}
+
+; {i16 page, i8 offset}
+define internal { i16, i8 } @atlas.boundary.decode.impl(i32 %boundary) nounwind readnone willreturn {
+entry:
+  %is_valid = icmp sge i32 %boundary, 0
+  br i1 %is_valid, label %decode, label %error
+
+decode:
+  %offset32 = and i32 %boundary, 255
+  %page32   = lshr i32 %boundary, 16
+  %offset   = trunc i32 %offset32 to i8
+  %page     = trunc i32 %page32   to i16
+  %r1 = insertvalue { i16, i8 } undef, i16 %page,   0
+  %r2 = insertvalue { i16, i8 } %r1,  i8  %offset, 1
+  ret { i16, i8 } %r2
+
+error:
+  %e1 = insertvalue { i16, i8 } undef, i16 -1, 0
+  %e2 = insertvalue { i16, i8 } %e1,  i8  -1, 1
+  ret { i16, i8 } %e2
+}
+
+define internal i32 @atlas.boundary.transform.impl(i32 %boundary, i7 %resonance) nounwind readnone willreturn {
+entry:
+  %decoded = call { i16, i8 } @atlas.boundary.decode.impl(i32 %boundary)
+  %page   = extractvalue { i16, i8 } %decoded, 0
+  %offset = extractvalue { i16, i8 } %decoded, 1
+  %off16  = zext i8 %offset      to i16
+  %r16    = zext i7 %resonance   to i16
+  %sum16  = add i16 %off16, %r16
+  %newoff = trunc i16 %sum16 to i8
+  %wrapped = icmp uge i16 %sum16, 256
+  %inc     = zext i1 %wrapped to i16
+  %page'   = add i16 %page, %inc
+  %page''  = urem i16 %page', 48
+  %res     = call i32 @atlas.boundary.encode.impl(i16 %page'', i8 %newoff)
+  ret i32 %res
+}
+
+; Klein orbit = page mod 4
+define internal i2 @atlas.boundary.klein.impl(i32 %boundary) nounwind readnone willreturn {
+entry:
+  %d     = call { i16, i8 } @atlas.boundary.decode.impl(i32 %boundary)
+  %page  = extractvalue { i16, i8 } %d, 0
+  %mod4  = urem i16 %page, 4
+  %k     = trunc i16 %mod4 to i2
+  ret i2 %k
+}
+
+; Rotate: set page's klein component to given value, keep offset; wrap by 48
+define internal i32 @atlas.boundary.rotate.impl(i32 %boundary, i2 %klein) nounwind readnone willreturn {
+entry:
+  %d      = call { i16, i8 } @atlas.boundary.decode.impl(i32 %boundary)
+  %page   = extractvalue { i16, i8 } %d, 0
+  %offset = extractvalue { i16, i8 } %d, 1
+  %pmod4  = urem i16 %page, 4
+  %base   = sub i16 %page, %pmod4
+  %k16    = zext i2 %klein to i16
+  %np     = add i16 %base, %k16
+  %np48   = urem i16 %np, 48
+  %res    = call i32 @atlas.boundary.encode.impl(i16 %np48, i8 %offset)
+  ret i32 %res
+}
+
+; ---- Public wrappers (match intrinsic names & attributes) ----
+
+define i32 @atlas.boundary.encode(i16 %page, i8 %offset) #0 {
+  %r = call i32 @atlas.boundary.encode.impl(i16 %page, i8 %offset)
+  ret i32 %r
+}
+
+define { i16, i8 } @atlas.boundary.decode(i32 %boundary) #0 {
+  %r = call { i16, i8 } @atlas.boundary.decode.impl(i32 %boundary)
+  ret { i16, i8 } %r
+}
+
+define i32 @atlas.boundary.transform(i32 %boundary, i7 %resonance) #0 {
+  %r = call i32 @atlas.boundary.transform.impl(i32 %boundary, i7 %resonance)
+  ret i32 %r
+}
+
+define i2 @atlas.boundary.klein(i32 %boundary) #0 {
+  %r = call i2 @atlas.boundary.klein.impl(i32 %boundary)
+  ret i2 %r
+}
+
+define i32 @atlas.boundary.rotate(i32 %boundary, i2 %klein) #0 {
+  %r = call i32 @atlas.boundary.rotate.impl(i32 %boundary, i2 %klein)
+  ret i32 %r
+}
+
+; =============================================================================
+; Conservation Operations
+; =============================================================================
+
+; ---- Implementations (internal) ----
+
+define internal i1 @atlas.conserved.check.impl(ptr %data, i64 %len) nounwind readonly willreturn {
+entry:
+  %sum = call i64 @atlas._sum_bytes(ptr %data, i64 %len)
+  %mod = urem i64 %sum, 96
+  %ok  = icmp eq i64 %mod, 0
+  ret i1 %ok
+}
+
+; Return sum of 256 bytes (truncate to i16)
+define internal i16 @atlas.conserved.sum.page.impl(ptr %page) nounwind readonly willreturn {
+entry:
+  %sum = call i64 @atlas._sum_bytes(ptr %page, i64 256)
+  %r   = trunc i64 %sum to i16
+  ret i16 %r
+}
+
+; Return sum of 12,288 bytes (truncate to i32)
+define internal i32 @atlas.conserved.sum.structure.impl(ptr %s) nounwind readonly willreturn {
+entry:
+  %sum = call i64 @atlas._sum_bytes(ptr %s, i64 12288)
+  %r   = trunc i64 %sum to i32
+  ret i32 %r
+}
+
+; Delta between two buffers modulo 96
+define internal i32 @atlas.conserved.delta.impl(ptr %before, ptr %after, i64 %len) nounwind readonly willreturn {
+entry:
+  %b = call i64 @atlas._sum_bytes(ptr %before, i64 %len)
+  %a = call i64 @atlas._sum_bytes(ptr %after,  i64 %len)
+  %d = sub i64 %a, %b
+  %m = srem i64 %d, 96
+  %r = trunc i64 %m to i32
+  ret i32 %r
+}
+
+; Conservative structural domain check: non-null pointer treated as valid
+define internal i1 @atlas.conserved.domain.impl(ptr %domain) nounwind readnone willreturn {
+entry:
+  %ok = icmp ne ptr %domain, null
+  ret i1 %ok
+}
+
+; dst[i] = (src1[i] + src2[i]) wrapping byte addition — total is conserved mod 256
+; (Use higher-level checks if you require mod 96 invariants.)
+define internal void @atlas.conserved.add.impl(ptr %dst, ptr %src1, ptr %src2, i64 %len) nounwind {
+entry:
+  br label %loop
+
+loop:
+  %i = phi i64 [ 0, %entry ], [ %i.next, %loop ]
+  %done = icmp uge i64 %i, %len
+  br i1 %done, label %exit, label %body
+
+body:
+  %p1 = getelementptr i8, ptr %src1, i64 %i
+  %p2 = getelementptr i8, ptr %src2, i64 %i
+  %pd = getelementptr i8, ptr %dst,  i64 %i
+  %b1 = load i8, ptr %p1, align 1
+  %b2 = load i8, ptr %p2, align 1
+  %b1w = zext i8 %b1 to i16
+  %b2w = zext i8 %b2 to i16
+  %sum = add i16 %b1w, %b2w
+  %out = trunc i16 %sum to i8
+  store i8 %out, ptr %pd, align 1
+  %i.next = add i64 %i, 1
+  br label %loop
+
+exit:
+  ret void
+}
+
+; ---- Public wrappers ----
+
+define i1 @atlas.conserved.check(ptr %data, i64 %len) #1 {
+  %r = call i1 @atlas.conserved.check.impl(ptr %data, i64 %len)
+  ret i1 %r
+}
+
+define i16 @atlas.conserved.sum.page(ptr %page) #1 {
+  %r = call i16 @atlas.conserved.sum.page.impl(ptr %page)
+  ret i16 %r
+}
+
+define i32 @atlas.conserved.sum.structure(ptr %s) #1 {
+  %r = call i32 @atlas.conserved.sum.structure.impl(ptr %s)
+  ret i32 %r
+}
+
+define i32 @atlas.conserved.delta(ptr %before, ptr %after, i64 %len) #1 {
+  %r = call i32 @atlas.conserved.delta.impl(ptr %before, ptr %after, i64 %len)
+  ret i32 %r
+}
+
+define i1 @atlas.conserved.domain(ptr %domain) #1 {
+  %r = call i1 @atlas.conserved.domain.impl(ptr %domain)
+  ret i1 %r
+}
+
+define void @atlas.conserved.add(ptr %dst, ptr %src1, ptr %src2, i64 %len) #2 {
+  call void @atlas.conserved.add.impl(ptr %dst, ptr %src1, ptr %src2, i64 %len)
+  ret void
+}
+
+; =============================================================================
+; Budget Operations (RL‑96 Algebra)
+; =============================================================================
+
+; ---- Implementations (internal) ----
+
+define internal i7 @atlas.budget.add.impl(i7 %a, i7 %b) nounwind readnone willreturn {
+entry:
+  %a16 = zext i7 %a to i16
+  %b16 = zext i7 %b to i16
+  %sum = add i16 %a16, %b16
+  %mod = urem i16 %sum, 96
+  %res = trunc i16 %mod to i7
+  ret i7 %res
+}
+
+define internal i7 @atlas.budget.mul.impl(i7 %a, i7 %b) nounwind readnone willreturn {
+entry:
+  %a16 = zext i7 %a to i16
+  %b16 = zext i7 %b to i16
+  %prd = mul i16 %a16, %b16
+  %mod = urem i16 %prd, 96
+  %res = trunc i16 %mod to i7
+  ret i7 %res
+}
+
+define internal i7 @atlas.budget.inv.impl(i7 %budget) nounwind readnone willreturn {
+entry:
+  %b16 = zext i7 %budget to i16
+  %inv = sub i16 96, %b16
+  %mod = urem i16 %inv, 96
+  %res = trunc i16 %mod to i7
+  ret i7 %res
+}
+
+define internal i1 @atlas.budget.zero.impl(i7 %budget) nounwind readnone willreturn {
+entry:
+  %z = icmp eq i7 %budget, 0
+  ret i1 %z
+}
+
+define internal i1 @atlas.budget.less.impl(i7 %a, i7 %b) nounwind readnone willreturn {
+entry:
+  %r = icmp ult i7 %a, %b
+  ret i1 %r
+}
+
+; ---- Public wrappers ----
+
+define i7 @atlas.budget.add(i7 %a, i7 %b) #0 { %r = call i7 @atlas.budget.add.impl(i7 %a, i7 %b) ; ret i7 %r }
+
+define i7 @atlas.budget.mul(i7 %a, i7 %b) #0 { %r = call i7 @atlas.budget.mul.impl(i7 %a, i7 %b) ; ret i7 %r }
+
+define i7 @atlas.budget.inv(i7 %b)        #0 { %r = call i7 @atlas.budget.inv.impl(i7 %b)        ; ret i7 %r }
+
+define i1 @atlas.budget.zero(i7 %b)       #0 { %r = call i1 @atlas.budget.zero.impl(i7 %b)       ; ret i1 %r }
+
+define i1 @atlas.budget.less(i7 %a, i7 %b)#0 { %r = call i1 @atlas.budget.less.impl(i7 %a, i7 %b) ; ret i1 %r }
+
+; =============================================================================
+; Witness Operations (opaque handle)
+; Layout: [data bytes][u32 checksum][u32 length]
+; =============================================================================
+
+; ---- Implementations (internal) ----
+
+; Compute a simple rolling checksum (NOT cryptographically secure)
+define internal i32 @atlas._checksum(ptr %data, i64 %len) nounwind readonly {
+entry:
+  br label %loop
+
+loop:
+  %i    = phi i64 [ 0, %entry ], [ %i.next, %loop ]
+  %crc  = phi i32 [ -1, %entry ], [ %crc.next, %loop ]
+  %done = icmp uge i64 %i, %len
+  br i1 %done, label %exit, label %body
+
+body:
+  %p   = getelementptr i8, ptr %data, i64 %i
+  %b   = load i8, ptr %p, align 1
+  %b32 = zext i8 %b to i32
+  %x   = xor i32 %crc, %b32
+  %s   = lshr i32 %x, 1
+  %crc.next = xor i32 %s, 3988292384 ; 0xEDB88320
+  %i.next   = add i64 %i, 1
+  br label %loop
+
+exit:
+  %final = xor i32 %crc, -1
+  ret i32 %final
+}
+
+; Allocate witnessed memory and return handle (ptr)
+define internal ptr @atlas.witness.generate.impl(ptr %data, i64 %len) nounwind {
+entry:
+  %bytes_plus_meta = add i64 %len, 8 ; +4 checksum +4 length
+  ; Align to 16 for vector-friendly layout
+  %add15 = add i64 %bytes_plus_meta, 15
+  %size  = and i64 %add15, -16
+  %buf   = call ptr @aligned_alloc(i64 16, i64 %size)
+  ; Copy payload
+  call void @llvm.memcpy.p0.p0.i64(ptr %buf, ptr %data, i64 %len, i1 false)
+  ; Write checksum and length at the end
+  %chk   = call i32 @atlas._checksum(ptr %data, i64 %len)
+  %tail  = getelementptr i8, ptr %buf, i64 %len
+  %chkptr = bitcast ptr %tail to ptr
+  store i32 %chk, ptr %chkptr, align 4
+  %lenoff = getelementptr i8, ptr %tail, i64 4
+  %lenptr = bitcast ptr %lenoff to ptr
+  %len32  = trunc i64 %len to i32
+  store i32 %len32, ptr %lenptr, align 4
+  ret ptr %buf
+}
+
+; Verify witness against data by comparing checksums
+define internal i1 @atlas.witness.verify.impl(ptr %w, ptr %data, i64 %len) nounwind readonly willreturn {
+entry:
+  %chk_calc = call i32 @atlas._checksum(ptr %data, i64 %len)
+  %tail     = getelementptr i8, ptr %w, i64 %len
+  %chkptr   = bitcast ptr %tail to ptr
+  %chk_stored = load i32, ptr %chkptr, align 4
+  %ok = icmp eq i32 %chk_calc, %chk_stored
+  ret i1 %ok
+}
+
+; Destroy witness
+define internal void @atlas.witness.destroy.impl(ptr %w) nounwind {
+entry:
+  call void @free(ptr %w)
+  ret void
+}
+
+; ---- Public wrappers ----
+
+define ptr @atlas.witness.generate(ptr %data, i64 %len) #4 {
+  %r = call ptr @atlas.witness.generate.impl(ptr %data, i64 %len)
+  ret ptr %r
+}
+
+define i1 @atlas.witness.verify(ptr %w, ptr %data, i64 %len) #1 {
+  %r = call i1 @atlas.witness.verify.impl(ptr %w, ptr %data, i64 %len)
+  ret i1 %r
+}
+
+define void @atlas.witness.destroy(ptr %w) #4 {
+  call void @atlas.witness.destroy.impl(ptr %w)
+  ret void
+}
+
+; =============================================================================
+; Memory Operations
+; =============================================================================
+
+; Conservation‑preserving memcpy: require source & dest conserved else trap
+define internal void @atlas.memcpy.conserved.impl(ptr %dst, ptr %src, i64 %len) nounwind {
+entry:
+  %ok_src = call i1 @atlas.conserved.check.impl(ptr %src, i64 %len)
+  br i1 %ok_src, label %copy, label %trap
+
+copy:
+  call void @llvm.memcpy.p0.p0.i64(ptr %dst, ptr %src, i64 %len, i1 false)
+  %ok_dst = call i1 @atlas.conserved.check.impl(ptr %dst, i64 %len)
+  br i1 %ok_dst, label %exit, label %trap
+
+trap:
+  call void @llvm.trap()
+  unreachable
+
+exit:
+  ret void
+}
+
+; Conservation‑preserving memset
+define internal void @atlas.memset.conserved.impl(ptr %dst, i8 %val, i64 %len) nounwind {
+entry:
+  call void @llvm.memset.p0.i64(ptr %dst, i8 %val, i64 %len, i1 false)
+  %ok = call i1 @atlas.conserved.check.impl(ptr %dst, i64 %len)
+  br i1 %ok, label %exit, label %trap
+
+trap:
+  call void @llvm.trap()
+  unreachable
+
+exit:
+  ret void
+}
+
+; Allocate witnessed memory (also tagged)
+@.str.resonance = private unnamed_addr constant [16 x i8] c"atlas.resonance\00"
+@.str.atlas     = private unnamed_addr constant [8 x i8]  c"atlas\00\00\00"
+declare ptr @llvm.ptr.annotation.p0(ptr, ptr, ptr, i32, ptr)
+
+define internal ptr @atlas.alloc.witnessed.impl(i64 %size, i7 %resonance) nounwind {
+entry:
+  %add63 = add i64 %size, 63
+  %sizeA = and i64 %add63, -64
+  %p = call ptr @aligned_alloc(i64 64, i64 %sizeA)
+  ; Initialize with resonance pattern
+  br label %loop
+
+loop:
+  %i = phi i64 [ 0, %entry ], [ %i.next, %loop ]
+  %done = icmp uge i64 %i, %size
+  br i1 %done, label %ann, label %body
+
+body:
+  %q = getelementptr i8, ptr %p, i64 %i
+  %r8 = zext i7 %resonance to i8
+  store i8 %r8, ptr %q, align 1
+  %i.next = add i64 %i, 1
+  br label %loop
+
+ann:
+  %tag = zext i7 %resonance to i32
+  %p2 = call ptr @llvm.ptr.annotation.p0(ptr %p,
+         ptr getelementptr ([16 x i8], ptr @.str.resonance, i32 0, i32 0),
+         ptr getelementptr ([8 x i8],  ptr @.str.atlas,     i32 0, i32 0),
+         i32 %tag,
+         ptr null)
+  ret ptr %p2
+}
+
+; Free witnessed memory
+
+define internal void @atlas.free.witnessed.impl(ptr %ptr) nounwind {
+entry:
+  call void @free(ptr %ptr)
+  ret void
+}
+
+; Resonance‑aware allocation (alignment is minimum)
+
+define internal ptr @atlas.alloc.resonant.impl(i64 %size, i7 %res, i32 %align) nounwind {
+entry:
+  %a64 = zext i32 %align to i64
+  %p   = call ptr @aligned_alloc(i64 %a64, i64 %size)
+  ret ptr %p
+}
+
+; Page‑aligned allocation of N pages (256 bytes each)
+
+define internal ptr @atlas.alloc.pages.impl(i32 %count) nounwind {
+entry:
+  %c64  = zext i32 %count to i64
+  %bytes = mul i64 %c64, 256
+  %p = call ptr @aligned_alloc(i64 256, i64 %bytes)
+  ret ptr %p
+}
+
+; ---- Public wrappers ----
+
+define void @atlas.memcpy.conserved(ptr %dst, ptr %src, i64 %len) #2 {
+  call void @atlas.memcpy.conserved.impl(ptr %dst, ptr %src, i64 %len)
+  ret void
+}
+
+define void @atlas.memset.conserved(ptr %dst, i8 %val, i64 %len) #2 {
+  call void @atlas.memset.conserved.impl(ptr %dst, i8 %val, i64 %len)
+  ret void
+}
+
+define ptr @atlas.alloc.witnessed(i64 %size, i7 %resonance) #3 {
+  %r = call ptr @atlas.alloc.witnessed.impl(i64 %size, i7 %resonance)
+  ret ptr %r
+}
+
+define void @atlas.free.witnessed(ptr %ptr) #4 {
+  call void @atlas.free.witnessed.impl(ptr %ptr)
+  ret void
+}
+
+define ptr @atlas.alloc.resonant(i64 %size, i7 %resonance, i32 %alignment) #3 {
+  %r = call ptr @atlas.alloc.resonant.impl(i64 %size, i7 %resonance, i32 %alignment)
+  ret ptr %r
+}
+
+define ptr @atlas.alloc.pages(i32 %count) #3 {
+  %r = call ptr @atlas.alloc.pages.impl(i32 %count)
+  ret ptr %r
+}
+
+; =============================================================================
+; Resonance Operations
+; =============================================================================
+
+; ---- Implementations (internal) ----
+
+define internal i7 @atlas.resonance.harmonic.impl(i7 %r1, i7 %r2) nounwind readnone willreturn {
+entry:
+  %a = zext i7 %r1 to i16
+  %b = zext i7 %r2 to i16
+  %s = add i16 %a, %b
+  %m = urem i16 %s, 96
+  %t = trunc i16 %m to i7
+  ret i7 %t
+}
+
+define internal i1 @atlas.resonance.harmonizes.impl(i7 %r1, i7 %r2) nounwind readnone willreturn {
+entry:
+  %a = zext i7 %r1 to i16
+  %b = zext i7 %r2 to i16
+  %s = add i16 %a, %b
+  %m = urem i16 %s, 96
+  %z = icmp eq i16 %m, 0
+  ret i1 %z
+}
+
+; Return the same pointer as a trivial clustering handle
+define internal ptr @atlas.resonance.cluster.impl(ptr %coords, i32 %count) nounwind readnone willreturn {
+entry:
+  ret ptr %coords
+}
+
+; Schedule: map resonance to a simple cycle length (here: r + 1)
+define internal i64 @atlas.resonance.schedule.impl(i7 %r) nounwind readnone willreturn {
+entry:
+  %r64 = zext i7 %r to i64
+  %one = add i64 %r64, 1
+  ret i64 %one
+}
+
+; ---- Public wrappers ----
+
+define i7 @atlas.resonance.harmonic(i7 %r1, i7 %r2) #0 {
+  %r = call i7 @atlas.resonance.harmonic.impl(i7 %r1, i7 %r2)
+  ret i7 %r
+}
+
+define i1 @atlas.resonance.harmonizes(i7 %r1, i7 %r2) #0 {
+  %r = call i1 @atlas.resonance.harmonizes.impl(i7 %r1, i7 %r2)
+  ret i1 %r
+}
+
+define ptr @atlas.resonance.cluster(ptr %coords, i32 %count) #4 {
+  %r = call ptr @atlas.resonance.cluster.impl(ptr %coords, i32 %count)
+  ret ptr %r
+}
+
+define i64 @atlas.resonance.schedule(i7 %r) #0 {
+  %r2 = call i64 @atlas.resonance.schedule.impl(i7 %r)
+  ret i64 %r2
+}
+
+; =============================================================================
+; Module metadata
+; =============================================================================
+
+!atlas.ops.version   = !{!"1.1.0"}
+!atlas.ops.features  = !{!"conservation", !"witness", !"budget", !"boundary", !"memory", !"resonance"}
