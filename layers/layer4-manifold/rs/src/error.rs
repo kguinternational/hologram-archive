@@ -21,6 +21,10 @@ pub enum AtlasError {
     NumericalError(&'static str),
     /// Integration with lower layers failed
     LayerIntegrationError(&'static str),
+    /// Memory allocation error with specific message
+    MemoryAllocation(&'static str),
+    /// Witness generation failed
+    WitnessGeneration(&'static str),
 }
 
 impl core::fmt::Display for AtlasError {
@@ -37,6 +41,8 @@ impl core::fmt::Display for AtlasError {
             AtlasError::InvalidInput(msg) => write!(f, "Invalid input: {}", msg),
             AtlasError::NumericalError(msg) => write!(f, "Numerical computation error: {}", msg),
             AtlasError::LayerIntegrationError(msg) => write!(f, "Layer integration error: {}", msg),
+            AtlasError::MemoryAllocation(msg) => write!(f, "Memory allocation error: {}", msg),
+            AtlasError::WitnessGeneration(msg) => write!(f, "Witness generation error: {}", msg),
         }
     }
 }
@@ -59,5 +65,7 @@ pub fn error_to_code(error: &AtlasError) -> i32 {
         AtlasError::InvalidInput(_) => -7,
         AtlasError::NumericalError(_) => -8,
         AtlasError::LayerIntegrationError(_) => -9,
+        AtlasError::MemoryAllocation(_) => -10,
+        AtlasError::WitnessGeneration(_) => -11,
     }
 }

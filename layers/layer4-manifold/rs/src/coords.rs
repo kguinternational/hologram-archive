@@ -404,4 +404,30 @@ pub mod util {
         }
         matrix
     }
+
+    /// Create a 2D rotation transformation matrix
+    pub fn rotation_2d(angle: Float) -> TransformMatrix<2, 2> {
+        let cos_a = angle.cos();
+        let sin_a = angle.sin();
+
+        let mut matrix = TransformMatrix::zero();
+        matrix.elements[0][0] = cos_a;
+        matrix.elements[0][1] = -sin_a;
+        matrix.elements[1][0] = sin_a;
+        matrix.elements[1][1] = cos_a;
+        matrix
+    }
+
+    /// Create a 2D rotation transformation matrix (homogeneous coordinates)
+    pub fn rotation_2d_homogeneous(angle: Float) -> TransformMatrix<3, 3> {
+        let cos_a = angle.cos();
+        let sin_a = angle.sin();
+
+        let mut matrix = TransformMatrix::identity();
+        matrix.elements[0][0] = cos_a;
+        matrix.elements[0][1] = -sin_a;
+        matrix.elements[1][0] = sin_a;
+        matrix.elements[1][1] = cos_a;
+        matrix
+    }
 }

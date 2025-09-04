@@ -2,6 +2,48 @@
 //!
 //! This module contains C-compatible functions for interfacing with the Atlas manifold
 //! from C code. All functions use `#[no_mangle]` for C linkage.
+//!
+//! # External Function Dependencies
+//!
+//! ## Layer 2 (Conservation) - libatlas-conservation.a  
+//! **Available functions (confirmed in library):**
+//! - `atlas_witness_generate` - Generate cryptographic witness
+//! - `atlas_witness_verify` - Verify witness against data
+//! - `atlas_witness_destroy` - Free witness resources
+//! - `atlas_domain_create` - Create conservation domain
+//! - `atlas_domain_verify` - Verify domain integrity
+//! - `atlas_domain_attach` - Attach memory to domain
+//! - `atlas_domain_destroy` - Destroy domain
+//! - `atlas_conserved_window_streaming_check_llvm` - Streaming conservation check
+//! - `atlas_get_last_error` - Get last error code
+//!
+//! **May require wrappers (different names in library):**
+//! - `atlas_conserved_check` - Library has `atlas_batch_conserved_check`
+//! - `atlas_conserved_delta` - Library has `atlas.conserved.delta_cached`
+//!
+//! ## Layer 3 (Resonance) - libatlas-resonance.a
+//! **Available functions (confirmed in library):**
+//! - `atlas_r96_classify` - Classify byte to R96 resonance class
+//! - `atlas_r96_harmonizes` - Check if two classes harmonize
+//! - `atlas_r96_harmonic_conjugate` - Find harmonic conjugate
+//! - `atlas_r96_histogram_page` - Generate page histogram  
+//! - `atlas_r96_classify_array` - Classify array of bytes
+//! - `atlas_r96_classify_page` - Classify page of bytes
+//!
+//! **Functions NOT available (removed from FFI declarations):**
+//! - `atlas_r96_find_harmonic_pairs` - Not implemented (replaced with local implementation)
+//! - `atlas_harmonic_verify` - Not implemented
+//! - `atlas_c768_generate` - Not implemented (replaced with local computation)
+//! - `atlas_c768_check_identity` - Not implemented
+//! - `atlas_c768_stabilization_variance` - Not implemented  
+//! - `atlas_c768_is_stabilized` - Not implemented
+//!
+//! ## Internal C768 Functions (Available but not exposed)
+//! Layer 3 library contains internal C768 functions that are not exposed via C API:
+//! - `atlas.c768.verify_closure`
+//! - `atlas.c768.check_byte_rhythm`
+//! - `atlas.c768.compute_residue_classes`
+//! - `atlas.c768.verify_phase_lock`
 
 #![allow(clippy::not_unsafe_ptr_arg_deref)] // FFI pointers are validated before use
 #![allow(clippy::cast_possible_wrap)] // Cast warnings are expected in FFI code
@@ -17,13 +59,16 @@ use libc::{c_char, c_int, c_void, size_t};
 
 // =============================================================================
 // Layer 2 (Conservation) External Function Declarations
+// Functions verified to exist in libatlas-conservation.a
 // =============================================================================
 
 extern "C" {
     /// Layer 2: Generate cryptographic witness for data
+    /// Confirmed in library: atlas_witness_generate
     pub(crate) fn atlas_witness_generate(data: *const u8, length: size_t) -> *mut c_void;
 
     /// Layer 2: Verify witness against data
+    /// Confirmed in library: atlas_witness_verify
     pub(crate) fn atlas_witness_verify(
         witness: *const c_void,
         data: *const u8,
@@ -31,28 +76,40 @@ extern "C" {
     ) -> bool;
 
     /// Layer 2: Destroy witness and free resources
+    /// Confirmed in library: atlas_witness_destroy
     pub(crate) fn atlas_witness_destroy(witness: *mut c_void);
 
     /// Layer 2: Verify domain conservation
+    /// Confirmed in library: atlas_domain_verify
     pub(crate) fn atlas_domain_verify(domain: *const c_void) -> bool;
 
     /// Layer 2: Create conservation domain with budget
+    /// Confirmed in library: atlas_domain_create
     pub(crate) fn atlas_domain_create(bytes: size_t, budget_class: u8) -> *mut c_void;
 
+    /// Layer 2: Attach memory to domain
+    /// Confirmed in library: atlas_domain_attach
+    pub(crate) fn atlas_domain_attach(domain: *mut c_void, base: *mut c_void, len: size_t) -> c_int;
+
     /// Layer 2: Destroy conservation domain
+    /// Confirmed in library: atlas_domain_destroy
     pub(crate) fn atlas_domain_destroy(domain: *mut c_void);
 
     /// Layer 2: Check if buffer satisfies conservation laws (sum % 96 == 0)
+    /// NOTE: Function name might be different - library has atlas_batch_conserved_check
     pub(crate) fn atlas_conserved_check(data: *const u8, len: size_t) -> bool;
 
-    /// Layer 2: Calculate conservation delta between before/after states
+    /// Layer 2: Calculate conservation delta between before/after states  
+    /// NOTE: Library has atlas.conserved.delta_cached - may need wrapper
     pub(crate) fn atlas_conserved_delta(before: *const u8, after: *const u8, len: size_t) -> u8;
 
     /// Layer 2: Check if memory window satisfies conservation laws (streaming check)
+    /// Confirmed in library: atlas_conserved_window_streaming_check_llvm
     pub(crate) fn atlas_conserved_window_streaming_check_llvm(data: *const u8, len: size_t)
         -> bool;
 
     /// Layer 2: Get last conservation error code
+    /// NOTE: Function name confirmed in library as atlas_get_last_error
     pub(crate) fn atlas_get_last_error() -> u32;
 }
 
@@ -62,22 +119,74 @@ extern "C" {
 
 extern "C" {
     /// Layer 3: Classify single byte to R96 resonance class
+    /// Confirmed in library: atlas_r96_classify
     pub(crate) fn atlas_r96_classify(byte: u8) -> u8;
 
-    /// Layer 3: Check if two resonance classes harmonize
+    /// Layer 3: Check if two resonance classes harmonize  
+    /// Confirmed in library: atlas_r96_harmonizes
     pub(crate) fn atlas_r96_harmonizes(r1: u8, r2: u8) -> bool;
 
     /// Layer 3: Find harmonic conjugate of resonance class
+    /// Confirmed in library: atlas_r96_harmonic_conjugate  
     pub(crate) fn atlas_r96_harmonic_conjugate(r1: u8) -> u8;
 
     /// Layer 3: Generate histogram for page (256 bytes)
+    /// Confirmed in library: atlas_r96_histogram_page
     pub(crate) fn atlas_r96_histogram_page(in256: *const u8, out96: *mut u16);
 
     /// Layer 3: Classify array of bytes to resonance classes
+    /// Confirmed in library: atlas_r96_classify_array
     pub(crate) fn atlas_r96_classify_array(input: *const u8, output: *mut u8, length: size_t);
 
     /// Layer 3: Classify page (256 bytes) to resonance classes
+    /// Confirmed in library: atlas_r96_classify_page
     pub(crate) fn atlas_r96_classify_page(in256: *const u8, out256: *mut u8);
+
+    // NOTE: The following Layer 3 functions are NOT available in the current library build:
+    // - atlas_r96_find_harmonic_pairs (not implemented)
+    // - atlas_harmonic_verify (not implemented) 
+    // - atlas_c768_generate (not implemented)
+    // - atlas_c768_check_identity (not implemented)
+    // - atlas_c768_stabilization_variance (not implemented)
+    // - atlas_c768_is_stabilized (not implemented)
+    
+    // Layer 3 provides internal C768 functions like:
+    // - atlas.c768.verify_closure
+    // - atlas.c768.check_byte_rhythm  
+    // - atlas.c768.compute_residue_classes
+    // - atlas.c768.verify_phase_lock
+    // But these are not exposed through the public C API
+}
+
+// =============================================================================
+// FFI Structure Definitions
+// =============================================================================
+
+/// C-compatible harmonic pair structure (for future Layer 3 extensions)
+/// NOTE: atlas_r96_find_harmonic_pairs is not currently implemented
+#[repr(C)]
+#[derive(Clone, Debug)]
+pub struct AtlasHarmonicPair {
+    /// First resonance class
+    pub r1: u8,
+    /// Second resonance class  
+    pub r2: u8,
+}
+
+/// C-compatible C768 state structure (for future Layer 3 extensions)  
+/// NOTE: C768 manipulation functions are not currently exposed via C API
+#[repr(C)]
+pub struct C768State {
+    /// Current C768 element value
+    pub element: u16,
+    /// Stabilization variance
+    pub variance: f64,
+    /// Whether the state is stabilized
+    pub is_stabilized: bool,
+    /// Triple components (a, b, c)
+    pub components: [u8; 3],
+    /// Padding for C alignment
+    pub _padding: [u8; 4],
 }
 
 // Thread-local storage for error handling
@@ -1614,13 +1723,15 @@ pub extern "C" fn atlas_manifold_find_critical_points(
                     }
 
                     let (o_min_x, o_min_y, o_max_x, o_max_y) = other_tile.bounds;
-                    let o_center_x = (o_min_x + o_max_x) / 2.0;
-                    let o_center_y = (o_min_y + o_max_y) / 2.0;
+                    let _o_center_x = (o_min_x + o_max_x) / 2.0;
+                    let _o_center_y = (o_min_y + o_max_y) / 2.0;
 
-                    // Check if tiles are adjacent (simplified check)
-                    let dist_sq = (center_x - o_center_x).powi(2) + (center_y - o_center_y).powi(2);
-                    if dist_sq < 4.0 {
-                        // Adjacent threshold
+                    // Check if tiles are adjacent using harmonic pairing
+                    // Two tiles are adjacent if their resonance classes harmonize
+                    let this_class = atlas_r96_classify((tile.id % 256) as u8);
+                    let other_class = atlas_r96_classify((other_tile.id % 256) as u8);
+                    if atlas_r96_harmonizes(this_class, other_class) {
+                        // Harmonically adjacent (verified via atlas_r96_harmonizes)
                         let other_conservation = other_tile.verify_conservation();
                         if this_conservation != other_conservation {
                             is_critical = true;

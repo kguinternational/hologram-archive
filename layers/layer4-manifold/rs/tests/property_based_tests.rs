@@ -406,8 +406,8 @@ proptest! {
         prop_assert!(scaling_factor > 0.0);
         prop_assert!(scaling_factor.is_finite());
         prop_assert!(rotation_angle.is_finite());
-        prop_assert!(translation_x.is_finite());
-        prop_assert!(translation_y.is_finite());
+        prop_assert!((translation_x as f64).is_finite());
+        prop_assert!((translation_y as f64).is_finite());
     }
 
     /// Test basic transformation properties
@@ -425,7 +425,7 @@ proptest! {
         // Test that scaling preserves sign and magnitude relationships
         let scaled_value = 10.0 * scaling_factor;
         prop_assert!(scaled_value > 0.0);
-        prop_assert!((scaled_value / 10.0 - scaling_factor).abs() < 1e-10);
+        prop_assert!(((scaled_value / 10.0 - scaling_factor) as f64).abs() < 1e-10);
     }
 }
 

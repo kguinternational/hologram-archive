@@ -22,12 +22,23 @@ fn main() {
     let _layer3_build_path = PathBuf::from(&layer3_path).join("build");
 
     // Add library search paths - use main lib directory for all Atlas libraries
-    let main_lib_path = PathBuf::from("../../../lib");
+    let manifest_dir = PathBuf::from(env::var("CARGO_MANIFEST_DIR").unwrap());
+    let hologram_root = manifest_dir
+        .parent() // rs
+        .unwrap()
+        .parent() // layer4-manifold
+        .unwrap()
+        .parent() // layers
+        .unwrap()
+        .to_path_buf();
+    
+    let main_lib_path = hologram_root.join("lib");
 
     if main_lib_path.exists() {
         println!("cargo:rustc-link-search=native={}", main_lib_path.display());
-        // Link Atlas libraries in dependency order
+        // Link Atlas libraries in dependency order (most fundamental first)
         println!("cargo:rustc-link-lib=static=atlas-core");
+        println!("cargo:rustc-link-lib=static=atlas-boundary");
         println!("cargo:rustc-link-lib=static=atlas-conservation");
         println!("cargo:rustc-link-lib=static=atlas-resonance");
     } else {

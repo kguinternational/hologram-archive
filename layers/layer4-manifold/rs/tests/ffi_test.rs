@@ -7,7 +7,7 @@
 use atlas_manifold::{
     atlas_manifold_cleanup, atlas_manifold_init, atlas_manifold_version, error::*, ffi::*,
 };
-use libc::{c_int, c_void, size_t};
+use libc::{c_void, size_t};
 use std::ptr;
 
 #[test]
@@ -336,7 +336,7 @@ fn test_error_code_consistency() {
     ];
 
     for error in &test_errors {
-        let error_code = atlas_manifold::error::error_to_code(error);
+        let error_code = error_to_code(error);
 
         // All error codes should be negative
         assert!(error_code < 0, "Error code should be negative: {:?}", error);
@@ -347,7 +347,7 @@ fn test_error_code_consistency() {
         // Different errors should have different codes
         for other_error in &test_errors {
             if std::mem::discriminant(error) != std::mem::discriminant(other_error) {
-                let other_code = atlas_manifold::error::error_to_code(other_error);
+                let other_code = error_to_code(other_error);
                 assert_ne!(
                     error_code, other_code,
                     "Different errors should have different codes: {:?} vs {:?}",
@@ -363,17 +363,17 @@ fn test_ffi_struct_layout() {
     use std::mem;
 
     // Test that C-compatible structs have expected layout and alignment
-    assert_eq!(mem::align_of::<CAtlasPoint>(), mem::align_of::<*mut f64>());
-    assert_eq!(mem::align_of::<CAtlasMatrix>(), mem::align_of::<*mut f64>());
+    assert_eq!(align_of::<CAtlasPoint>(), align_of::<*mut f64>());
+    assert_eq!(align_of::<CAtlasMatrix>(), align_of::<*mut f64>());
     assert_eq!(
-        mem::align_of::<AtlasManifoldHandle>(),
-        mem::align_of::<*mut c_void>()
+        align_of::<AtlasManifoldHandle>(),
+        align_of::<*mut c_void>()
     );
 
     // Test sizes are reasonable
-    assert!(mem::size_of::<CAtlasPoint>() <= 32); // Should be small
-    assert!(mem::size_of::<CAtlasMatrix>() <= 32); // Should be small
-    assert!(mem::size_of::<AtlasManifoldHandle>() <= 16); // Should be small
+    assert!(size_of::<CAtlasPoint>() <= 32); // Should be small
+    assert!(size_of::<CAtlasMatrix>() <= 32); // Should be small
+    assert!(size_of::<AtlasManifoldHandle>() <= 16); // Should be small
 
     // Test that structs are properly aligned for FFI
     let point = CAtlasPoint {
@@ -381,7 +381,7 @@ fn test_ffi_struct_layout() {
         dim: 0,
     };
     let point_ptr = &point as *const _ as usize;
-    assert_eq!(point_ptr % mem::align_of::<CAtlasPoint>(), 0);
+    assert_eq!(point_ptr % align_of::<CAtlasPoint>(), 0);
 }
 
 #[test]
@@ -444,13 +444,13 @@ fn test_ffi_parameter_validation() {
 
     // Test parameter validation in FFI layer
     let coords = [1.0, 2.0, 3.0];
-    let mut valid_point = CAtlasPoint {
+    let valid_point = CAtlasPoint {
         coords: coords.as_ptr() as *mut f64,
         dim: 3,
     };
 
     let mut output_coords = [0.0; 3];
-    let mut valid_output = CAtlasPoint {
+    let valid_output = CAtlasPoint {
         coords: output_coords.as_mut_ptr(),
         dim: 3,
     };

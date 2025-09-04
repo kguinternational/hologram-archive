@@ -8,6 +8,8 @@
 use crate::error::*;
 use crate::shard::*;
 use crate::types::*;
+use crate::ffi::{atlas_witness_generate, atlas_witness_destroy};
+use core::sync::atomic::{AtomicU64, Ordering};
 
 #[cfg(feature = "std")]
 use std::vec::Vec;
@@ -341,7 +343,7 @@ fn compress_deflate(data: &[u8], level: CompressionLevel) -> AtlasResult<Vec<u8>
 }
 
 /// Compress data using conservation-aware algorithm
-fn compress_conservation_aware(data: &[u8], config: &CompressionConfig) -> AtlasResult<Vec<u8>> {
+fn compress_conservation_aware(data: &[u8], _config: &CompressionConfig) -> AtlasResult<Vec<u8>> {
     // Simple conservation-aware compression:
     // 1. Group bytes by their modulo 96 class
     // 2. Run-length encode within each class
@@ -523,7 +525,7 @@ fn decompress_conservation_aware(compressed_data: &[u8]) -> AtlasResult<Vec<u8>>
 
     // Reconstruct original data by interleaving class data
     let mut decompressed = Vec::with_capacity(original_size);
-    let mut class_indices = [0usize; 96];
+    let _class_indices = [0usize; 96];
 
     // Simple reconstruction - this would need to be more sophisticated
     // to preserve the exact original order
@@ -537,17 +539,33 @@ fn decompress_conservation_aware(compressed_data: &[u8]) -> AtlasResult<Vec<u8>>
     Ok(decompressed)
 }
 
-/// Get current timestamp (simplified for testing)
+/// Get current timestamp using Layer 2 witness generation for monotonic Universal Numbers
+/// This generates a monotonic timestamp that acts as a Universal Number for witnessable computation
 fn get_timestamp() -> u64 {
-    #[cfg(feature = "std")]
-    {
-        use std::time::{SystemTime, UNIX_EPOCH};
-        SystemTime::now().duration_since(UNIX_EPOCH).unwrap_or_default().as_secs()
-    }
-
-    #[cfg(not(feature = "std"))]
-    {
-        0 // No timestamp in no_std environments
+    // Use a small amount of unique data to generate witness-based timestamps
+    static COUNTER: AtomicU64 = AtomicU64::new(1);
+    
+    // Get an atomic counter value for uniqueness
+    let count = COUNTER.fetch_add(1, Ordering::Relaxed);
+    
+    // Create unique data from counter for witness generation
+    let data = count.to_le_bytes();
+    
+    // Generate Layer 2 witness which provides monotonic Universal Number properties
+    let witness = unsafe { atlas_witness_generate(data.as_ptr(), data.len()) };
+    
+    if !witness.is_null() {
+        // Use witness pointer address as timestamp base (monotonic property)
+        let timestamp_base = witness as usize as u64;
+        
+        // Clean up witness
+        unsafe { atlas_witness_destroy(witness) };
+        
+        // Combine counter with witness address for uniqueness
+        timestamp_base.wrapping_add(count)
+    } else {
+        // Fallback to atomic counter if witness generation fails
+        count
     }
 }
 

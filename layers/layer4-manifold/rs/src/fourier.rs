@@ -913,14 +913,14 @@ mod tests {
 
         // For a more reliable test, use a phase that will definitely be quantized
         let mut coeff2 = R96HarmonicCoefficient::new(3.0, 4.0);
-        coeff2.phase = std::f64::consts::PI / 3.14159; // Slightly off from π/π to ensure quantization
+        coeff2.phase = PI / 3.14159; // Slightly off from π/π to ensure quantization
         let original_phase2 = coeff2.phase;
         coeff2.apply_normal_form(&rules);
 
         // The phase should now be quantized to a different value
         assert!(
             coeff2.phase != original_phase2
-                || (coeff2.phase - original_phase2).abs() < 2.0 * std::f64::consts::PI / 256.0
+                || (coeff2.phase - original_phase2).abs() < 2.0 * PI / 256.0
         );
     }
 

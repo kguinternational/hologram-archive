@@ -1097,14 +1097,24 @@ impl AtlasProjection {
             let scaled_max_x = max_x * params.scaling_factor;
             let scaled_max_y = max_y * params.scaling_factor;
 
-            // Apply rotation (simplified - full rotation would need matrix operations)
-            let cos_angle = params.rotation_angle.cos();
-            let sin_angle = params.rotation_angle.sin();
-
-            let rotated_min_x = scaled_min_x * cos_angle - scaled_min_y * sin_angle;
-            let rotated_min_y = scaled_min_x * sin_angle + scaled_min_y * cos_angle;
-            let rotated_max_x = scaled_max_x * cos_angle - scaled_max_y * sin_angle;
-            let rotated_max_y = scaled_max_x * sin_angle + scaled_max_y * cos_angle;
+            // Apply rotation using proper matrix operations
+            let rotation_matrix = crate::coords::util::rotation_2d(params.rotation_angle);
+            
+            // Transform min point
+            let min_vector = crate::types::AtlasVector::<2> {
+                components: [scaled_min_x, scaled_min_y],
+            };
+            let rotated_min = rotation_matrix.multiply_vector(&min_vector);
+            let rotated_min_x = rotated_min.components[0];
+            let rotated_min_y = rotated_min.components[1];
+            
+            // Transform max point
+            let max_vector = crate::types::AtlasVector::<2> {
+                components: [scaled_max_x, scaled_max_y],
+            };
+            let rotated_max = rotation_matrix.multiply_vector(&max_vector);
+            let rotated_max_x = rotated_max.components[0];
+            let rotated_max_y = rotated_max.components[1];
 
             // Apply translation
             tile.bounds = (
@@ -1238,6 +1248,7 @@ impl AtlasProjection {
 #[derive(Debug)]
 #[repr(transparent)]
 pub struct AtlasProjectionHandle {
+    /// Pointer to the inner AtlasProjection instance
     pub inner: *mut AtlasProjection,
 }
 

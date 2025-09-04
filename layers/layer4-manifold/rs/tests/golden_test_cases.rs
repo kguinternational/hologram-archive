@@ -4,11 +4,9 @@
 //! to ensure deterministic behavior and regression testing across versions.
 
 use atlas_manifold::{
-    error::*,
     fourier::{NormalFormRules, R96FourierProjection, R96HarmonicCoefficient},
     invariants::*,
-    projection::{AtlasProjection, ProjectionType},
-    types::*,
+    projection::AtlasProjection,
 };
 
 /// Golden test case 1: Simple R96 classification with known result
@@ -42,7 +40,7 @@ fn golden_r96_classification_simple() {
         assert!(harmonics.normalization_factor > 0.0);
         // Golden value: first coefficient should have specific magnitude
         let first_coeff = &harmonics.coefficients[0];
-        assert!(first_coeff.magnitude > 0.1 && first_coeff.magnitude < 10.0);
+        assert!(first_coeff.amplitude > 0.1 && first_coeff.amplitude < 10.0);
     }
 }
 
@@ -85,7 +83,7 @@ fn golden_c768_cycle_progression() {
 /// Golden test case 3: Φ bijection with known mappings
 #[test]
 fn golden_phi_bijection_mappings() {
-    let phi_verifier = PhiBijectionVerifier::new(256);
+    let phi_verifier = PhiBijectionVerifier::new(256).unwrap();
 
     // Golden test vectors: (page, offset) -> expected_encoding
     let test_vectors = [
@@ -193,7 +191,7 @@ fn golden_conservation_arithmetic() {
         assert_eq!(actual_sum % 96, 0, "Sum should be divisible by 96");
 
         // Test with projection
-        let projection_result = AtlasProjection::new_linear(&data, None);
+        let projection_result = AtlasProjection::new_linear(&data);
         assert!(projection_result.is_ok());
         let projection = projection_result.unwrap();
         assert!(projection.verify_projection());
@@ -211,8 +209,8 @@ fn golden_r96_harmonic_synthesis() {
     projection.build_from_data(&input_data).unwrap();
 
     // Synthesize data and verify reproducibility
-    let synthesized1 = projection.synthesize_bytes(256);
-    let synthesized2 = projection.synthesize_bytes(256);
+    let synthesized1 = projection.reconstruct_data(256);
+    let synthesized2 = projection.reconstruct_data(256);
 
     // Should be deterministic
     assert_eq!(synthesized1, synthesized2);
@@ -225,8 +223,8 @@ fn golden_r96_harmonic_synthesis() {
     let rules = NormalFormRules::default();
     projection.apply_normal_form(&rules).unwrap();
 
-    let synthesized3 = projection.synthesize_bytes(256);
-    let synthesized4 = projection.synthesize_bytes(256);
+    let synthesized3 = projection.reconstruct_data(256);
+    let synthesized4 = projection.reconstruct_data(256);
     assert_eq!(synthesized3, synthesized4);
 }
 
@@ -299,8 +297,8 @@ fn create_golden_orbit_data() -> Vec<u8> {
 fn create_golden_harmonic_coefficients() -> Vec<R96HarmonicCoefficient> {
     vec![
         R96HarmonicCoefficient::new(1.0, 0.0), // DC component
-        R96HarmonicCoefficient::new(0.5, std::f64::consts::PI / 4), // 45° phase
-        R96HarmonicCoefficient::new(0.25, std::f64::consts::PI / 2), // 90° phase
+        R96HarmonicCoefficient::new(0.5, std::f64::consts::PI / 4.0), // 45° phase
+        R96HarmonicCoefficient::new(0.25, std::f64::consts::PI / 2.0), // 90° phase
         R96HarmonicCoefficient::new(0.125, std::f64::consts::PI), // 180° phase
     ]
 }

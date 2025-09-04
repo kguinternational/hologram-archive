@@ -20,7 +20,7 @@ proptest! {
         prop_assert_eq!(point.coords, coords);
         
         // Memory layout should be predictable
-        prop_assert_eq!(std::mem::size_of::<AtlasPoint<3>>(), 24); // 3 * 8 bytes
+        prop_assert_eq!(size_of::<AtlasPoint<3>>(), 24); // 3 * 8 bytes
         
         // Should be copyable
         let point_copy = point;
@@ -249,9 +249,9 @@ proptest! {
         dim2 in 1u32..=10
     ) {
         // Test that different dimensional points have different sizes
-        let size_1d = std::mem::size_of::<AtlasPoint<1>>();
-        let size_2d = std::mem::size_of::<AtlasPoint<2>>();
-        let size_3d = std::mem::size_of::<AtlasPoint<3>>();
+        let size_1d = size_of::<AtlasPoint<1>>();
+        let size_2d = size_of::<AtlasPoint<2>>();
+        let size_3d = size_of::<AtlasPoint<3>>();
         
         prop_assert_eq!(size_1d, 8);   // 1 * 8 bytes
         prop_assert_eq!(size_2d, 16);  // 2 * 8 bytes  

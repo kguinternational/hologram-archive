@@ -296,8 +296,7 @@ impl StreamingContext {
         self.intermediate_results.push(handle);
 
         // Return the last added handle (clone the inner pointer)
-        // SAFETY: We just added this handle, so we know it's valid
-        let last_handle = unsafe {
+        let last_handle = {
             let inner = self.intermediate_results.last().unwrap().inner;
             AtlasProjectionHandle { inner }
         };
@@ -348,8 +347,7 @@ impl StreamingContext {
 
         // For now, return the first result as the merged result
         // In a more sophisticated implementation, this would combine all projections
-        // SAFETY: We checked that intermediate_results is not empty
-        let first_handle = unsafe {
+        let first_handle = {
             let inner = self.intermediate_results[0].inner;
             AtlasProjectionHandle { inner }
         };

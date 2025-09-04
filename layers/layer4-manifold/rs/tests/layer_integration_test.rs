@@ -7,7 +7,7 @@ use atlas_manifold::{
     error::*,
     fourier::{NormalFormRules, R96FourierProjection},
     invariants::{
-        C768CycleTracker, ConservationBudgetTracker, InvariantValidator, KleinOrbitAligner,
+        C768CycleTracker, InvariantValidator, KleinOrbitAligner,
         PhiBijectionVerifier,
     },
     projection::AtlasProjection,
@@ -111,7 +111,7 @@ fn test_c768_klein_orbit_integration() {
 #[test]
 fn test_phi_bijection_verification() {
     let max_pages = 1024;
-    let mut phi_verifier = PhiBijectionVerifier::new(max_pages);
+    let mut phi_verifier = PhiBijectionVerifier::new(max_pages).unwrap();
 
     // Test bijective mapping: Φ(page, offset) = page*256 + offset
     for page in 0..10 {
@@ -159,9 +159,9 @@ fn test_basic_shard_extraction() {
     // Test that we can extract a single region (simplified version)
     let (min_x, min_y, max_x, max_y) = create_simple_test_region();
     let region = AtlasBoundaryRegion::new(
-        (min_x * 256.0) as u64,
-        (max_x * 256.0) as u64,
-        ((max_y - min_y) * 256.0 / 256.0) as usize,
+        (min_x * 256.0) as u32,
+        (max_x * 256.0) as u32,
+        ((max_y - min_y) * 256.0 / 256.0) as u16,
         0,
     );
     let shard_result = projection.extract_shard(&region);

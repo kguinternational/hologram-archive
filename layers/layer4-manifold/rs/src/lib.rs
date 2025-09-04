@@ -307,6 +307,68 @@ pub fn cleanup() -> AtlasResult<()> {
     Ok(())
 }
 
+// =============================================================================
+// Layer 3 R96 Integration Helpers
+// =============================================================================
+
+/// Classify array of data bytes to R96 resonance classes using Layer 3 FFI
+/// 
+/// This provides a convenient Rust interface to the Layer 3 R96 classification
+/// system, which partitions the 256-byte space into 96 resonance classes.
+/// 
+/// # Arguments
+/// * `data` - Input byte array to classify
+/// 
+/// # Returns
+/// Vector of R96 resonance classes (values 0-95) corresponding to input bytes
+pub fn classify_data_r96(data: &[u8]) -> Vec<u8> {
+    let mut output = vec![0u8; data.len()];
+    
+    // SAFETY: FFI call with validated pointers and length
+    unsafe {
+        ffi::atlas_r96_classify_array(
+            data.as_ptr(),
+            output.as_mut_ptr(),
+            data.len(),
+        );
+    }
+    
+    output
+}
+
+/// Find harmonic pairs in resonance class array using Layer 3 FFI
+/// 
+/// Two resonance classes r1, r2 harmonize if (r1 + r2) % 96 == 0.
+/// This is fundamental for the Universal Numbers theory - harmonically
+/// paired elements are considered "adjacent" in the manifold.
+/// 
+/// # Arguments
+/// * `resonance_classes` - Array of R96 resonance class values (0-95)
+/// * `max_pairs` - Maximum number of pairs to find
+/// 
+/// # Returns
+/// Vector of harmonic pairs found in the data
+/// Since atlas_r96_find_harmonic_pairs is not available, we implement it using atlas_r96_harmonizes
+pub fn find_harmonic_pairs(resonance_classes: &[u8], max_pairs: usize) -> Vec<ffi::AtlasHarmonicPair> {
+    let mut pairs = Vec::new();
+    
+    // Find harmonic pairs by checking all combinations using atlas_r96_harmonizes
+    'outer: for (i, &r1) in resonance_classes.iter().enumerate() {
+        for &r2 in resonance_classes.iter().skip(i + 1) {
+            if pairs.len() >= max_pairs {
+                break 'outer;
+            }
+            
+            // SAFETY: FFI call with validated u8 values
+            if unsafe { ffi::atlas_r96_harmonizes(r1, r2) } {
+                pairs.push(ffi::AtlasHarmonicPair { r1, r2 });
+            }
+        }
+    }
+    
+    pairs
+}
+
 // C-compatible exports
 
 /// Returns the version string of the Atlas Manifold library
@@ -351,7 +413,7 @@ mod tests {
     use crate::manifold::*;
     use crate::shard::*;
     use crate::tlv::*;
-    use crate::types::*;
+    
 
     #[test]
     fn test_library_init_cleanup() {
@@ -674,8 +736,8 @@ mod tests {
         // These should be different types - we can't directly test with assert_ne!
         // but we can verify their sizes are different
         assert_ne!(
-            core::mem::size_of::<AtlasPoint<2>>(),
-            core::mem::size_of::<AtlasPoint<3>>()
+            size_of::<AtlasPoint<2>>(),
+            size_of::<AtlasPoint<3>>()
         );
 
         // Test transformation matrix type safety
@@ -687,8 +749,8 @@ mod tests {
         };
 
         assert_ne!(
-            core::mem::size_of_val(&matrix_2x2),
-            core::mem::size_of_val(&matrix_3x3)
+            size_of_val(&matrix_2x2),
+            size_of_val(&matrix_3x3)
         );
     }
 }

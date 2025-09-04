@@ -150,17 +150,17 @@ fn test_failure_closed_semantics() {
 
     // Record first error - should move to warning
     let error1 = AtlasError::NumericalError("test error 1");
-    assert!(enforcer.record_error(error1).is_ok());
+    assert!(enforcer.record_error(&error1).is_ok());
     assert!(enforcer.can_operate());
 
     // Record critical error - should move to error state
     let error2 = AtlasError::LayerIntegrationError("test critical error");
-    assert!(enforcer.record_error(error2).is_ok());
+    assert!(enforcer.record_error(&error2).is_ok());
     assert!(!enforcer.can_operate()); // Error state prevents operation
 
     // Record too many errors - should lock system
     let error3 = AtlasError::TopologyError("test topology error");
-    let result = enforcer.record_error(error3);
+    let result = enforcer.record_error(&error3);
     assert!(result.is_err()); // Should fail due to lockdown
     assert!(!enforcer.can_operate());
 }
@@ -331,7 +331,7 @@ fn test_error_recovery_mechanisms() {
 
     // Force an error condition
     let error = AtlasError::NumericalError("simulated numerical error");
-    validator.failure_enforcer.record_error(error).unwrap();
+    validator.failure_enforcer.record_error(&error).unwrap();
 
     // Should still be operational after one error
     assert!(validator.failure_enforcer.can_operate());
@@ -341,7 +341,7 @@ fn test_error_recovery_mechanisms() {
 
     // Force more errors
     let critical_error = AtlasError::LayerIntegrationError("critical error");
-    validator.failure_enforcer.record_error(critical_error).unwrap();
+    validator.failure_enforcer.record_error(&critical_error).unwrap();
 
     // System should now be in error state
     assert!(!validator.failure_enforcer.can_operate());

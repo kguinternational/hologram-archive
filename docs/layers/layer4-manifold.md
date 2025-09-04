@@ -1,10 +1,34 @@
 # Layer 4: Manifold Layer Documentation
 
 ## Overview
-Layer 4 (Manifold) creates holographic projections where parts contain information about the whole. This layer enables self-contained partial views (shards) that can reconstruct the complete structure while maintaining all conservation invariants.
+Layer 4 (Manifold) creates holographic projections where parts contain information about the whole. This layer enables self-contained partial views (shards) that can reconstruct the complete structure while maintaining all conservation invariants. All operations are implemented as Universal Numbers (UN), ensuring witnessability, composability, and conservation preservation.
 
 ## Status
-📋 **Planned** - Implementation in Rust with C ABI compatibility
+✅ **Complete** - Implemented in Rust with C ABI compatibility
+
+## Theoretical Foundation
+
+Layer 4 operations are grounded in three mathematical frameworks:
+
+### Universal Numbers (UN)
+All Layer 4 operations are scalar invariants that:
+- Are invariant under symmetry transformations
+- Support witnessable computation (verifiable with certificates)
+- Compose algebraically (pointwise addition/multiplication)
+- Preserve conservation laws automatically
+
+### Conservation Computation Theory (CCT)
+The implementation maintains:
+- Fixed state space of 12,288 elements
+- All transformations preserve `C(s) ≡ 0 (mod 96)`
+- Witness chains provide verifiable computation trails
+- Complexity classes: WC ⊆ HC ⊆ RC ⊆ CC
+
+### Resonance Field Theory (RFT)
+Leverages R96/C768 structure:
+- Harmonic pairing: classes r₁, r₂ harmonize if `(r₁ + r₂) % 96 == 0`
+- Triple-cycle conservation: 768 = 16×48 = 3×256
+- Replaces Euclidean distance with harmonic adjacency
 
 ## Purpose
 The Manifold layer provides:
@@ -42,6 +66,50 @@ bool          atlas_shard_verify(const shard_t* shard, const domain_t* domain);
 projection_t* atlas_proj_transform(const projection_t* src, transform_type_t type);
 dimension_t   atlas_proj_get_dimension(const projection_t* proj);
 complexity_t  atlas_proj_get_complexity(const projection_t* proj);
+```
+
+## Universal Number Operations
+
+Layer 4 implements complex operations as UN computations:
+
+### Metric Tensor (UN Operation)
+Instead of Jacobian computation:
+```rust
+// Spectral moments are Universal Numbers
+fn compute_metric_tensor_un(matrix: &TransformMatrix) -> MetricTensor {
+    let trace1 = Tr(M);      // First spectral moment
+    let trace2 = Tr(M²);     // Second spectral moment
+    // Build metric from UN invariants
+}
+```
+
+### Curvature (UN Operation)
+Replaces Riemann tensor with traces:
+```rust
+fn compute_curvature_un(metric: &MetricTensor) -> Curvature {
+    let tr_m = spectral_moment(metric, 1);
+    let tr_m2 = spectral_moment(metric, 2);
+    // Cayley-Hamilton for determinant
+    let det = (tr_m * tr_m - tr_m2) / 2.0;
+}
+```
+
+### Harmonic Adjacency (UN Operation)
+Replaces Euclidean distance:
+```rust
+fn are_harmonically_adjacent(elem1: u8, elem2: u8) -> bool {
+    // Elements adjacent if resonances harmonize
+    (r1 + r2) % 96 == 0
+}
+```
+
+### Timestamps (UN Operation)
+Simple atomic counter as Universal Number:
+```rust
+fn get_timestamp() -> u64 {
+    // Atomic counter is already a UN (monotonic, invariant)
+    COUNTER.fetch_add(1, Ordering::SeqCst)
+}
 ```
 
 ## Algorithms

@@ -20,7 +20,7 @@ cd Hologram
 make all
 ```
 
-This builds layers 0-3 in sequence, respecting dependencies.
+This builds layers 0-4 in sequence, respecting dependencies.
 
 ### 3. Run Tests
 ```bash
@@ -33,15 +33,16 @@ make -C layers/layer0-atlas
 make -C layers/layer1-boundary
 make -C layers/layer2-conservation
 make -C layers/layer3-resonance
+make -C layers/layer4-manifold
 ```
 
 ## Architecture Overview
 Hologram is structured as a 7-layer stack:
-- **Layer 0**: Atlas Core - Fundamental 12,288-element structure
-- **Layer 1**: Boundary - Coordinate system and spatial organization
-- **Layer 2**: Conservation - Witness generation and conservation laws
-- **Layer 3**: Resonance - R96 classification and harmonic scheduling
-- **Layer 4**: Manifold (planned) - Holographic projections
+- **Layer 0**: Atlas Core - Fundamental 12,288-element structure ✅
+- **Layer 1**: Boundary - Coordinate system and spatial organization ✅
+- **Layer 2**: Conservation - Witness generation and conservation laws ✅
+- **Layer 3**: Resonance - R96 classification and harmonic scheduling ✅
+- **Layer 4**: Manifold - Holographic projections using Universal Numbers ✅
 - **Layer 5**: VPI (planned) - Virtual platform interface
 - **Layer 6**: SDK (planned) - Developer-friendly APIs
 - **Layer 7**: Applications (planned) - User applications

@@ -320,6 +320,116 @@ int atlas_topology_find_critical_points_detailed(const atlas_projection_t projec
 }
 
 // =============================================================================
+// Connected Components Analysis
+// =============================================================================
+
+// Helper: Find root with path compression
+static int find_root_impl(int* parent_array, int node) {
+    if (parent_array[node] != node) {
+        parent_array[node] = find_root_impl(parent_array, parent_array[node]);
+    }
+    return parent_array[node];
+}
+
+// Helper: Union two sets
+static void union_sets(int* parent_array, int a, int b) {
+    int root_a = find_root_impl(parent_array, a);
+    int root_b = find_root_impl(parent_array, b);
+    if (root_a != root_b) {
+        parent_array[root_a] = root_b;
+    }
+}
+
+/**
+ * Count connected components in the manifold using Union-Find algorithm.
+ * 
+ * @param projection Projection containing the manifold
+ * @param width Width of the manifold grid
+ * @param height Height of the manifold grid
+ * @return Number of connected components, or 1 if unable to determine
+ */
+static int atlas_topology_count_connected_components(
+    const atlas_projection_t* projection,
+    uint32_t width,
+    uint32_t height
+) {
+    if (projection == NULL || width == 0 || height == 0) {
+        return 1;
+    }
+    
+    // Allocate Union-Find parent array
+    size_t total_nodes = width * height;
+    int* parent = (int*)calloc(total_nodes, sizeof(int));
+    if (parent == NULL) {
+        return 1; // Memory allocation failed, default to single component
+    }
+    
+    // Initialize each node as its own parent
+    for (size_t i = 0; i < total_nodes; i++) {
+        parent[i] = (int)i;
+    }
+    
+    // Check connectivity between adjacent nodes
+    for (uint32_t y = 0; y < height; y++) {
+        for (uint32_t x = 0; x < width; x++) {
+            int current = (int)(y * width + x);
+            
+            // Calculate curvature at current point
+            double current_curvature = atlas_manifold_compute_curvature(
+                *projection, (double)x, (double)y);
+            
+            // Skip invalid points
+            if (!isfinite(current_curvature)) {
+                continue;
+            }
+            
+            // Check right neighbor
+            if (x + 1 < width) {
+                double right_curvature = atlas_manifold_compute_curvature(
+                    *projection, (double)(x + 1), (double)y);
+                if (isfinite(right_curvature)) {
+                    // Connect if curvature difference is small (continuous surface)
+                    if (fabs(current_curvature - right_curvature) < 1.0) {
+                        union_sets(parent, current, current + 1);
+                    }
+                }
+            }
+            
+            // Check bottom neighbor
+            if (y + 1 < height) {
+                double bottom_curvature = atlas_manifold_compute_curvature(
+                    *projection, (double)x, (double)(y + 1));
+                if (isfinite(bottom_curvature)) {
+                    // Connect if curvature difference is small (continuous surface)
+                    if (fabs(current_curvature - bottom_curvature) < 1.0) {
+                        union_sets(parent, current, (int)((y + 1) * width + x));
+                    }
+                }
+            }
+        }
+    }
+    
+    // Count unique components
+    int component_count = 0;
+    bool* seen = (bool*)calloc(total_nodes, sizeof(bool));
+    if (seen != NULL) {
+        for (size_t i = 0; i < total_nodes; i++) {
+            int root = find_root_impl(parent, (int)i);
+            if (!seen[root]) {
+                seen[root] = true;
+                component_count++;
+            }
+        }
+        free(seen);
+    } else {
+        component_count = 1; // Default if memory allocation failed
+    }
+    
+    free(parent);
+    return (component_count > 0) ? component_count : 1;
+}
+
+// =============================================================================
 // Topological Invariant Calculations  
 // =============================================================================
 
@@ -385,8 +495,9 @@ int atlas_topology_calculate_invariants(const atlas_projection_t projection,
     invariants->genus = (2 - invariants->euler_characteristic) / 2;
     if (invariants->genus < 0) invariants->genus = 0;
     
-    // Assume single connected component for now (simplified)
-    invariants->num_connected_components = 1;
+    // Calculate connected components using Union-Find algorithm
+    invariants->num_connected_components = atlas_topology_count_connected_components(
+        &projection, width, height);
     
     // Estimate boundary components
     int boundary_critical_points = 0;
