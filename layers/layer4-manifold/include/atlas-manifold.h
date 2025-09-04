@@ -70,6 +70,8 @@ typedef struct {
     uint32_t current_shard;  /* Current shard being processed */
     uint64_t checksum;       /* Verification checksum */
     bool     is_complete;    /* Reconstruction completion status */
+    atlas_shard_t* shards;   /* Array of collected shards */
+    size_t shard_capacity;   /* Allocated capacity for shards array */
 } atlas_reconstruction_ctx_t;
 
 // =============================================================================
@@ -320,6 +322,16 @@ bool atlas_reconstruction_is_complete(const atlas_reconstruction_ctx_t* ctx);
  */
 atlas_projection_t atlas_reconstruction_finalize(atlas_reconstruction_ctx_t* ctx,
                                                 atlas_projection_type_t type);
+
+/**
+ * Destroy reconstruction context and free resources.
+ * 
+ * @param ctx Pointer to reconstruction context to destroy (can be NULL)
+ * 
+ * Thread safety: Not thread-safe (modifies context)
+ * Memory: Frees context resources (not the individual shards)
+ */
+void atlas_reconstruction_destroy(atlas_reconstruction_ctx_t* ctx);
 
 // =============================================================================
 // Verification Functions
@@ -597,6 +609,156 @@ bool atlas_manifold_get_statistics(uint64_t* projections_created,
  * Thread safety: Safe to call concurrently (atomic operations)
  */
 void atlas_manifold_reset_statistics(void);
+
+// =============================================================================
+// Layer 2 Conservation Integration Functions
+// =============================================================================
+
+/**
+ * Generate witness for data with Layer 2 conservation verification.
+ * 
+ * Creates a cryptographic witness for the provided data using Layer 2 
+ * conservation algorithms. The witness can be used to verify data integrity
+ * and conservation law compliance.
+ * 
+ * @param data Pointer to data buffer (must be non-NULL)
+ * @param length Length of data buffer in bytes (must be > 0)
+ * @return Witness handle, or NULL on error
+ * 
+ * Thread safety: Safe to call from multiple threads
+ * Memory: Caller must call atlas_manifold_witness_destroy() to free witness
+ */
+void* atlas_manifold_witness_generate(const uint8_t* data, size_t length);
+
+/**
+ * Verify witness against data using Layer 2 conservation.
+ * 
+ * Verifies that the provided data matches the cryptographic witness,
+ * confirming both data integrity and conservation law compliance.
+ * 
+ * @param witness Witness handle (must be valid)
+ * @param data Pointer to data buffer (must be non-NULL)
+ * @param length Length of data buffer in bytes (must match witness)
+ * @return true if verification succeeds, false otherwise
+ * 
+ * Thread safety: Safe to call concurrently (read-only operation)
+ */
+bool atlas_manifold_witness_verify(const void* witness, const uint8_t* data, size_t length);
+
+/**
+ * Destroy witness and free resources.
+ * 
+ * Releases all resources associated with a witness handle created by
+ * atlas_manifold_witness_generate().
+ * 
+ * @param witness Witness handle (can be NULL - no-op)
+ * 
+ * Thread safety: Not thread-safe (modifies and frees witness)
+ * Memory: Frees all witness resources
+ */
+void atlas_manifold_witness_destroy(void* witness);
+
+/**
+ * Check if data satisfies Layer 2 conservation laws (sum % 96 == 0).
+ * 
+ * Verifies that the sum of all bytes in the data buffer modulo 96 equals zero,
+ * indicating compliance with Atlas Layer 2 conservation mathematics.
+ * 
+ * @param data Pointer to data buffer (must be non-NULL)
+ * @param length Length of data buffer in bytes (must be > 0)
+ * @return true if data satisfies conservation laws, false otherwise
+ * 
+ * Thread safety: Safe to call from multiple threads (read-only operation)
+ * Performance: O(n) where n is data length
+ */
+bool atlas_manifold_conserved_check(const uint8_t* data, size_t length);
+
+/**
+ * Check if data window satisfies Layer 2 conservation laws with enhanced validation.
+ * 
+ * Specialized conservation check for data windows with enhanced validation
+ * and performance optimizations compared to basic conservation check.
+ * 
+ * @param data Pointer to data buffer (must be non-NULL)
+ * @param length Length of data buffer in bytes (must be > 0 and <= 1MB)
+ * @return true if data window satisfies conservation laws, false otherwise
+ * 
+ * Thread safety: Safe to call from multiple threads (read-only operation)
+ * Performance: O(n) where n is data length, with optimizations
+ */
+bool atlas_manifold_conserved_window_check(const uint8_t* data, size_t length);
+
+/**
+ * Calculate conservation delta between two memory states.
+ * 
+ * Computes the change in conservation value between "before" and "after"
+ * memory states using mod-96 arithmetic. A delta of 0 indicates perfect
+ * conservation (no net change in computational energy).
+ * 
+ * @param before Pointer to "before" memory state (must be non-NULL)
+ * @param after Pointer to "after" memory state (must be non-NULL)
+ * @param length Length of both memory buffers in bytes (must be > 0)
+ * @return Conservation delta (0..95), or 255 on error
+ * 
+ * Thread safety: Safe to call from multiple threads (read-only operation)
+ * Arithmetic: Uses mod-96 arithmetic, handles underflow correctly
+ */
+uint8_t atlas_manifold_conserved_delta(const uint8_t* before, const uint8_t* after, size_t length);
+
+/**
+ * Create conservation domain for manifold operations.
+ * 
+ * Creates a Layer 2 conservation domain with the specified memory allocation
+ * and budget class for use in manifold operations. The domain provides
+ * failure-closed semantics for conservation law enforcement.
+ * 
+ * @param bytes Size of memory to allocate for domain operations (must be > 0)
+ * @param budget_class Budget class (0..95, mod-96 arithmetic)
+ * @return Domain handle, or NULL on error
+ * 
+ * Thread safety: Safe to call from multiple threads
+ * Memory: Caller must call atlas_manifold_domain_destroy() to free domain
+ */
+void* atlas_manifold_domain_create(size_t bytes, uint8_t budget_class);
+
+/**
+ * Verify conservation domain integrity.
+ * 
+ * Checks that the domain is in a valid state, attached memory is conserved,
+ * and any bound witnesses are still valid.
+ * 
+ * @param domain Domain handle (must be valid)
+ * @return true if domain is valid and conserved, false otherwise
+ * 
+ * Thread safety: Safe to call concurrently (read-only operation)
+ * Performance: O(n) where n is domain memory size
+ */
+bool atlas_manifold_domain_verify(const void* domain);
+
+/**
+ * Destroy conservation domain and free resources.
+ * 
+ * Releases all resources associated with a domain handle created by
+ * atlas_manifold_domain_create().
+ * 
+ * @param domain Domain handle (can be NULL - no-op)
+ * 
+ * Thread safety: Not thread-safe (modifies and frees domain)
+ * Memory: Frees all domain resources
+ */
+void atlas_manifold_domain_destroy(void* domain);
+
+/**
+ * Get last Layer 2 conservation error code.
+ * 
+ * Retrieves the most recent error code from Layer 2 conservation operations
+ * for debugging and error handling purposes.
+ * 
+ * @return Error code (0 = success, non-zero = error)
+ * 
+ * Thread safety: Safe to call from any thread (thread-local storage)
+ */
+uint32_t atlas_manifold_get_conservation_error(void);
 
 #ifdef __cplusplus
 }

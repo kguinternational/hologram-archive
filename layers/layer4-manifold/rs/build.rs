@@ -1,3 +1,8 @@
+//! Build script for Atlas Manifold Layer 4
+//!
+//! Configures linking with Layer 2 (Conservation) and Layer 3 (Resonance) libraries
+//! and sets up necessary system library dependencies.
+
 use std::env;
 use std::path::PathBuf;
 
@@ -7,29 +12,29 @@ fn main() {
     println!("cargo:rerun-if-env-changed=ATLAS_LAYER3_PATH");
 
     // Get library paths from environment or use defaults
-    let layer2_path = env::var("ATLAS_LAYER2_PATH")
-        .unwrap_or_else(|_| "../../layer2-conservation".to_string());
-    let layer3_path = env::var("ATLAS_LAYER3_PATH")
-        .unwrap_or_else(|_| "../../layer3-resonance".to_string());
+    let layer2_path =
+        env::var("ATLAS_LAYER2_PATH").unwrap_or_else(|_| "../../layer2-conservation".to_string());
+    let layer3_path =
+        env::var("ATLAS_LAYER3_PATH").unwrap_or_else(|_| "../../layer3-resonance".to_string());
 
     // Convert to absolute paths
-    let layer2_lib_path = PathBuf::from(&layer2_path).join("lib");
-    let layer3_build_path = PathBuf::from(&layer3_path).join("build");
+    let _layer2_lib_path = PathBuf::from(&layer2_path).join("lib");
+    let _layer3_build_path = PathBuf::from(&layer3_path).join("build");
 
-    // Add library search paths
-    if layer2_lib_path.exists() {
-        println!("cargo:rustc-link-search=native={}", layer2_lib_path.display());
-        println!("cargo:rustc-link-lib=static=atlas");
-    } else {
-        println!("cargo:warning=Layer 2 library path not found: {}", layer2_lib_path.display());
-    }
+    // Add library search paths - use main lib directory for all Atlas libraries
+    let main_lib_path = PathBuf::from("../../../lib");
 
-    if layer3_build_path.exists() {
-        println!("cargo:rustc-link-search=native={}", layer3_build_path.display());
-        // Link individual Layer 3 object files as needed
-        // Note: For proper linking, Layer 3 should ideally provide a combined library
+    if main_lib_path.exists() {
+        println!("cargo:rustc-link-search=native={}", main_lib_path.display());
+        // Link Atlas libraries in dependency order
+        println!("cargo:rustc-link-lib=static=atlas-core");
+        println!("cargo:rustc-link-lib=static=atlas-conservation");
+        println!("cargo:rustc-link-lib=static=atlas-resonance");
     } else {
-        println!("cargo:warning=Layer 3 build path not found: {}", layer3_build_path.display());
+        println!(
+            "cargo:warning=Main library path not found: {}",
+            main_lib_path.display()
+        );
     }
 
     // Link system libraries

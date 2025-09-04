@@ -1,4 +1,9 @@
 //! Core type definitions for Atlas Manifold operations
+//!
+//! This module contains fundamental data structures used throughout the manifold system,
+//! including FFI-safe representations that use unsafe traits for byte-level compatibility.
+
+#![allow(clippy::module_name_repetitions)] // Allow repetitive names for FFI clarity
 
 use bytemuck::{Pod, Zeroable};
 
@@ -19,7 +24,10 @@ pub struct AtlasPoint<const N: usize> {
     pub coords: [Float; N],
 }
 
+// SAFETY: AtlasPoint is #[repr(C)] with only Float (f64) elements, which are Pod-safe
 unsafe impl<const N: usize> Pod for AtlasPoint<N> {}
+
+// SAFETY: AtlasPoint can be safely zero-initialized as all f64 values can be zero
 unsafe impl<const N: usize> Zeroable for AtlasPoint<N> {}
 
 /// Transformation matrix for manifold operations
@@ -30,7 +38,10 @@ pub struct TransformMatrix<const M: usize, const N: usize> {
     pub elements: [[Float; N]; M],
 }
 
+// SAFETY: TransformMatrix is #[repr(C)] with only Float (f64) arrays, which are Pod-safe
 unsafe impl<const M: usize, const N: usize> Pod for TransformMatrix<M, N> {}
+
+// SAFETY: TransformMatrix can be safely zero-initialized as f64 arrays can be zero
 unsafe impl<const M: usize, const N: usize> Zeroable for TransformMatrix<M, N> {}
 
 /// Manifold descriptor containing geometric properties
@@ -47,7 +58,10 @@ pub struct ManifoldDescriptor {
     pub metric_det: Float,
 }
 
+// SAFETY: ManifoldDescriptor is #[repr(C)] with only primitive types (u32, f64 arrays)
 unsafe impl Pod for ManifoldDescriptor {}
+
+// SAFETY: ManifoldDescriptor fields can be safely zero-initialized
 unsafe impl Zeroable for ManifoldDescriptor {}
 
 /// Shard identifier for distributed operations
@@ -60,7 +74,10 @@ pub struct ShardId {
     pub secondary: u32,
 }
 
+// SAFETY: ShardId is #[repr(C)] with only primitive integer types (u64, u32)
 unsafe impl Pod for ShardId {}
+
+// SAFETY: ShardId can be safely zero-initialized as integer types can be zero
 unsafe impl Zeroable for ShardId {}
 
 /// Atlas vector in N-dimensional space
@@ -71,7 +88,10 @@ pub struct AtlasVector<const N: usize> {
     pub components: [Float; N],
 }
 
+// SAFETY: AtlasVector is #[repr(C)] with only Float (f64) array components, which are Pod-safe
 unsafe impl<const N: usize> Pod for AtlasVector<N> {}
+
+// SAFETY: AtlasVector can be safely zero-initialized as f64 arrays can be zero
 unsafe impl<const N: usize> Zeroable for AtlasVector<N> {}
 
 /// Common manifold operations result

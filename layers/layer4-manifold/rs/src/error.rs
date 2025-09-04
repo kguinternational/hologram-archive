@@ -26,24 +26,17 @@ pub enum AtlasError {
 impl core::fmt::Display for AtlasError {
     fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
         match self {
-            AtlasError::InvalidDimension(dim) => 
-                write!(f, "Invalid dimension: {}", dim),
-            AtlasError::MatrixError(msg) => 
-                write!(f, "Matrix operation error: {}", msg),
-            AtlasError::TopologyError(msg) => 
-                write!(f, "Manifold topology error: {}", msg),
-            AtlasError::CoordinateError(msg) => 
-                write!(f, "Coordinate transformation error: {}", msg),
-            AtlasError::SerializationError(msg) => 
-                write!(f, "Serialization error: {}", msg),
-            AtlasError::AllocationError => 
-                write!(f, "Memory allocation failed"),
-            AtlasError::InvalidInput(msg) => 
-                write!(f, "Invalid input: {}", msg),
-            AtlasError::NumericalError(msg) => 
-                write!(f, "Numerical computation error: {}", msg),
-            AtlasError::LayerIntegrationError(msg) => 
-                write!(f, "Layer integration error: {}", msg),
+            AtlasError::InvalidDimension(dim) => write!(f, "Invalid dimension: {}", dim),
+            AtlasError::MatrixError(msg) => write!(f, "Matrix operation error: {}", msg),
+            AtlasError::TopologyError(msg) => write!(f, "Manifold topology error: {}", msg),
+            AtlasError::CoordinateError(msg) => {
+                write!(f, "Coordinate transformation error: {}", msg)
+            },
+            AtlasError::SerializationError(msg) => write!(f, "Serialization error: {}", msg),
+            AtlasError::AllocationError => write!(f, "Memory allocation failed"),
+            AtlasError::InvalidInput(msg) => write!(f, "Invalid input: {}", msg),
+            AtlasError::NumericalError(msg) => write!(f, "Numerical computation error: {}", msg),
+            AtlasError::LayerIntegrationError(msg) => write!(f, "Layer integration error: {}", msg),
         }
     }
 }

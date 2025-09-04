@@ -1,0 +1,62 @@
+# rustfmt configuration for Atlas Manifold Layer 4
+# Professional formatting settings for production Rust library with FFI
+
+# Basic formatting
+edition = "2021"
+max_width = 100
+hard_tabs = false
+tab_spaces = 4
+
+# Function and control flow formatting
+fn_args_layout = "Tall"
+brace_style = "SameLineWhere"
+control_brace_style = "AlwaysSameLine"
+indent_style = "Block"
+
+# Import organization
+imports_layout = "Vertical"
+group_imports = "StdExternalCrate"
+imports_granularity = "Crate"
+reorder_imports = true
+reorder_modules = true
+
+# Comments and documentation
+comment_width = 80
+wrap_comments = true
+format_code_in_doc_comments = true
+doc_comment_code_block_width = 80
+
+# Trailing elements
+trailing_comma = "Vertical"
+trailing_semicolon = true
+match_block_trailing_comma = true
+
+# Spacing and alignment
+spaces_around_ranges = false
+type_punctuation_density = "Wide"
+use_small_heuristics = "Default"
+
+# String formatting
+format_strings = true
+format_macro_matchers = true
+format_macro_bodies = true
+
+# Advanced formatting for FFI and unsafe code
+single_line_if_else_max_width = 50
+force_explicit_abi = true
+normalize_doc_attributes = true
+
+# Stability settings - enable unstable features for better FFI formatting
+unstable_features = true
+format_generated_files = false
+
+# Chain formatting for builder patterns common in FFI
+chain_width = 80
+chains_overflow_last = false
+
+# Error handling formatting
+overflow_delimited_expr = true
+use_try_shorthand = true
+
+# Module and item organization
+reorder_impl_items = true
