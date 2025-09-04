@@ -70,8 +70,8 @@
 //! let point_3d = AtlasPoint::<3> { coords: [1.0, 2.0, 3.0] };
 //!
 //! // Create vectors for transformations
-//! let vector = AtlasVector::<3> { 
-//!     components: [1.0, 0.0, 0.0] 
+//! let vector = AtlasVector::<3> {
+//!     components: [1.0, 0.0, 0.0]
 //! };
 //!
 //! // Points and vectors are FFI-safe and can be passed to C functions

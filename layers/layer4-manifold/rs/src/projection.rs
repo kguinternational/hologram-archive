@@ -1053,20 +1053,26 @@ impl AtlasProjection {
     }
 
     /// Apply incremental update to this projection
-    pub fn apply_incremental_update(&mut self, delta: crate::incremental::ProjectionDelta) -> AtlasResult<()> {
+    pub fn apply_incremental_update(
+        &mut self,
+        delta: crate::incremental::ProjectionDelta,
+    ) -> AtlasResult<()> {
         crate::incremental::apply_incremental_update(self, delta, None)
     }
 
     /// Apply batch of incremental updates to this projection
-    pub fn apply_incremental_batch(&mut self, deltas: Vec<crate::incremental::ProjectionDelta>) -> AtlasResult<crate::incremental::IncrementalStats> {
+    pub fn apply_incremental_batch(
+        &mut self,
+        deltas: Vec<crate::incremental::ProjectionDelta>,
+    ) -> AtlasResult<crate::incremental::IncrementalStats> {
         crate::incremental::apply_incremental_batch_update(self, deltas, None)
     }
 
     /// Apply incremental update with custom configuration
     pub fn apply_incremental_update_with_config(
-        &mut self, 
+        &mut self,
         delta: crate::incremental::ProjectionDelta,
-        config: crate::incremental::IncrementalConfig
+        config: crate::incremental::IncrementalConfig,
     ) -> AtlasResult<()> {
         crate::incremental::apply_incremental_update(self, delta, Some(config))
     }
@@ -1182,7 +1188,7 @@ impl AtlasProjection {
                 results.push(shard);
             }
         }
-        
+
         Ok(results)
     }
 
@@ -1332,7 +1338,7 @@ pub fn atlas_projection_destroy(handle: AtlasProjectionHandle) {
 #[cfg(test)]
 mod tests {
     use super::*;
-    
+
     /// Create conservation-compliant test data (sum % 96 == 0)
     fn create_conservation_test_data(size: usize) -> Vec<u8> {
         // For now, use all zeros which definitely satisfies Layer 2 conservation
@@ -1440,11 +1446,11 @@ mod tests {
         for i in 0..source_data.len() {
             source_data[i] = (i % 256) as u8;
         }
-        
+
         // Make the data conservation-compliant
         let current_sum: u32 = source_data.iter().map(|&b| u32::from(b)).sum();
         let remainder = current_sum % 96;
-        
+
         if remainder != 0 {
             let adjustment = (96 - remainder) as u8;
             let last_idx = source_data.len() - 1;
@@ -1598,7 +1604,12 @@ mod tests {
         for i in 0..16 {
             let start = i * 256;
             let end = (i + 1) * 256;
-            regions.push(crate::shard::AtlasBoundaryRegion::new(start, end, 1, (i % 96) as u8));
+            regions.push(crate::shard::AtlasBoundaryRegion::new(
+                start,
+                end,
+                1,
+                (i % 96) as u8,
+            ));
         }
 
         // Test chunked parallel extraction
@@ -1662,7 +1673,7 @@ mod tests {
         // Create an incremental update delta with conservation-compliant data
         // 10 + 20 + 66 = 96, which satisfies conservation law
         let delta = crate::incremental::ProjectionDelta::insert(100, vec![10, 20, 66]);
-        
+
         // Apply the incremental update
         let result = projection.apply_incremental_update(delta);
         assert!(result.is_ok());
@@ -1683,7 +1694,7 @@ mod tests {
         let deltas = vec![
             // 1 + 2 + 93 = 96
             crate::incremental::ProjectionDelta::insert(100, vec![1, 2, 93]),
-            // 3 + 4 + 5 + 84 = 96  
+            // 3 + 4 + 5 + 84 = 96
             crate::incremental::ProjectionDelta::update(200, 250, vec![3, 4, 5, 84]),
             // 6 + 7 + 8 + 75 = 96
             crate::incremental::ProjectionDelta::insert(300, vec![6, 7, 8, 75]),
@@ -1719,7 +1730,7 @@ mod tests {
         // Create conservation-compliant data: sum should be multiple of 96
         // 42 + 43 + 11 = 96, which satisfies conservation law
         let delta = crate::incremental::ProjectionDelta::insert(150, vec![42, 43, 11]);
-        
+
         let result = projection.apply_incremental_update_with_config(delta, config);
         assert!(result.is_ok());
         assert!(projection.verify().is_ok());

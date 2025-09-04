@@ -10,9 +10,9 @@ use crate::error::*;
 use crate::projection::*;
 
 #[cfg(feature = "std")]
-use std::vec::Vec;
-#[cfg(feature = "std")]
 use std::collections::HashMap;
+#[cfg(feature = "std")]
+use std::vec::Vec;
 
 #[cfg(not(feature = "std"))]
 use alloc::vec::Vec;
@@ -135,25 +135,20 @@ impl Default for IncrementalStats {
 
 impl ProjectionDelta {
     /// Create a new projection delta
-    pub fn new(
-        change_type: ChangeType,
-        start_coord: u32,
-        end_coord: u32,
-        data: Vec<u8>,
-    ) -> Self {
+    pub fn new(change_type: ChangeType, start_coord: u32, end_coord: u32, data: Vec<u8>) -> Self {
         let conservation_delta = match change_type {
             ChangeType::Insert => data.iter().map(|&b| i64::from(b)).sum(),
             ChangeType::Update => 0, // Will be recalculated when original_data is set
             ChangeType::Delete => 0, // Will be recalculated when original_data is set
             ChangeType::Move => 0,   // Move operations don't change conservation sum
         };
-        
+
         let mut hash_input = Vec::new();
         hash_input.extend_from_slice(&start_coord.to_le_bytes());
         hash_input.extend_from_slice(&end_coord.to_le_bytes());
         hash_input.extend_from_slice(&data);
         let id = fasthash::city::hash64(&hash_input);
-        
+
         Self {
             id,
             change_type,
@@ -192,28 +187,28 @@ impl ProjectionDelta {
     /// Update conservation delta based on original data
     pub fn set_original_data(&mut self, original_data: Vec<u8>) {
         self.original_data = Some(original_data.clone());
-        
+
         // Recalculate conservation delta based on change type
         match self.change_type {
             ChangeType::Insert => {
                 // Insert operations add new data to conservation sum
                 self.conservation_delta = self.data.iter().map(|&b| i64::from(b)).sum();
-            }
+            },
             ChangeType::Update => {
                 // Update operations: delta = new_sum - original_sum
                 let original_sum: i64 = original_data.iter().map(|&b| i64::from(b)).sum();
                 let new_sum: i64 = self.data.iter().map(|&b| i64::from(b)).sum();
                 self.conservation_delta = new_sum - original_sum;
-            }
+            },
             ChangeType::Delete => {
                 // Delete operations remove data from conservation sum
                 let original_sum: i64 = original_data.iter().map(|&b| i64::from(b)).sum();
                 self.conservation_delta = -original_sum;
-            }
+            },
             ChangeType::Move => {
                 // Move operations don't change total conservation sum
                 self.conservation_delta = 0;
-            }
+            },
         }
     }
 
@@ -232,7 +227,7 @@ impl ProjectionDelta {
         let page_size = 4096u32;
         let start_tile = self.start_coord / (page_size * 256); // Tiles contain multiple pages
         let end_tile = self.end_coord / (page_size * 256);
-        
+
         self.affected_tiles.clear();
         for tile_id in start_tile..=end_tile.min(tiles_per_side * tiles_per_side - 1) {
             self.affected_tiles.push(tile_id);
@@ -245,7 +240,7 @@ impl ProjectionDelta {
             ChangeType::Insert => {
                 // Insert operations can change conservation sum
                 true
-            }
+            },
             ChangeType::Update => {
                 // Update operations should maintain conservation if original data is known
                 if let Some(ref original) = self.original_data {
@@ -255,7 +250,7 @@ impl ProjectionDelta {
                 } else {
                     true // Can't validate without original data
                 }
-            }
+            },
             ChangeType::Delete => {
                 // Delete operations remove conservation contribution
                 if let Some(ref original) = self.original_data {
@@ -264,11 +259,11 @@ impl ProjectionDelta {
                 } else {
                     true
                 }
-            }
+            },
             ChangeType::Move => {
                 // Move operations shouldn't change total conservation sum
                 self.conservation_delta == 0
-            }
+            },
         }
     }
 }
@@ -299,7 +294,9 @@ impl IncrementalUpdateContext {
 
         // Validate conservation if required
         if config.validate_conservation && !delta.validate_conservation() {
-            return Err(AtlasError::LayerIntegrationError("conservation law violation"));
+            return Err(AtlasError::LayerIntegrationError(
+                "conservation law violation",
+            ));
         }
 
         // Apply the delta based on change type
@@ -312,13 +309,13 @@ impl IncrementalUpdateContext {
 
         // Update conservation tracking
         self.conservation_changes += delta.conservation_delta;
-        projection.total_conservation_sum = 
+        projection.total_conservation_sum =
             (projection.total_conservation_sum as i64 + delta.conservation_delta) as u64;
 
         // Store delta for potential rollback
         if self.enable_rollback {
             self.applied_deltas.push(delta);
-            
+
             // Limit rollback history
             if self.applied_deltas.len() > self.max_rollback_deltas {
                 self.applied_deltas.remove(0);
@@ -337,13 +334,13 @@ impl IncrementalUpdateContext {
         config: &IncrementalConfig,
     ) -> AtlasResult<()> {
         let batch_size = config.batch_size;
-        
+
         for chunk in deltas.chunks(batch_size) {
             for delta in chunk {
                 self.apply_delta(projection, delta.clone(), config)?;
             }
         }
-        
+
         Ok(())
     }
 
@@ -358,28 +355,28 @@ impl IncrementalUpdateContext {
         }
 
         let deltas_to_rollback = self.applied_deltas.len().min(count);
-        
+
         for _ in 0..deltas_to_rollback {
             if let Some(delta) = self.applied_deltas.pop() {
                 self.rollback_single_delta(projection, &delta)?;
                 self.conservation_changes -= delta.conservation_delta;
-                projection.total_conservation_sum = 
+                projection.total_conservation_sum =
                     (projection.total_conservation_sum as i64 - delta.conservation_delta) as u64;
                 self.sequence_number -= 1;
             }
         }
-        
+
         Ok(())
     }
 
     /// Get statistics about applied updates
     pub fn get_stats(&self) -> IncrementalStats {
         let mut stats = IncrementalStats::default();
-        
+
         for delta in &self.applied_deltas {
             stats.total_updates += 1;
             stats.bytes_modified += delta.affected_size() as u64;
-            
+
             match delta.change_type {
                 ChangeType::Insert => stats.insert_operations += 1,
                 ChangeType::Update => stats.update_operations += 1,
@@ -387,18 +384,23 @@ impl IncrementalUpdateContext {
                 ChangeType::Move => stats.move_operations += 1,
             }
         }
-        
+
         stats
     }
 
     // Private helper methods
 
-    fn apply_insert(&mut self, projection: &mut AtlasProjection, delta: &ProjectionDelta) -> AtlasResult<()> {
+    fn apply_insert(
+        &mut self,
+        projection: &mut AtlasProjection,
+        delta: &ProjectionDelta,
+    ) -> AtlasResult<()> {
         // Find the appropriate tile and insert data
         for tile_id in &delta.affected_tiles {
             if let Some(tile) = projection.tiles.get_mut(*tile_id as usize) {
                 // Create a new page with the insert data
-                if delta.data.len() <= 4096 { // Single page
+                if delta.data.len() <= 4096 {
+                    // Single page
                     let mut page_data = vec![0u8; 4096];
                     let copy_len = delta.data.len().min(4096);
                     page_data[..copy_len].copy_from_slice(&delta.data[..copy_len]);
@@ -409,7 +411,11 @@ impl IncrementalUpdateContext {
         Ok(())
     }
 
-    fn apply_update(&mut self, projection: &mut AtlasProjection, delta: &mut ProjectionDelta) -> AtlasResult<()> {
+    fn apply_update(
+        &mut self,
+        projection: &mut AtlasProjection,
+        delta: &mut ProjectionDelta,
+    ) -> AtlasResult<()> {
         // Find affected tiles and update their data
         for tile_id in &delta.affected_tiles {
             if let Some(tile) = projection.tiles.get_mut(*tile_id as usize) {
@@ -422,12 +428,12 @@ impl IncrementalUpdateContext {
                     }
                     delta.original_data = Some(original);
                 }
-                
+
                 // Apply update to tile pages
                 if !tile.pages.is_empty() && !delta.data.is_empty() {
                     let update_len = delta.data.len().min(tile.pages[0].len());
                     tile.pages[0][..update_len].copy_from_slice(&delta.data[..update_len]);
-                    
+
                     // Recalculate conservation sum for the tile
                     tile.conservation_sum = 0;
                     for page in &tile.pages {
@@ -440,7 +446,11 @@ impl IncrementalUpdateContext {
         Ok(())
     }
 
-    fn apply_delete(&mut self, projection: &mut AtlasProjection, delta: &mut ProjectionDelta) -> AtlasResult<()> {
+    fn apply_delete(
+        &mut self,
+        projection: &mut AtlasProjection,
+        delta: &mut ProjectionDelta,
+    ) -> AtlasResult<()> {
         // Mark data for deletion by zeroing it out
         for tile_id in &delta.affected_tiles {
             if let Some(tile) = projection.tiles.get_mut(*tile_id as usize) {
@@ -452,14 +462,14 @@ impl IncrementalUpdateContext {
                     }
                     delta.original_data = Some(original);
                 }
-                
+
                 // Zero out the specified range
                 let delete_size = (delta.end_coord - delta.start_coord) as usize;
                 for page in &mut tile.pages {
                     let zero_len = delete_size.min(page.len());
                     page[..zero_len].fill(0);
                 }
-                
+
                 // Recalculate conservation sum
                 tile.conservation_sum = 0;
                 for page in &tile.pages {
@@ -471,38 +481,54 @@ impl IncrementalUpdateContext {
         Ok(())
     }
 
-    fn apply_move(&mut self, _projection: &mut AtlasProjection, _delta: &ProjectionDelta) -> AtlasResult<()> {
+    fn apply_move(
+        &mut self,
+        _projection: &mut AtlasProjection,
+        _delta: &ProjectionDelta,
+    ) -> AtlasResult<()> {
         // Move operation would involve copying data from source to destination
         // and zeroing the source - simplified implementation
         Ok(())
     }
 
-    fn rollback_single_delta(&mut self, projection: &mut AtlasProjection, delta: &ProjectionDelta) -> AtlasResult<()> {
+    fn rollback_single_delta(
+        &mut self,
+        projection: &mut AtlasProjection,
+        delta: &ProjectionDelta,
+    ) -> AtlasResult<()> {
         // Rollback the delta by applying the inverse operation
         match delta.change_type {
             ChangeType::Insert => {
                 // Remove the inserted data by deleting it
-                let delete_delta = ProjectionDelta::delete(delta.start_coord, delta.start_coord + delta.data.len() as u32);
+                let delete_delta = ProjectionDelta::delete(
+                    delta.start_coord,
+                    delta.start_coord + delta.data.len() as u32,
+                );
                 self.apply_delete(projection, &mut delete_delta.clone())?;
-            }
+            },
             ChangeType::Update => {
                 // Restore original data
                 if let Some(ref original_data) = delta.original_data {
-                    let restore_delta = ProjectionDelta::update(delta.start_coord, delta.end_coord, original_data.clone());
+                    let restore_delta = ProjectionDelta::update(
+                        delta.start_coord,
+                        delta.end_coord,
+                        original_data.clone(),
+                    );
                     self.apply_update(projection, &mut restore_delta.clone())?;
                 }
-            }
+            },
             ChangeType::Delete => {
                 // Restore deleted data
                 if let Some(ref original_data) = delta.original_data {
-                    let restore_delta = ProjectionDelta::insert(delta.start_coord, original_data.clone());
+                    let restore_delta =
+                        ProjectionDelta::insert(delta.start_coord, original_data.clone());
                     self.apply_insert(projection, &restore_delta)?;
                 }
-            }
+            },
             ChangeType::Move => {
                 // Reverse the move operation
                 // Implementation would depend on how move was originally applied
-            }
+            },
         }
         Ok(())
     }
@@ -535,17 +561,17 @@ pub fn apply_incremental_batch_update(
 pub fn optimize_after_incremental_updates(projection: &mut AtlasProjection) -> AtlasResult<()> {
     // Consolidate tiles and rebuild conservation sums
     let mut new_total_sum = 0u64;
-    
+
     for tile in &mut projection.tiles {
         tile.apply_conservation_correction()?;
         new_total_sum = new_total_sum.wrapping_add(tile.conservation_sum);
     }
-    
+
     projection.total_conservation_sum = new_total_sum;
-    
+
     // Verify the projection is still valid
     projection.verify()?;
-    
+
     Ok(())
 }
 
@@ -554,12 +580,9 @@ fn get_timestamp() -> u64 {
     #[cfg(feature = "std")]
     {
         use std::time::{SystemTime, UNIX_EPOCH};
-        SystemTime::now()
-            .duration_since(UNIX_EPOCH)
-            .unwrap_or_default()
-            .as_secs()
+        SystemTime::now().duration_since(UNIX_EPOCH).unwrap_or_default().as_secs()
     }
-    
+
     #[cfg(not(feature = "std"))]
     {
         0 // No timestamp in no_std environments
@@ -569,7 +592,7 @@ fn get_timestamp() -> u64 {
 #[cfg(test)]
 mod tests {
     use super::*;
-    
+
     fn create_test_projection() -> AtlasProjection {
         let test_data = vec![0u8; 4096 * 4]; // 4 pages of test data
         AtlasProjection::new_linear(&test_data).unwrap()
@@ -579,7 +602,7 @@ mod tests {
     fn test_projection_delta_creation() {
         let data = vec![1, 2, 3, 4];
         let delta = ProjectionDelta::insert(100, data.clone());
-        
+
         assert_eq!(delta.change_type, ChangeType::Insert);
         assert_eq!(delta.start_coord, 100);
         assert_eq!(delta.data, data);
@@ -598,7 +621,7 @@ mod tests {
     fn test_delta_affected_tiles_calculation() {
         let mut delta = ProjectionDelta::insert(1000, vec![1, 2, 3]);
         delta.calculate_affected_tiles(4); // 4x4 tile grid
-        
+
         assert!(!delta.affected_tiles.is_empty());
     }
 
@@ -607,7 +630,7 @@ mod tests {
         let data = vec![10, 20, 30];
         let delta = ProjectionDelta::insert(0, data);
         assert!(delta.validate_conservation()); // Insert operations are valid
-        
+
         let mut update_delta = ProjectionDelta::update(0, 10, vec![15, 25, 35]);
         update_delta.set_original_data(vec![10, 20, 30]);
         assert!(update_delta.validate_conservation()); // Conservation delta should match
@@ -618,11 +641,11 @@ mod tests {
         let config = IncrementalConfig::default();
         let mut context = IncrementalUpdateContext::new(config.clone());
         let mut projection = create_test_projection();
-        
+
         let delta = ProjectionDelta::insert(100, vec![42, 43, 44]);
         let result = context.apply_delta(&mut projection, delta, &config);
         assert!(result.is_ok());
-        
+
         assert_eq!(context.sequence_number, 1);
         assert_eq!(context.applied_deltas.len(), 1);
     }
@@ -635,13 +658,13 @@ mod tests {
         };
         let mut context = IncrementalUpdateContext::new(config.clone());
         let mut projection = create_test_projection();
-        
+
         let deltas = vec![
             ProjectionDelta::insert(100, vec![1, 2]),
             ProjectionDelta::insert(200, vec![3, 4]),
             ProjectionDelta::insert(300, vec![5, 6]),
         ];
-        
+
         let result = context.apply_batch(&mut projection, deltas, &config);
         assert!(result.is_ok());
         assert_eq!(context.applied_deltas.len(), 3);
@@ -655,17 +678,17 @@ mod tests {
         };
         let mut context = IncrementalUpdateContext::new(config.clone());
         let mut projection = create_test_projection();
-        
+
         // Apply some updates
         let delta1 = ProjectionDelta::insert(100, vec![10, 20]);
         let delta2 = ProjectionDelta::insert(200, vec![30, 40]);
-        
+
         context.apply_delta(&mut projection, delta1, &config).unwrap();
         context.apply_delta(&mut projection, delta2, &config).unwrap();
-        
+
         assert_eq!(context.applied_deltas.len(), 2);
         assert_eq!(context.sequence_number, 2);
-        
+
         // Rollback one delta
         let result = context.rollback_deltas(&mut projection, 1);
         assert!(result.is_ok());
@@ -678,12 +701,26 @@ mod tests {
         let config = IncrementalConfig::default();
         let mut context = IncrementalUpdateContext::new(config.clone());
         let mut projection = create_test_projection();
-        
+
         // Apply different types of operations
-        context.apply_delta(&mut projection, ProjectionDelta::insert(100, vec![1, 2]), &config).unwrap();
-        context.apply_delta(&mut projection, ProjectionDelta::update(200, 250, vec![3, 4]), &config).unwrap();
-        context.apply_delta(&mut projection, ProjectionDelta::delete(300, 350), &config).unwrap();
-        
+        context
+            .apply_delta(
+                &mut projection,
+                ProjectionDelta::insert(100, vec![1, 2]),
+                &config,
+            )
+            .unwrap();
+        context
+            .apply_delta(
+                &mut projection,
+                ProjectionDelta::update(200, 250, vec![3, 4]),
+                &config,
+            )
+            .unwrap();
+        context
+            .apply_delta(&mut projection, ProjectionDelta::delete(300, 350), &config)
+            .unwrap();
+
         let stats = context.get_stats();
         assert_eq!(stats.total_updates, 3);
         assert_eq!(stats.insert_operations, 1);
@@ -695,19 +732,19 @@ mod tests {
     fn test_public_api_functions() {
         let mut projection = create_test_projection();
         let delta = ProjectionDelta::insert(100, vec![1, 2, 3]);
-        
+
         let result = apply_incremental_update(&mut projection, delta, None);
         assert!(result.is_ok());
-        
+
         // Test batch update
         let deltas = vec![
             ProjectionDelta::insert(200, vec![4, 5]),
             ProjectionDelta::update(300, 310, vec![6, 7]),
         ];
-        
+
         let stats_result = apply_incremental_batch_update(&mut projection, deltas, None);
         assert!(stats_result.is_ok());
-        
+
         let stats = stats_result.unwrap();
         assert_eq!(stats.total_updates, 2);
     }
@@ -715,15 +752,15 @@ mod tests {
     #[test]
     fn test_optimization_after_updates() {
         let mut projection = create_test_projection();
-        
+
         // Apply some updates
         let delta1 = ProjectionDelta::insert(100, vec![10, 20, 30]);
         apply_incremental_update(&mut projection, delta1, None).unwrap();
-        
+
         // Optimize the projection
         let result = optimize_after_incremental_updates(&mut projection);
         assert!(result.is_ok());
-        
+
         // Verify the projection is still valid
         assert!(projection.verify().is_ok());
     }

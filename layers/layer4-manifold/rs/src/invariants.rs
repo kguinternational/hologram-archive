@@ -274,7 +274,8 @@ impl KleinOrbitAligner {
         }
 
         // Calculate alignment state from data
-        let alignment_state = data_chunk.iter().map(|&b| u64::from(b)).sum::<u64>() % CONSERVATION_MODULUS;
+        let alignment_state =
+            data_chunk.iter().map(|&b| u64::from(b)).sum::<u64>() % CONSERVATION_MODULUS;
         self.position_states[position] = Some(alignment_state);
 
         Ok(())
@@ -286,7 +287,7 @@ impl KleinOrbitAligner {
         for &pos in &KLEIN_ORBIT_POSITIONS {
             if self.position_states[pos].is_none() {
                 return Err(AtlasError::TopologyError(
-                    "Klein orbit position not recorded"
+                    "Klein orbit position not recorded",
                 ));
             }
         }
@@ -300,14 +301,14 @@ impl KleinOrbitAligner {
         // Position 1 should be close to position 0 (orbit distance = 1)
         if (pos_1.wrapping_sub(pos_0)) % CONSERVATION_MODULUS != 1 {
             return Err(AtlasError::TopologyError(
-                "Klein orbit positions 0,1 not properly aligned"
+                "Klein orbit positions 0,1 not properly aligned",
             ));
         }
 
         // Position 49 should be conjugate to position 48 (distance = 1)
         if (pos_49.wrapping_sub(pos_48)) % CONSERVATION_MODULUS != 1 {
             return Err(AtlasError::TopologyError(
-                "Klein orbit positions 48,49 not properly aligned"
+                "Klein orbit positions 48,49 not properly aligned",
             ));
         }
 
@@ -476,7 +477,7 @@ impl PhiBijectionVerifier {
 
         if self.encoding_table[encoding] {
             return Err(AtlasError::LayerIntegrationError(
-                "encoding already used - bijection violation"
+                "encoding already used - bijection violation",
             ));
         }
 
@@ -486,10 +487,11 @@ impl PhiBijectionVerifier {
 
     /// Verify bijection properties
     pub fn verify_bijection(&self) -> AtlasResult<()> {
-        if self.verification_state != BijectionState::Valid &&
-           self.verification_state != BijectionState::Recording {
+        if self.verification_state != BijectionState::Valid
+            && self.verification_state != BijectionState::Recording
+        {
             return Err(AtlasError::LayerIntegrationError(
-                "bijection verifier not in valid state"
+                "bijection verifier not in valid state",
             ));
         }
         Ok(())
@@ -574,7 +576,7 @@ impl ConservationBudgetTracker {
         // Clear previous state when reinitializing
         self.category_budgets.fill(0);
         self.transaction_history.clear();
-        
+
         // Keep the budget as given, don't normalize to mod-96 here
         // The normalization happens during allocation operations
         self.total_budget = initial_budget;

@@ -17,7 +17,7 @@ use alloc::vec::Vec;
 
 #[cfg(feature = "compression")]
 use flate2::{
-    write::{DeflateEncoder, DeflateDecoder},
+    write::{DeflateDecoder, DeflateEncoder},
     Compression,
 };
 
@@ -86,7 +86,7 @@ impl Default for CompressionConfig {
         Self {
             algorithm: CompressionAlgorithm::ConservationAware,
             level: CompressionLevel::Default,
-            min_size_threshold: 1024, // 1 KB minimum
+            min_size_threshold: 1024,   // 1 KB minimum
             max_compression_ratio: 0.9, // Don't compress if ratio > 90%
             preserve_conservation: true,
             verify_integrity: true,
@@ -191,7 +191,10 @@ impl CompressedShard {
 }
 
 /// Compress a shard using the specified configuration
-pub fn compress_shard(shard: &AtlasShard, config: &CompressionConfig) -> AtlasResult<CompressedShard> {
+pub fn compress_shard(
+    shard: &AtlasShard,
+    config: &CompressionConfig,
+) -> AtlasResult<CompressedShard> {
     // Check minimum size threshold
     if shard.total_size < config.min_size_threshold {
         return Err(AtlasError::InvalidInput("shard too small for compression"));
@@ -255,20 +258,27 @@ pub fn compress_shard(shard: &AtlasShard, config: &CompressionConfig) -> AtlasRe
 }
 
 /// Decompress a compressed shard back to original AtlasShard
-pub fn decompress_shard(compressed: &CompressedShard, config: &CompressionConfig) -> AtlasResult<AtlasShard> {
+pub fn decompress_shard(
+    compressed: &CompressedShard,
+    config: &CompressionConfig,
+) -> AtlasResult<AtlasShard> {
     // Decompress the data
     let decompressed_data = decompress_data(&compressed.compressed_data, compressed.algorithm)?;
 
     // Verify size matches
     if decompressed_data.len() != compressed.original_size {
-        return Err(AtlasError::LayerIntegrationError("decompressed size mismatch"));
+        return Err(AtlasError::LayerIntegrationError(
+            "decompressed size mismatch",
+        ));
     }
 
     // Verify conservation checksum if required
     if config.preserve_conservation {
         let decompressed_sum: u64 = decompressed_data.iter().map(|&b| u64::from(b)).sum();
         if decompressed_sum != compressed.conservation_checksum {
-            return Err(AtlasError::LayerIntegrationError("conservation checksum mismatch"));
+            return Err(AtlasError::LayerIntegrationError(
+                "conservation checksum mismatch",
+            ));
         }
     }
 
@@ -276,13 +286,15 @@ pub fn decompress_shard(compressed: &CompressedShard, config: &CompressionConfig
     if config.verify_integrity {
         let verification_hash = fasthash::city::hash64(&decompressed_data);
         if verification_hash != compressed.metadata.verification_hash {
-            return Err(AtlasError::LayerIntegrationError("integrity verification failed"));
+            return Err(AtlasError::LayerIntegrationError(
+                "integrity verification failed",
+            ));
         }
     }
 
     // Create boundary region for the reconstructed shard
     let boundary_region = AtlasBoundaryRegion::new(0, decompressed_data.len() as u32, 1, 0);
-    
+
     // Create new shard
     let mut shard = AtlasShard::new(compressed.shard_id, boundary_region);
 
@@ -303,7 +315,9 @@ pub fn decompress_shard(compressed: &CompressedShard, config: &CompressionConfig
 
     // Verify conservation sum matches
     if shard.conservation_sum != compressed.conservation_checksum {
-        return Err(AtlasError::LayerIntegrationError("reconstructed shard conservation mismatch"));
+        return Err(AtlasError::LayerIntegrationError(
+            "reconstructed shard conservation mismatch",
+        ));
     }
 
     Ok(shard)
@@ -313,14 +327,16 @@ pub fn decompress_shard(compressed: &CompressedShard, config: &CompressionConfig
 #[cfg(feature = "compression")]
 fn compress_deflate(data: &[u8], level: CompressionLevel) -> AtlasResult<Vec<u8>> {
     use std::io::Write;
-    
+
     let compression_level = Compression::new(level.into());
     let mut encoder = DeflateEncoder::new(Vec::new(), compression_level);
-    
-    encoder.write_all(data)
+
+    encoder
+        .write_all(data)
         .map_err(|_| AtlasError::LayerIntegrationError("compression failed"))?;
-    
-    encoder.finish()
+
+    encoder
+        .finish()
         .map_err(|_| AtlasError::LayerIntegrationError("compression finalization failed"))
 }
 
@@ -330,31 +346,31 @@ fn compress_conservation_aware(data: &[u8], config: &CompressionConfig) -> Atlas
     // 1. Group bytes by their modulo 96 class
     // 2. Run-length encode within each class
     // 3. Preserve class distribution for conservation law compliance
-    
+
     let mut compressed = Vec::new();
-    
+
     // Header: original size (8 bytes) + conservation info
     compressed.extend_from_slice(&(data.len() as u64).to_le_bytes());
-    
+
     // Calculate conservation checksum
     let conservation_sum: u64 = data.iter().map(|&b| u64::from(b)).sum();
     compressed.extend_from_slice(&conservation_sum.to_le_bytes());
-    
+
     // Group bytes by conservation class (mod 96)
     let mut class_counts = [0u32; 96];
     let mut class_data: [Vec<u8>; 96] = core::array::from_fn(|_| Vec::new());
-    
+
     for &byte in data {
         let class = byte % 96;
         class_counts[class as usize] += 1;
         class_data[class as usize].push(byte);
     }
-    
+
     // Write class distribution
     for count in &class_counts {
         compressed.extend_from_slice(&count.to_le_bytes());
     }
-    
+
     // Apply simple run-length encoding for each class
     for class in 0..96 {
         if class_counts[class] > 0 {
@@ -363,7 +379,7 @@ fn compress_conservation_aware(data: &[u8], config: &CompressionConfig) -> Atlas
             compressed.extend_from_slice(&class_compressed);
         }
     }
-    
+
     Ok(compressed)
 }
 
@@ -372,11 +388,11 @@ fn run_length_encode(data: &[u8]) -> Vec<u8> {
     if data.is_empty() {
         return Vec::new();
     }
-    
+
     let mut encoded = Vec::new();
     let mut current = data[0];
     let mut count = 1u8;
-    
+
     for &byte in &data[1..] {
         if byte == current && count < 255 {
             count += 1;
@@ -387,35 +403,38 @@ fn run_length_encode(data: &[u8]) -> Vec<u8> {
             count = 1;
         }
     }
-    
+
     // Add the last run
     encoded.push(count);
     encoded.push(current);
-    
+
     encoded
 }
 
 /// Simple run-length decoding
 fn run_length_decode(encoded: &[u8]) -> Vec<u8> {
     let mut decoded = Vec::new();
-    
+
     let mut i = 0;
     while i + 1 < encoded.len() {
         let count = encoded[i];
         let value = encoded[i + 1];
-        
+
         for _ in 0..count {
             decoded.push(value);
         }
-        
+
         i += 2;
     }
-    
+
     decoded
 }
 
 /// Decompress data based on algorithm
-fn decompress_data(compressed_data: &[u8], algorithm: CompressionAlgorithm) -> AtlasResult<Vec<u8>> {
+fn decompress_data(
+    compressed_data: &[u8],
+    algorithm: CompressionAlgorithm,
+) -> AtlasResult<Vec<u8>> {
     match algorithm {
         CompressionAlgorithm::None => Ok(compressed_data.to_vec()),
         #[cfg(feature = "compression")]
@@ -428,37 +447,42 @@ fn decompress_data(compressed_data: &[u8], algorithm: CompressionAlgorithm) -> A
 #[cfg(feature = "compression")]
 fn decompress_deflate(compressed_data: &[u8]) -> AtlasResult<Vec<u8>> {
     use std::io::Write;
-    
+
     let mut decoder = DeflateDecoder::new(Vec::new());
-    decoder.write_all(compressed_data)
+    decoder
+        .write_all(compressed_data)
         .map_err(|_| AtlasError::LayerIntegrationError("decompression failed"))?;
-    
-    decoder.finish()
+
+    decoder
+        .finish()
         .map_err(|_| AtlasError::LayerIntegrationError("decompression finalization failed"))
 }
 
 /// Decompress conservation-aware data
 fn decompress_conservation_aware(compressed_data: &[u8]) -> AtlasResult<Vec<u8>> {
-    if compressed_data.len() < 24 { // 8 + 8 + 8 minimum
+    if compressed_data.len() < 24 {
+        // 8 + 8 + 8 minimum
         return Err(AtlasError::InvalidInput("compressed data too small"));
     }
-    
+
     let mut offset = 0;
-    
+
     // Read original size
     let original_size = u64::from_le_bytes(
-        compressed_data[offset..offset + 8].try_into()
-            .map_err(|_| AtlasError::InvalidInput("invalid size header"))?
+        compressed_data[offset..offset + 8]
+            .try_into()
+            .map_err(|_| AtlasError::InvalidInput("invalid size header"))?,
     ) as usize;
     offset += 8;
-    
+
     // Read conservation sum (for verification)
     let _conservation_sum = u64::from_le_bytes(
-        compressed_data[offset..offset + 8].try_into()
-            .map_err(|_| AtlasError::InvalidInput("invalid conservation header"))?
+        compressed_data[offset..offset + 8]
+            .try_into()
+            .map_err(|_| AtlasError::InvalidInput("invalid conservation header"))?,
     );
     offset += 8;
-    
+
     // Read class counts
     let mut class_counts = [0u32; 96];
     for i in 0..96 {
@@ -466,12 +490,13 @@ fn decompress_conservation_aware(compressed_data: &[u8]) -> AtlasResult<Vec<u8>>
             return Err(AtlasError::InvalidInput("truncated class counts"));
         }
         class_counts[i] = u32::from_le_bytes(
-            compressed_data[offset..offset + 4].try_into()
-                .map_err(|_| AtlasError::InvalidInput("invalid class count"))?
+            compressed_data[offset..offset + 4]
+                .try_into()
+                .map_err(|_| AtlasError::InvalidInput("invalid class count"))?,
         );
         offset += 4;
     }
-    
+
     // Read and decompress class data
     let mut class_data: [Vec<u8>; 96] = core::array::from_fn(|_| Vec::new());
     for class in 0..96 {
@@ -480,34 +505,35 @@ fn decompress_conservation_aware(compressed_data: &[u8]) -> AtlasResult<Vec<u8>>
                 return Err(AtlasError::InvalidInput("truncated class data size"));
             }
             let class_size = u32::from_le_bytes(
-                compressed_data[offset..offset + 4].try_into()
-                    .map_err(|_| AtlasError::InvalidInput("invalid class size"))?
+                compressed_data[offset..offset + 4]
+                    .try_into()
+                    .map_err(|_| AtlasError::InvalidInput("invalid class size"))?,
             ) as usize;
             offset += 4;
-            
+
             if offset + class_size > compressed_data.len() {
                 return Err(AtlasError::InvalidInput("truncated class data"));
             }
-            
+
             let class_compressed = &compressed_data[offset..offset + class_size];
             class_data[class] = run_length_decode(class_compressed);
             offset += class_size;
         }
     }
-    
+
     // Reconstruct original data by interleaving class data
     let mut decompressed = Vec::with_capacity(original_size);
     let mut class_indices = [0usize; 96];
-    
+
     // Simple reconstruction - this would need to be more sophisticated
     // to preserve the exact original order
     for class in 0..96 {
         decompressed.extend_from_slice(&class_data[class]);
     }
-    
+
     // Truncate to original size if needed
     decompressed.truncate(original_size);
-    
+
     Ok(decompressed)
 }
 
@@ -516,12 +542,9 @@ fn get_timestamp() -> u64 {
     #[cfg(feature = "std")]
     {
         use std::time::{SystemTime, UNIX_EPOCH};
-        SystemTime::now()
-            .duration_since(UNIX_EPOCH)
-            .unwrap_or_default()
-            .as_secs()
+        SystemTime::now().duration_since(UNIX_EPOCH).unwrap_or_default().as_secs()
     }
-    
+
     #[cfg(not(feature = "std"))]
     {
         0 // No timestamp in no_std environments
@@ -548,27 +571,29 @@ impl CompressionManager {
     /// Compress a shard and update statistics
     pub fn compress(&mut self, shard: &AtlasShard) -> AtlasResult<CompressedShard> {
         let compressed = compress_shard(shard, &self.default_config)?;
-        
+
         // Update statistics
         self.stats.compression_operations += 1;
         self.stats.total_compressed_bytes += compressed.original_size as u64;
         self.stats.total_saved_bytes += compressed.bytes_saved() as u64;
         self.stats.shards_compressed += 1;
-        
+
         // Update average compression ratio
-        let total_ratio = self.stats.avg_compression_ratio * (self.stats.shards_compressed - 1) as f32;
-        self.stats.avg_compression_ratio = (total_ratio + compressed.compression_ratio()) / self.stats.shards_compressed as f32;
-        
+        let total_ratio =
+            self.stats.avg_compression_ratio * (self.stats.shards_compressed - 1) as f32;
+        self.stats.avg_compression_ratio =
+            (total_ratio + compressed.compression_ratio()) / self.stats.shards_compressed as f32;
+
         Ok(compressed)
     }
 
     /// Decompress a shard and update statistics
     pub fn decompress(&mut self, compressed: &CompressedShard) -> AtlasResult<AtlasShard> {
         let shard = decompress_shard(compressed, &self.default_config)?;
-        
+
         // Update statistics
         self.stats.decompression_operations += 1;
-        
+
         Ok(shard)
     }
 
@@ -590,13 +615,13 @@ mod tests {
     fn create_test_shard() -> AtlasShard {
         let boundary_region = AtlasBoundaryRegion::new(0, 4096, 1, 0);
         let mut shard = AtlasShard::new(ShardId::new(1, 0), boundary_region);
-        
+
         // Add test data blocks
         let block1 = vec![42u8; 1024];
         let block2 = vec![96u8; 1024];
         shard.add_data_block(block1).unwrap();
         shard.add_data_block(block2).unwrap();
-        
+
         shard
     }
 
@@ -623,7 +648,7 @@ mod tests {
         let data = vec![1, 1, 1, 2, 2, 3, 3, 3, 3];
         let encoded = run_length_encode(&data);
         let decoded = run_length_decode(&encoded);
-        
+
         assert_eq!(decoded, data);
     }
 
@@ -631,19 +656,19 @@ mod tests {
     fn test_conservation_aware_compression() {
         let shard = create_test_shard();
         let config = CompressionConfig::default();
-        
+
         let compressed = compress_shard(&shard, &config);
         assert!(compressed.is_ok());
-        
+
         let compressed_shard = compressed.unwrap();
         assert_eq!(compressed_shard.shard_id, shard.id);
         assert_eq!(compressed_shard.original_size, shard.total_size);
         assert!(compressed_shard.verify_conservation());
-        
+
         // Test decompression
         let decompressed = decompress_shard(&compressed_shard, &config);
         assert!(decompressed.is_ok());
-        
+
         let decompressed_shard = decompressed.unwrap();
         assert_eq!(decompressed_shard.conservation_sum, shard.conservation_sum);
         assert_eq!(decompressed_shard.total_size, shard.total_size);
@@ -653,15 +678,15 @@ mod tests {
     fn test_compression_manager() {
         let config = CompressionConfig::default();
         let mut manager = CompressionManager::new(config);
-        
+
         let shard = create_test_shard();
         let compressed = manager.compress(&shard);
         assert!(compressed.is_ok());
-        
+
         let compressed_shard = compressed.unwrap();
         let decompressed = manager.decompress(&compressed_shard);
         assert!(decompressed.is_ok());
-        
+
         let stats = manager.get_stats();
         assert_eq!(stats.compression_operations, 1);
         assert_eq!(stats.decompression_operations, 1);
@@ -672,12 +697,12 @@ mod tests {
     fn test_compressed_shard_metrics() {
         let shard = create_test_shard();
         let config = CompressionConfig::default();
-        
+
         let compressed = compress_shard(&shard, &config).unwrap();
-        
+
         assert!(compressed.compression_ratio() <= 1.0);
         assert!(compressed.bytes_saved() <= compressed.original_size);
-        
+
         // For repetitive test data, compression should be effective
         if compressed.compressed_size < compressed.original_size {
             assert!(compressed.is_effective());
@@ -690,10 +715,10 @@ mod tests {
         let data = vec![42u8; 1000]; // Highly compressible data
         let compressed = compress_deflate(&data, CompressionLevel::Default);
         assert!(compressed.is_ok());
-        
+
         let compressed_data = compressed.unwrap();
         assert!(compressed_data.len() < data.len()); // Should be smaller
-        
+
         let decompressed = decompress_deflate(&compressed_data);
         assert!(decompressed.is_ok());
         assert_eq!(decompressed.unwrap(), data);
@@ -705,7 +730,7 @@ mod tests {
             min_size_threshold: 10000, // Large threshold
             ..CompressionConfig::default()
         };
-        
+
         let small_shard = create_test_shard();
         let result = compress_shard(&small_shard, &config);
         assert!(result.is_err()); // Should fail due to size threshold

@@ -67,8 +67,8 @@ impl Default for BenchmarkConfig {
     fn default() -> Self {
         Self {
             iterations: 100,
-            min_duration_ms: 1000,   // 1 second minimum
-            max_duration_ms: 10000,  // 10 second maximum
+            min_duration_ms: 1000,  // 1 second minimum
+            max_duration_ms: 10000, // 10 second maximum
             warmup_iterations: 10,
             detailed_timing: false,
         }
@@ -77,18 +77,23 @@ impl Default for BenchmarkConfig {
 
 impl BenchmarkResult {
     /// Create a new benchmark result
-    pub fn new(operation_name: String, iterations: u32, durations: &[Duration], data_size: u64) -> Self {
+    pub fn new(
+        operation_name: String,
+        iterations: u32,
+        durations: &[Duration],
+        data_size: u64,
+    ) -> Self {
         let total_duration: Duration = durations.iter().sum();
         let avg_duration = total_duration / iterations;
         let min_duration = *durations.iter().min().unwrap_or(&Duration::ZERO);
         let max_duration = *durations.iter().max().unwrap_or(&Duration::ZERO);
-        
+
         let throughput_bps = if total_duration.as_nanos() > 0 {
             (data_size * iterations as u64 * 1_000_000_000) / total_duration.as_nanos() as u64
         } else {
             0
         };
-        
+
         let ops_per_sec = if total_duration.as_secs_f64() > 0.0 {
             iterations as f64 / total_duration.as_secs_f64()
         } else {
@@ -226,7 +231,11 @@ impl ManifoldBenchmark {
     }
 
     /// Run shard extraction benchmark
-    pub fn bench_shard_extraction(&mut self, data_sizes: &[usize], shard_counts: &[u32]) -> AtlasResult<()> {
+    pub fn bench_shard_extraction(
+        &mut self,
+        data_sizes: &[usize],
+        shard_counts: &[u32],
+    ) -> AtlasResult<()> {
         for &size in data_sizes {
             let test_data = Self::create_test_data(size);
             let projection = AtlasProjection::new_linear(&test_data)?;
@@ -246,13 +255,14 @@ impl ManifoldBenchmark {
                 let start_time = Instant::now();
                 let mut iterations = 0;
 
-                while iterations < self.config.iterations.min(50) { // Limit iterations for shard extraction
+                while iterations < self.config.iterations.min(50) {
+                    // Limit iterations for shard extraction
                     let iter_start = Instant::now();
-                    
+
                     for region in &regions {
                         let _shard = projection.extract_shard(region)?;
                     }
-                    
+
                     let iter_duration = iter_start.elapsed();
                     durations.push(iter_duration);
                     iterations += 1;
@@ -264,7 +274,11 @@ impl ManifoldBenchmark {
                 }
 
                 let result = BenchmarkResult::new(
-                    format!("Shard Extraction ({}, {} shards)", Self::format_size(size), shard_count),
+                    format!(
+                        "Shard Extraction ({}, {} shards)",
+                        Self::format_size(size),
+                        shard_count
+                    ),
                     iterations,
                     &durations,
                     size as u64,
@@ -278,7 +292,11 @@ impl ManifoldBenchmark {
     }
 
     /// Run batch shard extraction benchmark
-    pub fn bench_batch_shard_extraction(&mut self, data_sizes: &[usize], shard_counts: &[u32]) -> AtlasResult<()> {
+    pub fn bench_batch_shard_extraction(
+        &mut self,
+        data_sizes: &[usize],
+        shard_counts: &[u32],
+    ) -> AtlasResult<()> {
         for &size in data_sizes {
             let test_data = Self::create_test_data(size);
             let projection = AtlasProjection::new_linear(&test_data)?;
@@ -296,7 +314,8 @@ impl ManifoldBenchmark {
                 let start_time = Instant::now();
                 let mut iterations = 0;
 
-                while iterations < self.config.iterations.min(20) { // Limit for batch operations
+                while iterations < self.config.iterations.min(20) {
+                    // Limit for batch operations
                     let iter_start = Instant::now();
                     let _shards = projection.extract_shards_batch(&regions)?;
                     let iter_duration = iter_start.elapsed();
@@ -310,7 +329,11 @@ impl ManifoldBenchmark {
                 }
 
                 let result = BenchmarkResult::new(
-                    format!("Batch Shard Extraction ({}, {} shards)", Self::format_size(size), shard_count),
+                    format!(
+                        "Batch Shard Extraction ({}, {} shards)",
+                        Self::format_size(size),
+                        shard_count
+                    ),
                     iterations,
                     &durations,
                     size as u64,
@@ -377,11 +400,11 @@ impl ManifoldBenchmark {
         for &size in data_sizes {
             let test_data = Self::create_test_data(size);
             let projection = AtlasProjection::new_linear(&test_data)?;
-            
+
             // Create shards for reconstruction
             let regions = Self::create_boundary_regions(4, size);
             let mut ctx = AtlasReconstructionCtx::new(regions.len() as u32);
-            
+
             for region in &regions {
                 let shard_handle = projection.extract_shard(region)?;
                 // SAFETY: We just created this handle from a valid shard
@@ -406,9 +429,11 @@ impl ManifoldBenchmark {
             let start_time = Instant::now();
             let mut iterations = 0;
 
-            while iterations < self.config.iterations.min(10) { // Limit for complex operations
+            while iterations < self.config.iterations.min(10) {
+                // Limit for complex operations
                 let iter_start = Instant::now();
-                let _reconstructed = reconstruct_projection_from_shards(&ctx, ProjectionType::Linear)?;
+                let _reconstructed =
+                    reconstruct_projection_from_shards(&ctx, ProjectionType::Linear)?;
                 let iter_duration = iter_start.elapsed();
                 durations.push(iter_duration);
                 iterations += 1;
@@ -435,12 +460,12 @@ impl ManifoldBenchmark {
     /// Run comprehensive benchmark suite
     pub fn run_full_benchmark_suite(&mut self) -> AtlasResult<()> {
         let data_sizes = vec![
-            4 * 1024,      // 4 KB
-            64 * 1024,     // 64 KB
-            1024 * 1024,   // 1 MB
+            4 * 1024,         // 4 KB
+            64 * 1024,        // 64 KB
+            1024 * 1024,      // 1 MB
             16 * 1024 * 1024, // 16 MB
         ];
-        
+
         let shard_counts = vec![2, 4, 8];
 
         println!("Running Linear Projection benchmarks...");
@@ -467,7 +492,7 @@ impl ManifoldBenchmark {
     /// Print benchmark results
     pub fn print_results(&self) {
         println!("\n=== Layer 4 Manifold Benchmark Results ===\n");
-        
+
         for result in &self.results {
             println!("Operation: {}", result.operation_name);
             println!("  Iterations: {}", result.iterations);
@@ -533,7 +558,11 @@ impl ManifoldBenchmark {
 
         for i in 0..count {
             let start = i as usize * region_size;
-            let end = if i == count - 1 { data_size } else { (i + 1) as usize * region_size };
+            let end = if i == count - 1 {
+                data_size
+            } else {
+                (i + 1) as usize * region_size
+            };
             let page_count = ((end - start) / 4096).max(1) as u16;
 
             regions.push(AtlasBoundaryRegion::new(
@@ -586,7 +615,7 @@ pub fn run_quick_benchmark() -> AtlasResult<BenchmarkSummary> {
     };
 
     let mut benchmark = ManifoldBenchmark::new(config);
-    
+
     // Quick test with small data sizes
     let data_sizes = vec![4096, 65536]; // 4KB, 64KB
     let shard_counts = vec![2, 4];
@@ -615,13 +644,8 @@ mod tests {
             Duration::from_millis(15),
             Duration::from_millis(12),
         ];
-        
-        let result = BenchmarkResult::new(
-            "Test Operation".to_string(),
-            3,
-            &durations,
-            1000,
-        );
+
+        let result = BenchmarkResult::new("Test Operation".to_string(), 3, &durations, 1000);
 
         assert_eq!(result.iterations, 3);
         assert_eq!(result.min_duration, Duration::from_millis(10));
@@ -633,23 +657,18 @@ mod tests {
     fn test_quick_benchmark() {
         let summary = run_quick_benchmark();
         assert!(summary.is_ok());
-        
+
         let summary = summary.unwrap();
         assert!(summary.total_operations > 0);
     }
 
     #[test]
     fn test_format_functions() {
-        let result = BenchmarkResult::new(
-            "Test".to_string(),
-            1,
-            &[Duration::from_millis(5)],
-            1000,
-        );
+        let result = BenchmarkResult::new("Test".to_string(), 1, &[Duration::from_millis(5)], 1000);
 
         let throughput_str = result.throughput_string();
         assert!(!throughput_str.is_empty());
-        
+
         let duration_str = result.avg_duration_string();
         assert!(!duration_str.is_empty());
     }

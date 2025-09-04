@@ -306,7 +306,10 @@ impl AtlasShard {
 
     /// Compress this shard using the specified configuration
     #[cfg(feature = "compression")]
-    pub fn compress(&self, config: &crate::compression::CompressionConfig) -> AtlasResult<crate::compression::CompressedShard> {
+    pub fn compress(
+        &self,
+        config: &crate::compression::CompressionConfig,
+    ) -> AtlasResult<crate::compression::CompressedShard> {
         crate::compression::compress_shard(self, config)
     }
 
@@ -375,7 +378,7 @@ impl AtlasShard {
             if block.len() < 1024 {
                 continue;
             }
-            
+
             // SAFETY: block is valid Vec<u8> with known size
             unsafe {
                 if !atlas_conserved_check(block.as_ptr(), block.len()) {
@@ -1216,7 +1219,7 @@ pub enum SplitStrategy {
 #[cfg(test)]
 mod tests {
     use super::*;
-    
+
     /// Create conservation-compliant test data (sum % 96 == 0)  
     fn create_conservation_test_data(size: usize) -> Vec<u8> {
         // For now, use all zeros which definitely satisfies Layer 2 conservation
@@ -1224,11 +1227,14 @@ mod tests {
     }
 
     /// Create a test-friendly conservation context that simulates proper Layer 2 integration
-    fn create_test_conservation_context(data: &[u8], budget_class: u8) -> AtlasResult<ShardConservationContext> {
+    fn create_test_conservation_context(
+        data: &[u8],
+        budget_class: u8,
+    ) -> AtlasResult<ShardConservationContext> {
         // For testing purposes, we always create a dummy context that passes verification
-        // This allows tests to focus on Layer 4 functionality without depending on 
+        // This allows tests to focus on Layer 4 functionality without depending on
         // complex Layer 2 FFI validation
-        
+
         // Use a special test marker pointer that the verify_domain method recognizes
         let test_dummy_ptr: *mut c_void = 0x1 as *mut c_void; // Test marker pointer
         Ok(ShardConservationContext {
@@ -1323,7 +1329,7 @@ mod tests {
         // Create proper Layer 2 conservation contexts
         let context1 = create_test_conservation_context(&test_data1, 0).unwrap();
         let context2 = create_test_conservation_context(&test_data2, 0).unwrap();
-        
+
         shard1.conservation_context = Some(Box::into_raw(Box::new(context1)));
         shard2.conservation_context = Some(Box::into_raw(Box::new(context2)));
 

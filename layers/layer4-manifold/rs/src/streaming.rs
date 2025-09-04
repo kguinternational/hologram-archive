@@ -98,11 +98,11 @@ impl StreamingConfig {
         if chunk_size < MIN_CHUNK_SIZE {
             return Err(AtlasError::InvalidInput("chunk size too small"));
         }
-        
+
         if chunk_size > MAX_CHUNK_SIZE {
             return Err(AtlasError::InvalidInput("chunk size too large"));
         }
-        
+
         if parallel_chunks == 0 {
             return Err(AtlasError::InvalidInput("parallel chunks must be > 0"));
         }
@@ -139,7 +139,7 @@ impl StreamingChunk {
     /// Create a new streaming chunk
     pub fn new(id: u32, data: Vec<u8>, start_offset: u64) -> Self {
         let conservation_sum = data.iter().map(|&b| u64::from(b)).sum();
-        
+
         Self {
             id,
             data,
@@ -186,15 +186,15 @@ impl StreamingContext {
     pub fn from_file<P: AsRef<Path>>(config: StreamingConfig, file_path: P) -> AtlasResult<Self> {
         let file = File::open(file_path.as_ref())
             .map_err(|_| AtlasError::InvalidInput("failed to open file"))?;
-        
+
         let mmap = unsafe {
             MmapOptions::new()
                 .map(&file)
                 .map_err(|_| AtlasError::InvalidInput("failed to memory map file"))?
         };
-        
+
         let total_size = mmap.len() as u64;
-        
+
         Ok(Self {
             config,
             total_size,
@@ -207,12 +207,16 @@ impl StreamingContext {
     }
 
     /// Get the next chunk for processing
-    pub fn next_chunk(&mut self, source_data: Option<&[u8]>) -> AtlasResult<Option<StreamingChunk>> {
+    pub fn next_chunk(
+        &mut self,
+        source_data: Option<&[u8]>,
+    ) -> AtlasResult<Option<StreamingChunk>> {
         if self.current_position >= self.total_size {
             return Ok(None);
         }
 
-        let chunk_end = (self.current_position + self.config.chunk_size as u64).min(self.total_size);
+        let chunk_end =
+            (self.current_position + self.config.chunk_size as u64).min(self.total_size);
         let _chunk_size = chunk_end - self.current_position;
 
         let chunk_data = if let Some(data) = source_data {
@@ -237,7 +241,8 @@ impl StreamingContext {
             }
         };
 
-        let mut chunk = StreamingChunk::new(self.processed_chunks, chunk_data, self.current_position);
+        let mut chunk =
+            StreamingChunk::new(self.processed_chunks, chunk_data, self.current_position);
 
         // Add overlap region if not the last chunk
         if chunk_end < self.total_size && self.config.chunk_overlap > 0 {
@@ -270,13 +275,18 @@ impl StreamingContext {
 
         self.current_position = chunk_end;
         self.processed_chunks += 1;
-        self.total_conservation_sum = self.total_conservation_sum.wrapping_add(chunk.conservation_sum);
+        self.total_conservation_sum =
+            self.total_conservation_sum.wrapping_add(chunk.conservation_sum);
 
         Ok(Some(chunk))
     }
 
     /// Process a chunk and create a projection
-    pub fn process_chunk(&mut self, chunk: StreamingChunk, projection_type: ProjectionType) -> AtlasResult<AtlasProjectionHandle> {
+    pub fn process_chunk(
+        &mut self,
+        chunk: StreamingChunk,
+        projection_type: ProjectionType,
+    ) -> AtlasResult<AtlasProjectionHandle> {
         let projection = match projection_type {
             ProjectionType::Linear => AtlasProjection::new_linear(&chunk.data)?,
             ProjectionType::R96Fourier => AtlasProjection::new_r96_fourier(&chunk.data)?,
@@ -296,7 +306,11 @@ impl StreamingContext {
     }
 
     /// Process all chunks in streaming mode
-    pub fn process_streaming(&mut self, source_data: Option<&[u8]>, projection_type: ProjectionType) -> AtlasResult<Vec<AtlasProjectionHandle>> {
+    pub fn process_streaming(
+        &mut self,
+        source_data: Option<&[u8]>,
+        projection_type: ProjectionType,
+    ) -> AtlasResult<Vec<AtlasProjectionHandle>> {
         let mut results = Vec::new();
 
         while let Some(chunk) = self.next_chunk(source_data)? {
@@ -361,7 +375,7 @@ pub fn stream_large_domain_projection(
 
     let mut context = StreamingContext::new(config, source_data.len() as u64);
     let _results = context.process_streaming(Some(source_data), projection_type)?;
-    
+
     context.merge_results()
 }
 
@@ -374,7 +388,7 @@ pub fn stream_file_projection<P: AsRef<Path>>(
 ) -> AtlasResult<AtlasProjectionHandle> {
     let mut context = StreamingContext::from_file(config, file_path)?;
     let _results = context.process_streaming(None, projection_type)?;
-    
+
     context.merge_results()
 }
 
@@ -395,7 +409,7 @@ mod tests {
         let config = StreamingConfig::default();
         assert_eq!(config.chunk_size, DEFAULT_CHUNK_SIZE);
         assert_eq!(config.parallel_chunks, 4);
-        
+
         let custom_config = StreamingConfig::new(1024 * 1024, 2).unwrap();
         assert_eq!(custom_config.chunk_size, 1024 * 1024);
         assert_eq!(custom_config.parallel_chunks, 2);
@@ -405,10 +419,10 @@ mod tests {
     fn test_streaming_config_validation() {
         // Too small chunk size
         assert!(StreamingConfig::new(1024, 2).is_err());
-        
+
         // Zero parallel chunks
         assert!(StreamingConfig::new(1024 * 1024, 0).is_err());
-        
+
         // Too large chunk size
         assert!(StreamingConfig::new(512 * 1024 * 1024, 2).is_err());
     }
@@ -417,12 +431,12 @@ mod tests {
     fn test_streaming_chunk() {
         let test_data = create_test_data(1000);
         let chunk = StreamingChunk::new(0, test_data.clone(), 0);
-        
+
         assert_eq!(chunk.id, 0);
         assert_eq!(chunk.start_offset, 0);
         assert_eq!(chunk.data.len(), 1000);
         assert!(chunk.verify_conservation());
-        
+
         let expected_sum: u64 = test_data.iter().map(|&b| u64::from(b)).sum();
         assert_eq!(chunk.conservation_sum, expected_sum);
     }
@@ -431,25 +445,25 @@ mod tests {
     fn test_streaming_context() {
         let config = StreamingConfig::new(1000, 2).unwrap();
         let mut context = StreamingContext::new(config, 5000);
-        
+
         assert_eq!(context.total_size, 5000);
         assert_eq!(context.current_position, 0);
         assert!(!context.is_complete());
         assert_eq!(context.progress(), 0.0);
-        
+
         let test_data = create_test_data(5000);
-        
+
         // Process first chunk
         let chunk1 = context.next_chunk(Some(&test_data)).unwrap().unwrap();
         assert_eq!(chunk1.id, 0);
         assert_eq!(chunk1.data.len(), 1000);
         assert_eq!(context.progress(), 0.2); // 1000/5000
-        
+
         // Process until completion
         while let Some(_chunk) = context.next_chunk(Some(&test_data)).unwrap() {
             // Process chunk
         }
-        
+
         assert!(context.is_complete());
         assert_eq!(context.progress(), 1.0);
     }
@@ -458,10 +472,10 @@ mod tests {
     fn test_small_data_streaming() {
         let test_data = create_test_data(1000); // Smaller than default chunk size
         let config = StreamingConfig::default();
-        
+
         let result = stream_large_domain_projection(&test_data, ProjectionType::Linear, config);
         assert!(result.is_ok());
-        
+
         let handle = result.unwrap();
         assert!(handle.is_valid());
     }
@@ -470,10 +484,10 @@ mod tests {
     fn test_large_data_streaming() {
         let test_data = create_test_data(50 * 1024 * 1024); // 50 MB - larger than default chunk
         let config = StreamingConfig::new(10 * 1024 * 1024, 2).unwrap(); // 10 MB chunks
-        
+
         let result = stream_large_domain_projection(&test_data, ProjectionType::Linear, config);
         assert!(result.is_ok());
-        
+
         let handle = result.unwrap();
         assert!(handle.is_valid());
     }

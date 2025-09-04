@@ -315,7 +315,7 @@ pub fn apply_fourier_transform(projection: &mut AtlasProjection, inverse: bool) 
 #[cfg(test)]
 mod tests {
     use super::*;
-    
+
     /// Create conservation-compliant test data (sum % 96 == 0)
     fn create_conservation_test_data(size: usize) -> Vec<u8> {
         // For now, use all zeros which definitely satisfies Layer 2 conservation

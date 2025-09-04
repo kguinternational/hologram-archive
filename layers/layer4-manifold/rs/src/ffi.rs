@@ -49,7 +49,8 @@ extern "C" {
     pub(crate) fn atlas_conserved_delta(before: *const u8, after: *const u8, len: size_t) -> u8;
 
     /// Layer 2: Check if memory window satisfies conservation laws (streaming check)
-    pub(crate) fn atlas_conserved_window_streaming_check_llvm(data: *const u8, len: size_t) -> bool;
+    pub(crate) fn atlas_conserved_window_streaming_check_llvm(data: *const u8, len: size_t)
+        -> bool;
 
     /// Layer 2: Get last conservation error code
     pub(crate) fn atlas_get_last_error() -> u32;
