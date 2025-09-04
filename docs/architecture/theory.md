@@ -267,6 +267,36 @@ Every continuous symmetry corresponds to a conservation law. Our mod-96 symmetry
 ### Holographic Principle
 Information about a volume can be encoded on its boundary. Our Φ-isomorphism implements this principle.
 
+## Unified Action Formalism
+
+The three theories above are unified through a variational principle on the 12,288 discrete torus.
+
+### Action Decomposition
+The total action S decomposes into sector Lagrangians:
+```
+S = S_geom + S_res + S_sched + S_cons + S_Φ + S_gauge + S_witness + S_spec
+```
+
+Each sector corresponds to a fundamental aspect:
+- **Geometric**: Smoothness via discrete Laplacian
+- **Resonance**: R96 class adherence
+- **Schedule**: C768 cyclic invariance
+- **Conservation**: Row/column sum constraints
+- **Round-trip**: Φ boundary↔bulk consistency
+- **Gauge**: Symmetry under translations and automorphisms
+- **Witness**: Resource budget and proof complexity
+- **Spectral**: Moment matching (Universal Numbers)
+
+### Variational Solution
+Minimizing the total action yields configurations that:
+1. Satisfy all conservation laws
+2. Maintain gauge invariance
+3. Achieve spectral targets
+4. Generate valid witnesses
+5. Preserve round-trip consistency
+
+This provides a unified mathematical framework where all Hologram operations emerge from a single variational principle. See [Unified Action Formalism](unified-action-formalism.md) for complete details.
+
 ## Conclusion
 
-The combination of Universal Numbers, Conservation Computation, and Resonance Field Theory provides a rigorous mathematical foundation for Hologram's architecture. Layer 4's implementation demonstrates that complex geometric and topological operations can be reduced to simple, efficient, and verifiable Universal Number computations while maintaining all essential properties.
+The combination of Universal Numbers, Conservation Computation, Resonance Field Theory, and the Unified Action Formalism provides a complete and rigorous mathematical foundation for Hologram's architecture. Layer 4's implementation demonstrates that complex geometric and topological operations can be reduced to simple, efficient, and verifiable Universal Number computations while maintaining all essential properties through the variational framework.

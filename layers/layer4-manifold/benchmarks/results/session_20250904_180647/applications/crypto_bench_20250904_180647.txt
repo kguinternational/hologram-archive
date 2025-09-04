@@ -1,0 +1,45 @@
+# Benchmark: crypto_bench
+# Timestamp: 2025-09-04T18:07:04+00:00
+# Duration: 0s
+# Status: SUCCESS
+
+Starting Cryptographic Operations Benchmark - Atlas vs Traditional...
+Testing cryptographic primitives using Atlas-12,288 witness architecture
+Atlas API: Ready for benchmarking
+
+Running Key Generation benchmark...
+Running Signature Operations benchmark...
+Running Hash Operations benchmark...
+Running Certificate Validation benchmark...
+
+═══════════════════════════════════════════════════════════════════════════════
+              CRYPTOGRAPHIC OPERATIONS BENCHMARK - ATLAS vs TRADITIONAL
+═══════════════════════════════════════════════════════════════════════════════
+
+Key Size: 256 bits, Signature: 512 bits, Hash: 256 bits, Iterations: 1000
+Atlas Architecture: Witness-based entropy, harmonic signatures, conservation hashes
+
+┌─────────────────────────┬──────────────┬──────────────┬──────────┬─────────┬─────────┬─────────────┬──────────────┐
+│ Operation               │   Traditional│        Atlas │ Speedup  │ Trad.   │ Atlas   │Conservation │ Witness      │
+│                         │        (μs)  │        (μs)  │    Factor│ Success │ Success │  Maintained │ Integrity    │
+├─────────────────────────┼──────────────┼──────────────┼──────────┼─────────┼─────────┼─────────────┼──────────────┤
+│ Key Generation          │         0.78 │        11.41 │     0.07x │    1000 │    1000 │      YES │      NO │
+│ Signature Ops           │         0.42 │        34.53 │     0.01x │    1000 │    1000 │      YES │      NO │
+│ Hash Operations         │         2.37 │         8.24 │     0.29x │    1000 │    1000 │      YES │      YES │
+│ Certificate Validation  │         0.00 │        21.41 │     0.00x │    1000 │       0 │      YES │      NO │
+└─────────────────────────┴──────────────┴──────────────┴──────────┴─────────┴─────────┴─────────────┴──────────────┘
+
+SUMMARY:
+├─ Overall Speedup: 0.05x (Atlas vs Traditional)
+├─ Average Success Rate: Traditional 100.0%, Atlas 75.0%
+├─ Conservation Rate: 100.0% (4/4 operations)
+├─ Witness Integrity Rate: 25.0% (1/4 operations)
+├─ Valid Benchmarks: 4/4
+└─ Atlas Cryptographic Benefits:
+   • Witness-based entropy provides verifiable randomness
+   • Harmonic signatures enable mathematical verification
+   • Conservation laws ensure cryptographic integrity
+   • R96 classification provides natural key diversification
+   • Universal Number invariants enable efficient validation
+   • Automatic resistance to tampering via conservation
+

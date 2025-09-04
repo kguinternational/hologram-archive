@@ -6,9 +6,9 @@
 #![allow(clippy::module_name_repetitions)]
 
 use crate::error::*;
+use crate::ffi::{atlas_witness_destroy, atlas_witness_generate};
 use crate::shard::*;
 use crate::types::*;
-use crate::ffi::{atlas_witness_generate, atlas_witness_destroy};
 use core::sync::atomic::{AtomicU64, Ordering};
 
 #[cfg(feature = "std")]
@@ -544,23 +544,23 @@ fn decompress_conservation_aware(compressed_data: &[u8]) -> AtlasResult<Vec<u8>>
 fn get_timestamp() -> u64 {
     // Use a small amount of unique data to generate witness-based timestamps
     static COUNTER: AtomicU64 = AtomicU64::new(1);
-    
+
     // Get an atomic counter value for uniqueness
     let count = COUNTER.fetch_add(1, Ordering::Relaxed);
-    
+
     // Create unique data from counter for witness generation
     let data = count.to_le_bytes();
-    
+
     // Generate Layer 2 witness which provides monotonic Universal Number properties
     let witness = unsafe { atlas_witness_generate(data.as_ptr(), data.len()) };
-    
+
     if !witness.is_null() {
         // Use witness pointer address as timestamp base (monotonic property)
         let timestamp_base = witness as usize as u64;
-        
+
         // Clean up witness
         unsafe { atlas_witness_destroy(witness) };
-        
+
         // Combine counter with witness address for uniqueness
         timestamp_base.wrapping_add(count)
     } else {

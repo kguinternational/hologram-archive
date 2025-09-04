@@ -99,15 +99,10 @@ fn test_r96_fourier_holographic() {
     assert!(projection.verify_projection());
 
     // Extract shards with R96-aware regions
-    let r96_region = AtlasBoundaryRegion::new_r96_aware(
-        0,
-        2560,
-        10,
-        1,
-        (0.0, 0.0, 25.0, 25.0),
-    );
+    let r96_region = AtlasBoundaryRegion::new_r96_aware(0, 2560, 10, 1, (0.0, 0.0, 25.0, 25.0));
 
-    let shard = atlas_manifold::shard::extract_shard_from_projection(&projection, &r96_region).unwrap();
+    let shard =
+        atlas_manifold::shard::extract_shard_from_projection(&projection, &r96_region).unwrap();
     assert!(shard.verify_with_layer2_conservation());
 
     // Verify R96 harmonic data is preserved in shard
@@ -121,15 +116,14 @@ fn test_r96_fourier_holographic() {
     }
 
     // Verify R96 conservation
-    let r96_conservation_sum: u64 =
-        shard.r96_harmonics.iter().map(|h| h.conservation_sum).sum();
+    let r96_conservation_sum: u64 = shard.r96_harmonics.iter().map(|h| h.conservation_sum).sum();
     assert_eq!(r96_conservation_sum % 96, 0);
 
     // Test R96 holographic reconstruction
     let shard_manager = ShardManager::new(ShardStrategy::CoordinateHash { num_shards: 4 });
     let shard_handle = AtlasShardHandle::new(shard);
     let reconstruction = shard_manager.reconstruct_from_shard(&shard_handle).unwrap();
-    
+
     // Verify R96 structure is maintained
     verify_r96_structure(&reconstruction);
 }
@@ -144,7 +138,7 @@ fn test_conservation_preservation_holographic() {
 
     let projection = AtlasProjection::new_linear(&conservation_data).unwrap();
 
-    // Extract first shard 
+    // Extract first shard
     let region = AtlasBoundaryRegion::new(0, 640, 3, 1); // 640 bytes = ~3 pages (640/256 = 2.5, round up to 3)
     let shard = atlas_manifold::shard::extract_shard_from_projection(&projection, &region).unwrap();
 

@@ -1,0 +1,26 @@
+{
+  "name": "shard_extract",
+  "description": "Atlas shard extraction performance",
+  "success": true,
+  "iterations_completed": 10,
+  "iterations_failed": 0,
+  "timing": {
+    "mean_ns": 1834,
+    "median_ns": 1864,
+    "min_ns": 1543,
+    "max_ns": 2094,
+    "stddev_ns": 166.37
+  },
+  "memory": {
+    "allocated_bytes": 0,
+    "peak_bytes": 0,
+    "allocations": 0
+  },
+  "conservation": {
+    "total_checks": 0,
+    "passed_checks": 0,
+    "maintained": true,
+    "total_delta": 0,
+    "max_delta": 0
+  }
+}

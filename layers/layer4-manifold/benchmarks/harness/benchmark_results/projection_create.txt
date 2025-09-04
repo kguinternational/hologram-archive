@@ -1,0 +1,29 @@
+=== Benchmark Results: projection_create ===
+Description: Atlas projection creation performance
+Success: Yes
+Iterations: 10 completed, 0 failed
+
+=== Timing Statistics ===
+Mean: 26478 ns
+Median: 26960 ns
+Min: 23223 ns
+Max: 28003 ns
+Std Dev: 1540.47 ns
+Total: 264784 ns
+Percentiles: P50=26940 P75=27691 P100=27691 P125=27691 ns
+
+=== Memory Statistics ===
+Allocated: 0 bytes
+Peak: 0 bytes
+Allocations: 0
+Deallocations: 0
+Still allocated: 0 bytes
+
+=== Conservation Statistics ===
+Total checks: 0
+Passed: 0
+Failed: 0
+Conservation maintained: Yes
+Total delta: 0
+Max delta: 0
+

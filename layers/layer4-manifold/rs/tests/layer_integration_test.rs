@@ -6,10 +6,7 @@
 use atlas_manifold::{
     error::*,
     fourier::{NormalFormRules, R96FourierProjection},
-    invariants::{
-        C768CycleTracker, InvariantValidator, KleinOrbitAligner,
-        PhiBijectionVerifier,
-    },
+    invariants::{C768CycleTracker, InvariantValidator, KleinOrbitAligner, PhiBijectionVerifier},
     projection::AtlasProjection,
     shard::AtlasBoundaryRegion,
 };
@@ -297,17 +294,17 @@ fn create_test_r96_data() -> Vec<u8> {
         let page = vec![class as u8; 256];
         data.extend_from_slice(&page);
     }
-    
+
     // Make the total data conservation-compliant
     let current_sum: u32 = data.iter().map(|&b| u32::from(b)).sum();
     let remainder = current_sum % 96;
-    
+
     if remainder != 0 && !data.is_empty() {
         let adjustment = (96 - remainder) as u8;
         let last_idx = data.len() - 1;
         data[last_idx] = data[last_idx].wrapping_add(adjustment);
     }
-    
+
     data
 }
 
@@ -318,7 +315,7 @@ fn create_test_c768_data() -> Vec<u8> {
 }
 
 fn create_test_holographic_data() -> Vec<u8> {
-    // Create structured data for shard reconstruction testing  
+    // Create structured data for shard reconstruction testing
     let size = 16 * 64 * 256; // 16 tiles * 64 pages * 256 bytes per page
     create_conservation_compliant_data(size)
 }

@@ -1,0 +1,66 @@
+# Benchmark: manifold_benchmarks
+# Timestamp: 2025-09-04T18:05:36+00:00
+# Duration: 0s
+# Status: SUCCESS
+
+Atlas Layer 4 - Manifold Benchmarks
+=====================================
+
+=== Topological Invariant Computation Benchmark ===
+Topological Invariant Computation Results:
+  Iterations: 100
+  Successful: 100 (100.0%)
+  Total Time: 0.03 ms
+  Average Time: 0.000 ms per computation
+  Invariant Sum: -8.282475
+  Throughput: 3082045.9 computations/sec
+
+=== Manifold Distance Benchmark ===
+Manifold Distance Results:
+  Iterations: 100
+  Successful: 100 (100.0%)
+  Total Time: 3.60 ms
+  Average Time: 0.0360 ms per distance
+  Average Distance: 104.839771
+  Throughput: 27745.8 distances/sec
+
+=== Geodesic Path Benchmark ===
+Geodesic Path Results:
+  Iterations: 100
+  Successful: 100 (100.0%)
+  Total Time: 0.43 ms
+  Average Time: 0.004 ms per path
+  Average Path Length: 19927.78
+  Throughput: 231285.0 paths/sec
+
+=== Curvature Computation Benchmark ===
+Curvature Computation Results:
+  Iterations: 100
+  Successful: 100 (100.0%)
+  Total Time: 2.05 ms
+  Average Time: 0.020 ms per computation
+  Average Curvature: 0.330686
+  Throughput: 48786.8 computations/sec
+
+=== Parallel Transport Benchmark ===
+Parallel Transport Results:
+  Vector Size: 256 elements
+  Iterations: 100
+  Successful: 100 (100.0%)
+  Total Time: 0.01 ms
+  Average Time: 0.0001 ms per transport
+  Throughput: 7239554.9 transports/sec
+
+=== Manifold Operation Conservation Results ===
+Total Operations: 0
+Conserved Operations: 0
+Violated Operations: 0
+Conservation Rate: 0.00%
+Total Witnesses: 0
+Verified Witnesses: 0
+Witness Verification Rate: 0.00%
+Total Bytes Processed: 0
+==============================
+
+
+Manifold benchmarks completed successfully.

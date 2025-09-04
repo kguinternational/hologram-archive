@@ -52,7 +52,7 @@ INTEGRATION_DIR := integration
 .PHONY: all clean distclean test check help check-llvm install uninstall
 .PHONY: $(ACTIVE_LAYERS) integration
 .PHONY: layer0 layer1 layer2 layer3 layer4
-.PHONY: bench bench-l2 bench-debug bench-release bench-thorough bench-quick bench-clean
+.PHONY: bench bench-l2 bench-l4 bench-debug bench-release bench-thorough bench-quick bench-clean
 .PHONY: lint format typecheck check-rust-tools
 .PHONY: lint-all format-check-all typecheck-all
 
@@ -298,26 +298,44 @@ bench-l2: layer2
 	@echo "[BENCH] Running Layer 2 benchmark suite..."
 	@$(MAKE) -C $(LAYER2_DIR) bench-l2
 
-bench-debug: layer2
+# Layer 4 specific benchmark targets
+bench-l4: layer4
+	@echo "[BENCH] Running Layer 4 benchmark suite..."
+	@$(MAKE) -C $(LAYER4_DIR) bench-run
+
+bench-l4-quick: layer4
+	@echo "[BENCH] Running Layer 4 quick benchmarks..."
+	@$(MAKE) -C $(LAYER4_DIR) bench-quick
+
+bench-l4-report: layer4
+	@echo "[BENCH] Generating Layer 4 benchmark report..."
+	@$(MAKE) -C $(LAYER4_DIR) bench-report
+
+bench-debug: layer2 layer4
 	@echo "[BENCH] Building and running debug benchmarks..."
 	@$(MAKE) -C $(LAYER2_DIR) bench-debug
+	@$(MAKE) -C $(LAYER4_DIR) bench-debug
 
-bench-release: layer2
+bench-release: layer2 layer4
 	@echo "[BENCH] Building and running release benchmarks..."
 	@$(MAKE) -C $(LAYER2_DIR) bench-release
+	@$(MAKE) -C $(LAYER4_DIR) bench-release
 
-bench-quick: layer2
+bench-quick: layer2 layer4
 	@echo "[BENCH] Running quick benchmark suite..."
 	@$(MAKE) -C $(LAYER2_DIR) bench-quick
+	@$(MAKE) -C $(LAYER4_DIR) bench-quick
 
-bench-thorough: layer2
+bench-thorough: layer2 layer4
 	@echo "[BENCH] Running thorough benchmark comparison..."
 	@$(MAKE) -C $(LAYER2_DIR) bench-thorough
+	@$(MAKE) -C $(LAYER4_DIR) bench-run
 
 # Clean benchmark builds
 bench-clean:
 	@echo "[BENCH-CLEAN] Cleaning all benchmark builds..."
 	@$(MAKE) -C $(LAYER2_DIR) bench-clean 2>/dev/null || true
+	@$(MAKE) -C $(LAYER4_DIR) benchmark-clean 2>/dev/null || true
 
 # Alias for test target (common Make convention)
 check: test
@@ -403,10 +421,13 @@ help:
 	@echo "  typecheck-all    - Comprehensive type checking (CI-ready)"
 	@echo "  bench            - Run Layer 2 performance benchmarks"
 	@echo "  bench-l2         - Run Layer 2 benchmark suite"
-	@echo "  bench-quick      - Run quick benchmark tests"
+	@echo "  bench-l4         - Run Layer 4 benchmark suite"
+	@echo "  bench-l4-quick   - Run Layer 4 quick benchmarks"
+	@echo "  bench-l4-report  - Generate Layer 4 benchmark report"
+	@echo "  bench-quick      - Run quick benchmark tests (all layers)"
 	@echo "  bench-thorough   - Run comprehensive benchmark comparison"
-	@echo "  bench-debug      - Run debug benchmark build"
-	@echo "  bench-release    - Run release benchmark build"
+	@echo "  bench-debug      - Run debug benchmark build (all layers)"
+	@echo "  bench-release    - Run release benchmark build (all layers)"
 	@echo "  bench-clean      - Clean benchmark build artifacts"
 	@echo "  install          - Install libraries and headers"
 	@echo "  uninstall        - Remove installed files"

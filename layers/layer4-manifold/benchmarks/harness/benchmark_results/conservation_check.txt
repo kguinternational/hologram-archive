@@ -1,0 +1,29 @@
+=== Benchmark Results: conservation_check ===
+Description: Conservation law verification performance
+Success: Yes
+Iterations: 10 completed, 0 failed
+
+=== Timing Statistics ===
+Mean: 20756 ns
+Median: 20809 ns
+Min: 20248 ns
+Max: 21089 ns
+Std Dev: 248.73 ns
+Total: 207567 ns
+Percentiles: P50=20669 P75=21049 P100=21049 P125=21049 ns
+
+=== Memory Statistics ===
+Allocated: 0 bytes
+Peak: 0 bytes
+Allocations: 0
+Deallocations: 0
+Still allocated: 0 bytes
+
+=== Conservation Statistics ===
+Total checks: 0
+Passed: 0
+Failed: 0
+Conservation maintained: Yes
+Total delta: 0
+Max delta: 0
+

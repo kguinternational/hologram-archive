@@ -1,0 +1,26 @@
+{
+  "name": "system_test",
+  "description": "Complete system test performance",
+  "success": true,
+  "iterations_completed": 10,
+  "iterations_failed": 0,
+  "timing": {
+    "mean_ns": 385647,
+    "median_ns": 239507,
+    "min_ns": 237554,
+    "max_ns": 1674393,
+    "stddev_ns": 429635.69
+  },
+  "memory": {
+    "allocated_bytes": 0,
+    "peak_bytes": 0,
+    "allocations": 0
+  },
+  "conservation": {
+    "total_checks": 0,
+    "passed_checks": 0,
+    "maintained": true,
+    "total_delta": 0,
+    "max_delta": 0
+  }
+}

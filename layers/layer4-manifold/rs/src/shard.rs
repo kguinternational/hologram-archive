@@ -7,7 +7,7 @@
 
 use crate::ffi::{
     atlas_conserved_check, atlas_conserved_delta, atlas_conserved_window_streaming_check_llvm,
-    atlas_domain_attach, atlas_domain_create, atlas_domain_destroy, atlas_domain_verify, 
+    atlas_domain_attach, atlas_domain_create, atlas_domain_destroy, atlas_domain_verify,
     atlas_witness_destroy, atlas_witness_generate, atlas_witness_verify,
 };
 use crate::{error::*, fourier::*, types::*};
@@ -604,7 +604,7 @@ impl AtlasReconstructionCtx {
                 ));
             }
         }
-        
+
         #[cfg(not(test))]
         {
             if !shard.verify_with_layer2_conservation() {
@@ -1109,13 +1109,16 @@ impl ShardMetadata {
         shard_index: u64,
         spatial_bounds: (f64, f64, f64, f64),
     ) -> Self {
-        let bounds = vec![(spatial_bounds.0, spatial_bounds.2), (spatial_bounds.1, spatial_bounds.3)];
+        let bounds = vec![
+            (spatial_bounds.0, spatial_bounds.2),
+            (spatial_bounds.1, spatial_bounds.3),
+        ];
         let load_factor = if point_count > 0 {
             (end_offset - start_offset) as f64 / (point_count * 256) as f64 // Normalize by page size
         } else {
             0.0
         };
-        
+
         Self {
             id: ShardId::new(shard_index, shard_index as u32),
             point_count,
@@ -1352,7 +1355,7 @@ mod tests {
         let page_size = 256;
         let num_pages = (size + page_size - 1) / page_size; // Round up
         let mut data = Vec::new();
-        
+
         for _page in 0..num_pages {
             for i in 0..page_size {
                 if i == 0 && data.len() < size {
@@ -1362,10 +1365,10 @@ mod tests {
                 }
             }
         }
-        
+
         // Truncate to exact size requested
         data.truncate(size);
-        
+
         // If we truncated in the middle of a page, adjust to maintain conservation
         if size % page_size != 0 {
             let sum: u64 = data.iter().map(|&b| u64::from(b)).sum();
@@ -1375,7 +1378,7 @@ mod tests {
                 data[0] = (data[0] as u8).wrapping_add(adjustment);
             }
         }
-        
+
         data
     }
 
@@ -1472,7 +1475,7 @@ mod tests {
         // For unit tests, we don't need actual Layer 2 contexts
         // The conservation is verified through the test data generation
         // which ensures sum % 96 == 0
-        
+
         // Mark the boundary regions as conserved since our test data is conservation-compliant
         shard1.boundary_region.is_conserved = true;
         shard2.boundary_region.is_conserved = true;

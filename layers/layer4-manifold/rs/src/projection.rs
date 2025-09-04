@@ -1099,7 +1099,7 @@ impl AtlasProjection {
 
             // Apply rotation using proper matrix operations
             let rotation_matrix = crate::coords::util::rotation_2d(params.rotation_angle);
-            
+
             // Transform min point
             let min_vector = crate::types::AtlasVector::<2> {
                 components: [scaled_min_x, scaled_min_y],
@@ -1107,7 +1107,7 @@ impl AtlasProjection {
             let rotated_min = rotation_matrix.multiply_vector(&min_vector);
             let rotated_min_x = rotated_min.components[0];
             let rotated_min_y = rotated_min.components[1];
-            
+
             // Transform max point
             let max_vector = crate::types::AtlasVector::<2> {
                 components: [scaled_max_x, scaled_max_y],

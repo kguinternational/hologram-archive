@@ -1,0 +1,29 @@
+=== Benchmark Results: manifold_verify ===
+Description: Manifold verification performance
+Success: Yes
+Iterations: 10 completed, 0 failed
+
+=== Timing Statistics ===
+Mean: 74868 ns
+Median: 61084 ns
+Min: 60854 ns
+Max: 180497 ns
+Std Dev: 35584.42 ns
+Total: 748686 ns
+Percentiles: P50=61083 P75=78466 P100=78466 P125=78466 ns
+
+=== Memory Statistics ===
+Allocated: 0 bytes
+Peak: 0 bytes
+Allocations: 0
+Deallocations: 0
+Still allocated: 0 bytes
+
+=== Conservation Statistics ===
+Total checks: 0
+Passed: 0
+Failed: 0
+Conservation maintained: Yes
+Total delta: 0
+Max delta: 0
+

@@ -11,7 +11,7 @@ Hologram is a 7-layer computing platform built on the Atlas-12,288 structure (48
 
 ## Theoretical Foundation
 
-The implementation is informed by three key theoretical frameworks:
+The implementation is informed by four key theoretical frameworks:
 
 ### Universal Numbers (UN)
 All Layer 4+ operations are **Universal Numbers** - scalar invariants that:
@@ -32,6 +32,14 @@ The R96/C768 structure emerges from:
 - 8 base oscillators with unity pair normalization
 - Triple-cycle conservation (768 = 16×48 = 3×256)
 - Harmonic pairing: classes r₁, r₂ harmonize if `(r₁ + r₂) % 96 == 0`
+
+### Unified Action Formalism (UAF)
+The 12,288 lattice as a discrete torus with unified action:
+- **Discrete Torus**: ℤ/48ℤ × ℤ/256ℤ with periodic boundary conditions
+- **Sector Lagrangians**: Geometric, resonance (R96), schedule (C768), conservation, round-trip (Φ), gauge, witness, spectral
+- **Variational Principle**: Solutions minimize total action S = Σ S_α
+- **Gauge Group**: G = G_T × ⟨R⟩ × Aut_∂ (translations, rotations, automorphisms)
+- **Acceptance Criteria**: Conservation satisfied, zero resource budget, spectral fit
 
 ### Layer Stack
 

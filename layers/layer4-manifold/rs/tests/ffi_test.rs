@@ -365,10 +365,7 @@ fn test_ffi_struct_layout() {
     // Test that C-compatible structs have expected layout and alignment
     assert_eq!(align_of::<CAtlasPoint>(), align_of::<*mut f64>());
     assert_eq!(align_of::<CAtlasMatrix>(), align_of::<*mut f64>());
-    assert_eq!(
-        align_of::<AtlasManifoldHandle>(),
-        align_of::<*mut c_void>()
-    );
+    assert_eq!(align_of::<AtlasManifoldHandle>(), align_of::<*mut c_void>());
 
     // Test sizes are reasonable
     assert!(size_of::<CAtlasPoint>() <= 32); // Should be small

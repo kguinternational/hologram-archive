@@ -122,6 +122,7 @@ A conformant implementation passes:
 - **Witness.** Immutable, verifiable record of closure/identity.
 - **Budget (RL‑96).** Mod‑96 proof accounting with conservative Boolean collapse.
 - **Klein orbits.** Distinguished orbits enabling canonicalization.
+- **Action Formalism.** Variational principle unifying all operations through sector Lagrangians.
 
 ---
 

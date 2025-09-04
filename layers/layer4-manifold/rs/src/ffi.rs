@@ -89,7 +89,8 @@ extern "C" {
 
     /// Layer 2: Attach memory to domain
     /// Confirmed in library: atlas_domain_attach
-    pub(crate) fn atlas_domain_attach(domain: *mut c_void, base: *mut c_void, len: size_t) -> c_int;
+    pub(crate) fn atlas_domain_attach(domain: *mut c_void, base: *mut c_void, len: size_t)
+        -> c_int;
 
     /// Layer 2: Destroy conservation domain
     /// Confirmed in library: atlas_domain_destroy
@@ -144,15 +145,15 @@ extern "C" {
 
     // NOTE: The following Layer 3 functions are NOT available in the current library build:
     // - atlas_r96_find_harmonic_pairs (not implemented)
-    // - atlas_harmonic_verify (not implemented) 
+    // - atlas_harmonic_verify (not implemented)
     // - atlas_c768_generate (not implemented)
     // - atlas_c768_check_identity (not implemented)
     // - atlas_c768_stabilization_variance (not implemented)
     // - atlas_c768_is_stabilized (not implemented)
-    
+
     // Layer 3 provides internal C768 functions like:
     // - atlas.c768.verify_closure
-    // - atlas.c768.check_byte_rhythm  
+    // - atlas.c768.check_byte_rhythm
     // - atlas.c768.compute_residue_classes
     // - atlas.c768.verify_phase_lock
     // But these are not exposed through the public C API

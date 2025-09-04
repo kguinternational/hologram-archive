@@ -1,0 +1,29 @@
+=== Benchmark Results: shard_extract ===
+Description: Atlas shard extraction performance
+Success: Yes
+Iterations: 10 completed, 0 failed
+
+=== Timing Statistics ===
+Mean: 1834 ns
+Median: 1864 ns
+Min: 1543 ns
+Max: 2094 ns
+Std Dev: 166.37 ns
+Total: 18346 ns
+Percentiles: P50=1834 P75=2034 P100=2034 P125=2034 ns
+
+=== Memory Statistics ===
+Allocated: 0 bytes
+Peak: 0 bytes
+Allocations: 0
+Deallocations: 0
+Still allocated: 0 bytes
+
+=== Conservation Statistics ===
+Total checks: 0
+Passed: 0
+Failed: 0
+Conservation maintained: Yes
+Total delta: 0
+Max delta: 0
+

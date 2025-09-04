@@ -188,6 +188,153 @@ clean-runtime:
 	@rm -f runtime/*.o
 	@rm -f build/tests/test-manifold build/tests/test-projection build/tests/test-geometry build/tests/test-topology build/tests/test-verification build/tests/test-integration
 
+# =============================================================================
+# Benchmark targets
+# =============================================================================
+
+.PHONY: benchmarks bench-run bench-quick bench-report benchmark-harness
+.PHONY: bench-core bench-geometric bench-signal bench-traditional bench-applications
+.PHONY: bench-debug bench-release bench-profile benchmark-clean benchmark-test
+
+# Build all benchmarks
+benchmarks: $(LIB_PATH)
+	@echo "  [BENCHMARKS] Building all Layer 4 benchmarks..."
+	@$(MAKE) -C benchmarks BUILD_TYPE=release all
+
+# Run all benchmarks
+bench-run: benchmarks
+	@echo "  [BENCHMARKS] Running all Layer 4 benchmarks..."
+	@$(MAKE) -C benchmarks run
+
+# Run quick benchmarks (for development)
+bench-quick: benchmarks
+	@echo "  [BENCHMARKS] Running quick Layer 4 benchmarks..."
+	@$(MAKE) -C benchmarks bench-quick
+
+# Generate benchmark report
+bench-report: benchmarks
+	@echo "  [BENCHMARKS] Generating Layer 4 benchmark report..."
+	@cd benchmarks && python3 harness/generate_report.py
+
+# Build benchmark harness utilities
+benchmark-harness: $(LIB_PATH)
+	@echo "  [BENCHMARKS] Setting up benchmark harness..."
+	@$(MAKE) -C benchmarks harness
+
+# Individual benchmark suites
+bench-core: benchmarks
+	@echo "  [BENCHMARKS] Running core UN operation benchmarks..."
+	@$(MAKE) -C benchmarks run-core
+
+bench-geometric: benchmarks
+	@echo "  [BENCHMARKS] Running geometric computation benchmarks..."
+	@$(MAKE) -C benchmarks run-geometric
+
+bench-signal: benchmarks
+	@echo "  [BENCHMARKS] Running signal processing benchmarks..."
+	@$(MAKE) -C benchmarks run-signal
+
+bench-traditional: benchmarks
+	@echo "  [BENCHMARKS] Running traditional baseline benchmarks..."
+	@$(MAKE) -C benchmarks run-traditional
+
+bench-applications: benchmarks
+	@echo "  [BENCHMARKS] Running application workload benchmarks..."
+	@$(MAKE) -C benchmarks run-applications
+
+# Build type specific targets
+bench-debug: $(LIB_PATH)
+	@echo "  [BENCHMARKS] Building debug benchmarks..."
+	@$(MAKE) -C benchmarks BUILD_TYPE=debug all
+
+bench-release: $(LIB_PATH)
+	@echo "  [BENCHMARKS] Building release benchmarks..."
+	@$(MAKE) -C benchmarks BUILD_TYPE=release all
+
+# Profile benchmarks with perf
+bench-profile: benchmarks
+	@echo "  [BENCHMARKS] Running profiled benchmarks..."
+	@$(MAKE) -C benchmarks profile
+
+# Test benchmark framework
+benchmark-test: benchmark-harness
+	@echo "  [BENCHMARKS] Testing benchmark framework..."
+	@$(MAKE) -C benchmarks check-deps validate
+
+# Clean benchmark artifacts
+benchmark-clean:
+	@echo "  [BENCHMARKS] Cleaning benchmark artifacts..."
+	@$(MAKE) -C benchmarks distclean
+
+# =============================================================================
+# Real-World Application Benchmarks Integration
+# =============================================================================
+
+.PHONY: app-benchmarks app-bench-all app-bench-ml app-bench-db app-bench-crypto
+.PHONY: app-bench-test app-bench-report app-bench-clean app-bench-install
+
+# Build application benchmarks
+app-benchmarks: $(LIB_PATH)
+	@echo "  [APP-BENCH] Building real-world application benchmarks..."
+	@$(MAKE) -C benchmarks/applications all
+
+# Run all application benchmarks
+app-bench-all: app-benchmarks
+	@echo "  [APP-BENCH] Running comprehensive application benchmarks..."
+	@$(MAKE) -C benchmarks/applications run-all
+
+# Run individual application benchmarks
+app-bench-ml: app-benchmarks
+	@echo "  [APP-BENCH] Running ML Operations benchmark..."
+	@$(MAKE) -C benchmarks/applications run-ml
+
+app-bench-db: app-benchmarks
+	@echo "  [APP-BENCH] Running Database Operations benchmark..."
+	@$(MAKE) -C benchmarks/applications run-db
+
+app-bench-crypto: app-benchmarks
+	@echo "  [APP-BENCH] Running Cryptographic Operations benchmark..."
+	@$(MAKE) -C benchmarks/applications run-crypto
+
+# Quick application benchmark tests
+app-bench-test: app-benchmarks
+	@echo "  [APP-BENCH] Running quick application benchmark tests..."
+	@$(MAKE) -C benchmarks/applications test-all
+
+# Generate application benchmark report
+app-bench-report: app-benchmarks
+	@echo "  [APP-BENCH] Generating comprehensive application benchmark report..."
+	@$(MAKE) -C benchmarks/applications report
+
+# Install application benchmarks
+app-bench-install: app-benchmarks
+	@echo "  [APP-BENCH] Installing application benchmarks..."
+	@$(MAKE) -C benchmarks/applications install
+
+# Clean application benchmark artifacts
+app-bench-clean:
+	@echo "  [APP-BENCH] Cleaning application benchmark artifacts..."
+	@$(MAKE) -C benchmarks/applications clean
+
+# Convenience targets combining existing and new benchmarks
+.PHONY: bench-comprehensive bench-test-all bench-clean-all
+
+# Run all benchmarks (framework + applications)
+bench-comprehensive: bench-full app-bench-all
+	@echo "  [BENCH-ALL] Comprehensive benchmarks completed (core + applications)"
+
+# Test all benchmark systems
+bench-test-all: benchmark-test app-bench-test
+	@echo "  [BENCH-ALL] All benchmark tests completed"
+
+# Clean all benchmark artifacts
+bench-clean-all: benchmark-clean app-bench-clean
+	@echo "  [BENCH-ALL] All benchmark artifacts cleaned"
+
+# =============================================================================
+# Clean Targets
+# =============================================================================
+
 # Override clean to include Rust artifacts (overrides base layer.mk clean target)
 .PHONY: clean
 clean: clean-runtime
@@ -197,3 +344,8 @@ clean: clean-runtime
 	@rm -rf build
 	@rm -f $(LIB_PATH)
 	@rm -f runtime/*.o
+
+# Deep clean including benchmarks
+.PHONY: distclean
+distclean: clean bench-clean-all
+	@echo "  [DISTCLEAN] Deep cleaning Layer 4..."
