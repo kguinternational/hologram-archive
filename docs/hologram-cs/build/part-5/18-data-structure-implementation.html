@@ -1,0 +1,848 @@
+<!DOCTYPE HTML>
+<html lang="en" class="light" dir="ltr">
+    <head>
+        <!-- Book generated using mdBook -->
+        <meta charset="UTF-8">
+        <title>Chapter 18: Data Structure Implementation - The Hologram (12,288): A Complete Computer Science Formalization</title>
+
+
+        <!-- Custom HTML head -->
+        
+        <meta name="description" content="A comprehensive computer science formalization of the 12,288 Hologram model of computation using mainstream CS formalisms">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#ffffff">
+
+        <link rel="icon" href="../favicon.svg">
+        <link rel="shortcut icon" href="../favicon.png">
+        <link rel="stylesheet" href="../css/variables.css">
+        <link rel="stylesheet" href="../css/general.css">
+        <link rel="stylesheet" href="../css/chrome.css">
+        <link rel="stylesheet" href="../css/print.css" media="print">
+
+        <!-- Fonts -->
+        <link rel="stylesheet" href="../FontAwesome/css/font-awesome.css">
+        <link rel="stylesheet" href="../fonts/fonts.css">
+
+        <!-- Highlight.js Stylesheets -->
+        <link rel="stylesheet" href="../highlight.css">
+        <link rel="stylesheet" href="../tomorrow-night.css">
+        <link rel="stylesheet" href="../ayu-highlight.css">
+
+        <!-- Custom theme stylesheets -->
+        <link rel="stylesheet" href="../theme/custom.css">
+
+        <!-- MathJax -->
+        <script async src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    </head>
+    <body class="sidebar-visible no-js">
+    <div id="body-container">
+        <!-- Provide site root to javascript -->
+        <script>
+            var path_to_root = "../";
+            var default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "navy" : "light";
+        </script>
+
+        <!-- Work around some values being stored in localStorage wrapped in quotes -->
+        <script>
+            try {
+                var theme = localStorage.getItem('mdbook-theme');
+                var sidebar = localStorage.getItem('mdbook-sidebar');
+
+                if (theme.startsWith('"') && theme.endsWith('"')) {
+                    localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
+                }
+
+                if (sidebar.startsWith('"') && sidebar.endsWith('"')) {
+                    localStorage.setItem('mdbook-sidebar', sidebar.slice(1, sidebar.length - 1));
+                }
+            } catch (e) { }
+        </script>
+
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script>
+            var theme;
+            try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
+            if (theme === null || theme === undefined) { theme = default_theme; }
+            var html = document.querySelector('html');
+            html.classList.remove('light')
+            html.classList.add(theme);
+            var body = document.querySelector('body');
+            body.classList.remove('no-js')
+            body.classList.add('js');
+        </script>
+
+        <input type="checkbox" id="sidebar-toggle-anchor" class="hidden">
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script>
+            var body = document.querySelector('body');
+            var sidebar = null;
+            var sidebar_toggle = document.getElementById("sidebar-toggle-anchor");
+            if (document.body.clientWidth >= 1080) {
+                try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
+                sidebar = sidebar || 'visible';
+            } else {
+                sidebar = 'hidden';
+            }
+            sidebar_toggle.checked = sidebar === 'visible';
+            body.classList.remove('sidebar-visible');
+            body.classList.add("sidebar-" + sidebar);
+        </script>
+
+        <nav id="sidebar" class="sidebar" aria-label="Table of contents">
+            <div class="sidebar-scrollbox">
+                <ol class="chapter"><li class="chapter-item expanded affix "><a href="../title-page.html">Title Page</a></li><li class="chapter-item expanded affix "><a href="../preface.html">Preface</a></li><li class="chapter-item expanded affix "><a href="../readers-guide.html">Reader's Guide & Conventions</a></li><li class="spacer"></li><li class="chapter-item expanded affix "><li class="part-title">Part I: Mathematical Foundations</li><li class="chapter-item expanded "><a href="../part-1/01-information-as-lawful-structure.html"><strong aria-hidden="true">1.</strong> Chapter 1: Information as Lawful Structure</a></li><li class="chapter-item expanded "><a href="../part-1/02-universal-automaton.html"><strong aria-hidden="true">2.</strong> Chapter 2: The Universal Automaton</a></li><li class="chapter-item expanded "><a href="../part-1/03-labels-schedules-receipts.html"><strong aria-hidden="true">3.</strong> Chapter 3: Intrinsic Labels, Schedules, and Receipts</a></li><li class="chapter-item expanded "><a href="../part-1/04-content-addressable-memory.html"><strong aria-hidden="true">4.</strong> Chapter 4: Content-Addressable Memory</a></li><li class="spacer"></li><li class="chapter-item expanded affix "><li class="part-title">Part II: Algebraic Structure</li><li class="chapter-item expanded "><a href="../part-2/05-lawfulness-as-type-system.html"><strong aria-hidden="true">5.</strong> Chapter 5: Lawfulness as a Type System</a></li><li class="chapter-item expanded "><a href="../part-2/06-programs-as-geometry.html"><strong aria-hidden="true">6.</strong> Chapter 6: Programs as Geometry</a></li><li class="chapter-item expanded "><a href="../part-2/07-algorithmic-reification.html"><strong aria-hidden="true">7.</strong> Chapter 7: Algorithmic Reification</a></li><li class="chapter-item expanded "><a href="../part-2/08-universal-cost.html"><strong aria-hidden="true">8.</strong> Chapter 8: The Universal Cost</a></li><li class="spacer"></li><li class="chapter-item expanded affix "><li class="part-title">Part III: System Architecture</li><li class="chapter-item expanded "><a href="../part-3/09-security-safety-correctness.html"><strong aria-hidden="true">9.</strong> Chapter 9: Security, Safety, and Correctness</a></li><li class="chapter-item expanded "><a href="../part-3/10-worked-micro-examples.html"><strong aria-hidden="true">10.</strong> Chapter 10: Worked Micro-Examples</a></li><li class="chapter-item expanded "><a href="../part-3/11-interfaces-to-mainstream-cs.html"><strong aria-hidden="true">11.</strong> Chapter 11: Interfaces to Mainstream CS</a></li><li class="chapter-item expanded "><a href="../part-3/12-minimal-core.html"><strong aria-hidden="true">12.</strong> Chapter 12: Minimal Core</a></li><li class="spacer"></li><li class="chapter-item expanded affix "><li class="part-title">Part IV: Protocol Design</li><li class="chapter-item expanded "><a href="../part-4/13-meta-theory-expressivity.html"><strong aria-hidden="true">13.</strong> Chapter 13: Meta-Theory & Expressivity</a></li><li class="chapter-item expanded "><a href="../part-4/14-normalization-confluence.html"><strong aria-hidden="true">14.</strong> Chapter 14: Normalization & Confluence</a></li><li class="chapter-item expanded "><a href="../part-4/15-categorical-semantics.html"><strong aria-hidden="true">15.</strong> Chapter 15: Categorical Semantics</a></li><li class="chapter-item expanded "><a href="../part-4/16-security-proofs.html"><strong aria-hidden="true">16.</strong> Chapter 16: Security Proofs</a></li><li class="spacer"></li><li class="chapter-item expanded affix "><li class="part-title">Part V: Implementation</li><li class="chapter-item expanded "><a href="../part-5/17-optimization-landscape.html"><strong aria-hidden="true">17.</strong> Chapter 17: Optimization Landscape</a></li><li class="chapter-item expanded "><a href="../part-5/18-data-structure-implementation.html" class="active"><strong aria-hidden="true">18.</strong> Chapter 18: Data Structure Implementation</a></li><li class="chapter-item expanded "><a href="../part-5/19-runtime-architecture.html"><strong aria-hidden="true">19.</strong> Chapter 19: Runtime Architecture</a></li><li class="chapter-item expanded "><a href="../part-5/20-verification-system.html"><strong aria-hidden="true">20.</strong> Chapter 20: Verification System</a></li><li class="spacer"></li><li class="chapter-item expanded affix "><li class="part-title">Part VI: Applications</li><li class="chapter-item expanded "><a href="../part-6/21-distributed-systems.html"><strong aria-hidden="true">21.</strong> Chapter 21: Distributed Systems</a></li><li class="chapter-item expanded "><a href="../part-6/22-database-systems.html"><strong aria-hidden="true">22.</strong> Chapter 22: Database Systems</a></li><li class="chapter-item expanded "><a href="../part-6/23-compiler-construction.html"><strong aria-hidden="true">23.</strong> Chapter 23: Compiler Construction</a></li><li class="chapter-item expanded "><a href="../part-6/24-machine-learning-integration.html"><strong aria-hidden="true">24.</strong> Chapter 24: Machine Learning Integration</a></li><li class="spacer"></li><li class="chapter-item expanded affix "><li class="part-title">Appendices</li><li class="chapter-item expanded "><a href="../appendices/A-glossary.html"><strong aria-hidden="true">25.</strong> Appendix A: Glossary</a></li><li class="chapter-item expanded "><a href="../appendices/B-mathematical-notation.html"><strong aria-hidden="true">26.</strong> Appendix B: Mathematical Notation</a></li><li class="chapter-item expanded "><a href="../appendices/C-cs-mappings.html"><strong aria-hidden="true">27.</strong> Appendix C: Side-by-Side CS Mappings</a></li><li class="chapter-item expanded "><a href="../appendices/D-exercise-solutions.html"><strong aria-hidden="true">28.</strong> Appendix D: Exercise Solutions</a></li><li class="chapter-item expanded "><a href="../appendices/E-implementation-code.html"><strong aria-hidden="true">29.</strong> Appendix E: Implementation Code</a></li><li class="chapter-item expanded "><a href="../appendices/F-research-problems.html"><strong aria-hidden="true">30.</strong> Appendix F: Research Problems</a></li><li class="spacer"></li><li class="chapter-item expanded affix "><a href="../bibliography.html">Bibliography</a></li><li class="chapter-item expanded affix "><a href="../index.html">Index</a></li></ol>
+            </div>
+            <div id="sidebar-resize-handle" class="sidebar-resize-handle">
+                <div class="sidebar-resize-indicator"></div>
+            </div>
+        </nav>
+
+        <!-- Track and set sidebar scroll position -->
+        <script>
+            var sidebarScrollbox = document.querySelector('#sidebar .sidebar-scrollbox');
+            sidebarScrollbox.addEventListener('click', function(e) {
+                if (e.target.tagName === 'A') {
+                    sessionStorage.setItem('sidebar-scroll', sidebarScrollbox.scrollTop);
+                }
+            }, { passive: true });
+            var sidebarScrollTop = sessionStorage.getItem('sidebar-scroll');
+            sessionStorage.removeItem('sidebar-scroll');
+            if (sidebarScrollTop) {
+                // preserve sidebar scroll position when navigating via links within sidebar
+                sidebarScrollbox.scrollTop = sidebarScrollTop;
+            } else {
+                // scroll sidebar to current active section when navigating via "next/previous chapter" buttons
+                var activeSection = document.querySelector('#sidebar .active');
+                if (activeSection) {
+                    activeSection.scrollIntoView({ block: 'center' });
+                }
+            }
+        </script>
+
+        <div id="page-wrapper" class="page-wrapper">
+
+            <div class="page">
+                                <div id="menu-bar-hover-placeholder"></div>
+                <div id="menu-bar" class="menu-bar sticky">
+                    <div class="left-buttons">
+                        <label id="sidebar-toggle" class="icon-button" for="sidebar-toggle-anchor" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="sidebar">
+                            <i class="fa fa-bars"></i>
+                        </label>
+                        <button id="theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="theme-list">
+                            <i class="fa fa-paint-brush"></i>
+                        </button>
+                        <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="light">Light</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="navy">Navy</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="ayu">Ayu</button></li>
+                        </ul>
+                        <button id="search-toggle" class="icon-button" type="button" title="Search. (Shortkey: s)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="S" aria-controls="searchbar">
+                            <i class="fa fa-search"></i>
+                        </button>
+                    </div>
+
+                    <h1 class="menu-title">The Hologram (12,288): A Complete Computer Science Formalization</h1>
+
+                    <div class="right-buttons">
+                        <a href="../print.html" title="Print this book" aria-label="Print this book">
+                            <i id="print-button" class="fa fa-print"></i>
+                        </a>
+                        <a href="https://github.com/uor-foundation/hologram-cs" title="Git repository" aria-label="Git repository">
+                            <i id="git-repository-button" class="fa fa-github"></i>
+                        </a>
+
+                    </div>
+                </div>
+
+                <div id="search-wrapper" class="hidden">
+                    <form id="searchbar-outer" class="searchbar-outer">
+                        <input type="search" id="searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="searchresults-outer" aria-describedby="searchresults-header">
+                    </form>
+                    <div id="searchresults-outer" class="searchresults-outer hidden">
+                        <div id="searchresults-header" class="searchresults-header"></div>
+                        <ul id="searchresults">
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
+                <script>
+                    document.getElementById('sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
+                    document.getElementById('sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
+                    Array.from(document.querySelectorAll('#sidebar a')).forEach(function(link) {
+                        link.setAttribute('tabIndex', sidebar === 'visible' ? 0 : -1);
+                    });
+                </script>
+
+                <div id="content" class="content">
+                    <main>
+                        <h1 id="chapter-18-data-structure-implementation"><a class="header" href="#chapter-18-data-structure-implementation">Chapter 18: Data Structure Implementation</a></h1>
+<h2 id="motivation"><a class="header" href="#motivation">Motivation</a></h2>
+<p>Efficient implementation of the Hologram model requires carefully designed data structures that respect conservation laws while enabling fast operations. This chapter presents production-quality implementations of the core data structures: the lattice representation, configuration buffers, and receipt structures. We optimize for both theoretical elegance and practical performance.</p>
+<h2 id="lattice-representation"><a class="header" href="#lattice-representation">Lattice Representation</a></h2>
+<h3 id="memory-efficient-lattice"><a class="header" href="#memory-efficient-lattice">Memory-Efficient Lattice</a></h3>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>use std::sync::Arc;
+use parking_lot::RwLock;
+
+/// The 12,288-site lattice with efficient memory layout
+#[repr(C, align(64))]  // Cache-line aligned
+pub struct Lattice {
+    /// Raw data storage - exactly 12,288 bytes
+    data: [u8; 12_288],
+
+    /// Metadata for fast operations
+    metadata: LatticeMetadata,
+
+    /// Version for optimistic concurrency
+    version: AtomicU64,
+}
+
+impl Lattice {
+    /// Constants for lattice dimensions
+    pub const PAGES: usize = 48;
+    pub const BYTES_PER_PAGE: usize = 256;
+    pub const TOTAL_SITES: usize = Self::PAGES * Self::BYTES_PER_PAGE;
+
+    /// Create empty lattice
+    pub fn new() -&gt; Self {
+        Self {
+            data: [0; Self::TOTAL_SITES],
+            metadata: LatticeMetadata::default(),
+            version: AtomicU64::new(0),
+        }
+    }
+
+    /// Efficient site indexing
+    #[inline(always)]
+    pub fn site_to_index(page: u8, byte: u8) -&gt; usize {
+        ((page as usize) % Self::PAGES) * Self::BYTES_PER_PAGE +
+        ((byte as usize) % Self::BYTES_PER_PAGE)
+    }
+
+    /// Index to site conversion
+    #[inline(always)]
+    pub fn index_to_site(index: usize) -&gt; (u8, u8) {
+        let index = index % Self::TOTAL_SITES;
+        ((index / Self::BYTES_PER_PAGE) as u8,
+         (index % Self::BYTES_PER_PAGE) as u8)
+    }
+
+    /// Get value at site with bounds checking
+    #[inline]
+    pub fn get(&amp;self, page: u8, byte: u8) -&gt; u8 {
+        self.data[Self::site_to_index(page, byte)]
+    }
+
+    /// Set value at site
+    #[inline]
+    pub fn set(&amp;mut self, page: u8, byte: u8, value: u8) {
+        let index = Self::site_to_index(page, byte);
+        self.data[index] = value;
+        self.version.fetch_add(1, Ordering::SeqCst);
+        self.metadata.mark_dirty(index);
+    }
+
+    /// Bulk operations for efficiency
+    pub fn apply_morphism(&amp;mut self, morphism: &amp;Morphism) {
+        // Pre-compute affected sites
+        let affected = morphism.affected_sites();
+
+        // Batch updates
+        for &amp;site in &amp;affected {
+            let old_value = self.data[site];
+            let new_value = morphism.apply_to_byte(old_value);
+            self.data[site] = new_value;
+        }
+
+        // Single version increment
+        self.version.fetch_add(1, Ordering::SeqCst);
+        self.metadata.bulk_mark_dirty(&amp;affected);
+    }
+}
+
+/// Metadata for optimization
+#[derive(Default)]
+struct LatticeMetadata {
+    /// Dirty tracking for incremental computation
+    dirty_bits: BitVec,
+
+    /// R96 histogram cache
+    r96_histogram: [u32; 96],
+
+    /// Active region bounds
+    active_min: usize,
+    active_max: usize,
+
+    /// Occupancy count
+    non_zero_count: usize,
+}
+
+impl LatticeMetadata {
+    fn mark_dirty(&amp;mut self, index: usize) {
+        self.dirty_bits.set(index, true);
+        self.active_min = self.active_min.min(index);
+        self.active_max = self.active_max.max(index);
+    }
+
+    fn bulk_mark_dirty(&amp;mut self, indices: &amp;[usize]) {
+        for &amp;i in indices {
+            self.dirty_bits.set(i, true);
+        }
+        // Update bounds efficiently
+        if let (Some(&amp;min), Some(&amp;max)) = (indices.iter().min(), indices.iter().max()) {
+            self.active_min = self.active_min.min(min);
+            self.active_max = self.active_max.max(max);
+        }
+    }
+}
+<span class="boring">}</span></code></pre></pre>
+<h3 id="simd-optimized-operations"><a class="header" href="#simd-optimized-operations">SIMD-Optimized Operations</a></h3>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>use std::arch::x86_64::*;
+
+impl Lattice {
+    /// SIMD-accelerated R96 computation
+    #[target_feature(enable = "avx2")]
+    unsafe fn compute_r96_simd(&amp;self) -&gt; [u32; 96] {
+        let mut histogram = [0u32; 96];
+
+        // Process 32 bytes at a time with AVX2
+        for chunk_start in (0..Self::TOTAL_SITES).step_by(32) {
+            let chunk = _mm256_loadu_si256(
+                self.data[chunk_start..].as_ptr() as *const __m256i
+            );
+
+            // Compute R96 for each byte in parallel
+            let r96_values = Self::simd_r96_transform(chunk);
+
+            // Update histogram
+            Self::simd_histogram_update(&amp;mut histogram, r96_values);
+        }
+
+        histogram
+    }
+
+    #[target_feature(enable = "avx2")]
+    unsafe fn simd_r96_transform(bytes: __m256i) -&gt; __m256i {
+        // R(b) = (b % 96) + floor(b/96) * 17
+        let mod_96 = _mm256_set1_epi8(96);
+        let factor_17 = _mm256_set1_epi8(17);
+
+        // Compute b % 96 and b / 96
+        let remainder = _mm256_rem_epi8(bytes, mod_96);
+        let quotient = _mm256_div_epi8(bytes, mod_96);
+
+        // Result = remainder + quotient * 17
+        let product = _mm256_mullo_epi8(quotient, factor_17);
+        _mm256_add_epi8(remainder, product)
+    }
+}
+<span class="boring">}</span></code></pre></pre>
+<h3 id="copy-on-write-optimization"><a class="header" href="#copy-on-write-optimization">Copy-on-Write Optimization</a></h3>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>/// Copy-on-write wrapper for efficient cloning
+pub struct CowLattice {
+    inner: Arc&lt;RwLock&lt;Lattice&gt;&gt;,
+    /// Local modifications before committing
+    local_changes: Option&lt;HashMap&lt;usize, u8&gt;&gt;,
+}
+
+impl CowLattice {
+    pub fn new(lattice: Lattice) -&gt; Self {
+        Self {
+            inner: Arc::new(RwLock::new(lattice)),
+            local_changes: None,
+        }
+    }
+
+    /// Read through to underlying lattice
+    pub fn get(&amp;self, page: u8, byte: u8) -&gt; u8 {
+        let index = Lattice::site_to_index(page, byte);
+
+        // Check local changes first
+        if let Some(ref changes) = self.local_changes {
+            if let Some(&amp;value) = changes.get(&amp;index) {
+                return value;
+            }
+        }
+
+        // Read from shared lattice
+        self.inner.read().get(page, byte)
+    }
+
+    /// Write triggers copy-on-write
+    pub fn set(&amp;mut self, page: u8, byte: u8, value: u8) {
+        let index = Lattice::site_to_index(page, byte);
+
+        // Initialize local changes if needed
+        if self.local_changes.is_none() {
+            self.local_changes = Some(HashMap::new());
+        }
+
+        self.local_changes.as_mut().unwrap().insert(index, value);
+    }
+
+    /// Commit local changes
+    pub fn commit(&amp;mut self) {
+        if let Some(changes) = self.local_changes.take() {
+            let mut lattice = self.inner.write();
+            for (index, value) in changes {
+                let (page, byte) = Lattice::index_to_site(index);
+                lattice.set(page, byte, value);
+            }
+        }
+    }
+}
+<span class="boring">}</span></code></pre></pre>
+<h2 id="configuration-buffers"><a class="header" href="#configuration-buffers">Configuration Buffers</a></h2>
+<h3 id="ring-buffer-for-streaming"><a class="header" href="#ring-buffer-for-streaming">Ring Buffer for Streaming</a></h3>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>/// Ring buffer for streaming configurations
+pub struct ConfigurationRingBuffer {
+    /// Fixed-size buffer
+    buffer: Vec&lt;Configuration&gt;,
+
+    /// Write position
+    write_pos: AtomicUsize,
+
+    /// Read position
+    read_pos: AtomicUsize,
+
+    /// Capacity (power of 2 for fast modulo)
+    capacity: usize,
+
+    /// Mask for fast modulo (capacity - 1)
+    mask: usize,
+}
+
+impl ConfigurationRingBuffer {
+    pub fn new(capacity_power_of_two: usize) -&gt; Self {
+        let capacity = 1 &lt;&lt; capacity_power_of_two;
+        Self {
+            buffer: vec![Configuration::default(); capacity],
+            write_pos: AtomicUsize::new(0),
+            read_pos: AtomicUsize::new(0),
+            capacity,
+            mask: capacity - 1,
+        }
+    }
+
+    /// Non-blocking write
+    pub fn try_write(&amp;self, config: Configuration) -&gt; bool {
+        let write = self.write_pos.load(Ordering::Acquire);
+        let read = self.read_pos.load(Ordering::Acquire);
+
+        // Check if full
+        if (write - read) &gt;= self.capacity {
+            return false;
+        }
+
+        // Write to buffer
+        let index = write &amp; self.mask;
+        unsafe {
+            // Safe because we checked bounds
+            let slot = &amp;self.buffer[index] as *const _ as *mut Configuration;
+            slot.write(config);
+        }
+
+        // Advance write position
+        self.write_pos.store(write + 1, Ordering::Release);
+        true
+    }
+
+    /// Non-blocking read
+    pub fn try_read(&amp;self) -&gt; Option&lt;Configuration&gt; {
+        let read = self.read_pos.load(Ordering::Acquire);
+        let write = self.write_pos.load(Ordering::Acquire);
+
+        // Check if empty
+        if read &gt;= write {
+            return None;
+        }
+
+        // Read from buffer
+        let index = read &amp; self.mask;
+        let config = unsafe {
+            // Safe because we checked bounds
+            self.buffer[index].clone()
+        };
+
+        // Advance read position
+        self.read_pos.store(read + 1, Ordering::Release);
+        Some(config)
+    }
+}
+<span class="boring">}</span></code></pre></pre>
+<h3 id="delta-compression"><a class="header" href="#delta-compression">Delta Compression</a></h3>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>/// Delta-compressed configuration storage
+pub struct DeltaConfiguration {
+    /// Base configuration
+    base: Arc&lt;Configuration&gt;,
+
+    /// Deltas from base
+    deltas: Vec&lt;Delta&gt;,
+
+    /// Cached full configuration
+    cached: Option&lt;Configuration&gt;,
+}
+
+#[derive(Clone)]
+pub struct Delta {
+    /// Changed sites
+    sites: SmallVec&lt;[usize; 32]&gt;,
+
+    /// New values
+    values: SmallVec&lt;[u8; 32]&gt;,
+
+    /// Receipt delta
+    receipt_delta: ReceiptDelta,
+}
+
+impl DeltaConfiguration {
+    /// Apply delta to configuration
+    pub fn apply_delta(&amp;mut self, delta: Delta) {
+        self.deltas.push(delta);
+        self.cached = None; // Invalidate cache
+    }
+
+    /// Materialize full configuration
+    pub fn materialize(&amp;mut self) -&gt; &amp;Configuration {
+        if self.cached.is_none() {
+            let mut config = (*self.base).clone();
+
+            // Apply all deltas
+            for delta in &amp;self.deltas {
+                for (i, &amp;site) in delta.sites.iter().enumerate() {
+                    config.lattice.data[site] = delta.values[i];
+                }
+                config.receipt = config.receipt.apply_delta(&amp;delta.receipt_delta);
+            }
+
+            self.cached = Some(config);
+        }
+
+        self.cached.as_ref().unwrap()
+    }
+
+    /// Compact deltas when too many accumulate
+    pub fn compact(&amp;mut self) {
+        if self.deltas.len() &gt; 100 {
+            let full = self.materialize().clone();
+            self.base = Arc::new(full);
+            self.deltas.clear();
+            self.cached = None;
+        }
+    }
+}
+<span class="boring">}</span></code></pre></pre>
+<h2 id="receipt-structures"><a class="header" href="#receipt-structures">Receipt Structures</a></h2>
+<h3 id="efficient-receipt-implementation"><a class="header" href="#efficient-receipt-implementation">Efficient Receipt Implementation</a></h3>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>use blake3::Hasher;
+
+/// Optimized receipt structure
+#[repr(C)]
+pub struct Receipt {
+    /// R96 digest (16 bytes)
+    r96_digest: [u8; 16],
+
+    /// C768 phase and fairness packed
+    c768_data: u16,  // phase: 10 bits, fairness: 6 bits
+
+    /// Φ coherence flag
+    phi_coherent: bool,
+
+    /// Budget (7 bits sufficient for 0-95)
+    budget: u8,
+
+    /// Witness hash (16 bytes)
+    witness_hash: [u8; 16],
+}
+
+impl Receipt {
+    /// Compute receipt from configuration
+    pub fn compute(config: &amp;Configuration) -&gt; Self {
+        // Parallel computation of components
+        let r96_future = std::thread::spawn({
+            let data = config.lattice.data.clone();
+            move || Self::compute_r96_digest(&amp;data)
+        });
+
+        let c768_future = std::thread::spawn({
+            let timestamp = config.timestamp;
+            move || Self::compute_c768_data(timestamp)
+        });
+
+        let phi_future = std::thread::spawn({
+            let config = config.clone();
+            move || Self::check_phi_coherence(&amp;config)
+        });
+
+        // Wait for all components
+        let r96_digest = r96_future.join().unwrap();
+        let c768_data = c768_future.join().unwrap();
+        let phi_coherent = phi_future.join().unwrap();
+
+        Self {
+            r96_digest,
+            c768_data,
+            phi_coherent,
+            budget: config.budget_used.min(127) as u8,
+            witness_hash: Self::compute_witness_hash(&amp;config.witness_chain),
+        }
+    }
+
+    fn compute_r96_digest(data: &amp;[u8]) -&gt; [u8; 16] {
+        let mut histogram = [0u32; 96];
+
+        // Build histogram
+        for &amp;byte in data {
+            let r_class = Self::r96_function(byte);
+            histogram[r_class as usize] += 1;
+        }
+
+        // Hash histogram
+        let mut hasher = Hasher::new();
+        for (i, &amp;count) in histogram.iter().enumerate() {
+            if count &gt; 0 {
+                hasher.update(&amp;i.to_le_bytes());
+                hasher.update(&amp;count.to_le_bytes());
+            }
+        }
+
+        let hash = hasher.finalize();
+        let mut digest = [0u8; 16];
+        digest.copy_from_slice(&amp;hash.as_bytes()[..16]);
+        digest
+    }
+
+    #[inline(always)]
+    fn r96_function(byte: u8) -&gt; u8 {
+        // Fast R96 computation
+        let primary = byte % 96;
+        let secondary = byte / 96;
+        ((primary + secondary * 17) % 96) as u8
+    }
+}
+<span class="boring">}</span></code></pre></pre>
+<h3 id="merkle-tree-for-witness-chains"><a class="header" href="#merkle-tree-for-witness-chains">Merkle Tree for Witness Chains</a></h3>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>/// Merkle tree for efficient witness verification
+pub struct WitnessMerkleTree {
+    /// Leaf nodes (witness fragments)
+    leaves: Vec&lt;WitnessFragment&gt;,
+
+    /// Internal nodes
+    nodes: Vec&lt;[u8; 32]&gt;,
+
+    /// Tree depth
+    depth: usize,
+}
+
+impl WitnessMerkleTree {
+    pub fn build(witnesses: Vec&lt;WitnessFragment&gt;) -&gt; Self {
+        let n = witnesses.len();
+        let depth = (n as f64).log2().ceil() as usize;
+        let padded_size = 1 &lt;&lt; depth;
+
+        // Pad to power of 2
+        let mut leaves = witnesses;
+        leaves.resize(padded_size, WitnessFragment::default());
+
+        // Build tree bottom-up
+        let mut nodes = Vec::with_capacity(padded_size - 1);
+        let mut current_level: Vec&lt;[u8; 32]&gt; = leaves
+            .iter()
+            .map(|w| w.hash())
+            .collect();
+
+        while current_level.len() &gt; 1 {
+            let mut next_level = Vec::new();
+
+            for chunk in current_level.chunks(2) {
+                let hash = Self::hash_pair(&amp;chunk[0], &amp;chunk[1]);
+                nodes.push(hash);
+                next_level.push(hash);
+            }
+
+            current_level = next_level;
+        }
+
+        Self { leaves, nodes, depth }
+    }
+
+    /// Generate inclusion proof
+    pub fn inclusion_proof(&amp;self, index: usize) -&gt; Vec&lt;[u8; 32]&gt; {
+        let mut proof = Vec::with_capacity(self.depth);
+        let mut current = index;
+        let mut level_start = 0;
+        let mut level_size = self.leaves.len();
+
+        for _ in 0..self.depth {
+            let sibling = current ^ 1; // Flip last bit
+
+            if sibling &lt; level_size {
+                let sibling_hash = if level_start == 0 {
+                    self.leaves[sibling].hash()
+                } else {
+                    self.nodes[level_start + sibling - self.leaves.len()]
+                };
+                proof.push(sibling_hash);
+            }
+
+            current /= 2;
+            level_start += level_size;
+            level_size /= 2;
+        }
+
+        proof
+    }
+
+    fn hash_pair(left: &amp;[u8; 32], right: &amp;[u8; 32]) -&gt; [u8; 32] {
+        let mut hasher = Hasher::new();
+        hasher.update(left);
+        hasher.update(right);
+        hasher.finalize().into()
+    }
+}
+<span class="boring">}</span></code></pre></pre>
+<h3 id="receipt-cache-with-lru"><a class="header" href="#receipt-cache-with-lru">Receipt Cache with LRU</a></h3>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>use lru::LruCache;
+
+/// LRU cache for receipt computation
+pub struct ReceiptCache {
+    /// Cache mapping configuration hash to receipt
+    cache: Arc&lt;Mutex&lt;LruCache&lt;[u8; 32], Receipt&gt;&gt;&gt;,
+
+    /// Statistics
+    hits: AtomicU64,
+    misses: AtomicU64,
+}
+
+impl ReceiptCache {
+    pub fn new(capacity: usize) -&gt; Self {
+        Self {
+            cache: Arc::new(Mutex::new(LruCache::new(capacity))),
+            hits: AtomicU64::new(0),
+            misses: AtomicU64::new(0),
+        }
+    }
+
+    pub fn get_or_compute&lt;F&gt;(&amp;self, key: [u8; 32], compute: F) -&gt; Receipt
+    where
+        F: FnOnce() -&gt; Receipt,
+    {
+        // Try cache first
+        {
+            let mut cache = self.cache.lock().unwrap();
+            if let Some(receipt) = cache.get(&amp;key) {
+                self.hits.fetch_add(1, Ordering::Relaxed);
+                return receipt.clone();
+            }
+        }
+
+        // Cache miss - compute
+        self.misses.fetch_add(1, Ordering::Relaxed);
+        let receipt = compute();
+
+        // Store in cache
+        {
+            let mut cache = self.cache.lock().unwrap();
+            cache.put(key, receipt.clone());
+        }
+
+        receipt
+    }
+
+    pub fn stats(&amp;self) -&gt; (u64, u64) {
+        (
+            self.hits.load(Ordering::Relaxed),
+            self.misses.load(Ordering::Relaxed),
+        )
+    }
+}
+<span class="boring">}</span></code></pre></pre>
+<h2 id="exercises"><a class="header" href="#exercises">Exercises</a></h2>
+<p><strong>Exercise 18.1</strong>: Implement a B-tree index for content addresses.</p>
+<p><strong>Exercise 18.2</strong>: Design a concurrent lattice with lock-free operations.</p>
+<p><strong>Exercise 18.3</strong>: Optimize receipt computation for GPU acceleration.</p>
+<p><strong>Exercise 18.4</strong>: Implement hierarchical configuration storage.</p>
+<p><strong>Exercise 18.5</strong>: Create a persistent lattice with memory-mapped files.</p>
+<h2 id="takeaways"><a class="header" href="#takeaways">Takeaways</a></h2>
+<ol>
+<li><strong>Cache-aligned lattice</strong>: Optimizes memory access patterns</li>
+<li><strong>SIMD acceleration</strong>: Parallel R96 computation and histogram updates</li>
+<li><strong>Copy-on-write</strong>: Efficient configuration cloning and modification</li>
+<li><strong>Delta compression</strong>: Reduces storage for similar configurations</li>
+<li><strong>Merkle witnesses</strong>: Efficient proof verification</li>
+<li><strong>LRU caching</strong>: Avoids redundant receipt computation</li>
+</ol>
+<p>These data structures form the foundation for an efficient Hologram implementation.</p>
+<hr />
+<p><em>Next: Chapter 19 details the runtime architecture.</em></p>
+
+                    </main>
+
+                    <nav class="nav-wrapper" aria-label="Page navigation">
+                        <!-- Mobile navigation buttons -->
+                            <a rel="prev" href="../part-5/17-optimization-landscape.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                                <i class="fa fa-angle-left"></i>
+                            </a>
+
+                            <a rel="next prefetch" href="../part-5/19-runtime-architecture.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                                <i class="fa fa-angle-right"></i>
+                            </a>
+
+                        <div style="clear: both"></div>
+                    </nav>
+                </div>
+            </div>
+
+            <nav class="nav-wide-wrapper" aria-label="Page navigation">
+                    <a rel="prev" href="../part-5/17-optimization-landscape.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                        <i class="fa fa-angle-left"></i>
+                    </a>
+
+                    <a rel="next prefetch" href="../part-5/19-runtime-architecture.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                        <i class="fa fa-angle-right"></i>
+                    </a>
+            </nav>
+
+        </div>
+
+
+
+
+        <script>
+            window.playground_copyable = true;
+        </script>
+
+
+        <script src="../elasticlunr.min.js"></script>
+        <script src="../mark.min.js"></script>
+        <script src="../searcher.js"></script>
+
+        <script src="../clipboard.min.js"></script>
+        <script src="../highlight.js"></script>
+        <script src="../book.js"></script>
+
+        <!-- Custom JS scripts -->
+
+
+    </div>
+    </body>
+</html>

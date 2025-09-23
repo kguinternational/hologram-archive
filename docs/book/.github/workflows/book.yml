@@ -1,0 +1,125 @@
+name: Build and Deploy Book
+
+on:
+  push:
+    branches: [ main ]
+    paths:
+      - 'docs/book/**'
+      - '.github/workflows/book.yml'
+  pull_request:
+    branches: [ main ]
+    paths:
+      - 'docs/book/**'
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Setup mdBook
+      uses: peaceiris/actions-mdbook@v1
+      with:
+        mdbook-version: '0.4.37'
+
+    - name: Build book
+      run: |
+        cd docs/book
+        mdbook build
+
+    - name: Upload artifacts
+      uses: actions/upload-artifact@v3
+      with:
+        name: book-html
+        path: docs/book/build/
+
+    - name: Deploy to GitHub Pages
+      if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+      uses: peaceiris/actions-gh-pages@v3
+      with:
+        github_token: ${{ secrets.GITHUB_TOKEN }}
+        publish_dir: ./docs/book/build
+        publish_branch: gh-pages
+        destination_dir: book
+        cname: hologram.foundation
+
+  lint:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Setup Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: '18'
+
+    - name: Install dependencies
+      run: |
+        cd docs/book
+        npm install markdownlint-cli prettier cspell markdown-link-check
+
+    - name: Run markdown linting
+      run: |
+        cd docs/book
+        npx markdownlint src/**/*.md || true
+
+    - name: Check spelling
+      run: |
+        cd docs/book
+        npx cspell "src/**/*.md" || true
+
+    - name: Check links
+      run: |
+        cd docs/book
+        find src -name "*.md" -exec npx markdown-link-check {} \; || true
+
+  pdf:
+    runs-on: ubuntu-latest
+    needs: build
+
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Setup mdBook
+      uses: peaceiris/actions-mdbook@v1
+      with:
+        mdbook-version: '0.4.37'
+
+    - name: Install wkhtmltopdf
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y wkhtmltopdf
+
+    - name: Build book
+      run: |
+        cd docs/book
+        mdbook build
+
+    - name: Generate PDF
+      run: |
+        cd docs/book
+        wkhtmltopdf \
+          --enable-local-file-access \
+          --javascript-delay 2000 \
+          --no-stop-slow-scripts \
+          --print-media-type \
+          --margin-top 25mm \
+          --margin-bottom 25mm \
+          --margin-left 25mm \
+          --margin-right 25mm \
+          --footer-center "[page]" \
+          --footer-font-size 9 \
+          --enable-toc-back-links \
+          --outline \
+          --outline-depth 3 \
+          build/print.html \
+          build/hologram-book.pdf
+
+    - name: Upload PDF
+      uses: actions/upload-artifact@v3
+      with:
+        name: book-pdf
+        path: docs/book/build/hologram-book.pdf

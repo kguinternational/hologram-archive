@@ -1,2 +1,0 @@
-name,description,success,iterations_completed,iterations_failed,mean_ns,median_ns,min_ns,max_ns,stddev_ns,allocated_bytes,peak_bytes,allocations,conservation_checks,conservation_passed,conservation_maintained,conservation_delta,max_delta
-projection_transform,Atlas projection transformation performance,true,10,0,831038,357747,301483,2170769,683175.97,0,0,0,0,0,true,0,0

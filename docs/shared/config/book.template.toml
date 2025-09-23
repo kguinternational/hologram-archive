@@ -1,0 +1,50 @@
+[book]
+title = "{{BOOK_TITLE}}"
+authors = ["{{BOOK_AUTHORS}}"]
+description = "{{BOOK_DESCRIPTION}}"
+language = "en"
+multilingual = false
+src = "src"
+
+[build]
+build-dir = "build"
+create-missing = false
+
+[output.html]
+theme = "theme"
+default-theme = "light"
+preferred-dark-theme = "navy"
+curly-quotes = true
+mathjax-support = true
+copy-fonts = true
+additional-css = ["theme/custom.css"]
+additional-js = []
+no-section-label = false
+git-repository-url = "{{GIT_REPOSITORY_URL}}"
+git-repository-icon = "fa-github"
+site-url = "{{SITE_URL}}"
+
+[output.html.fold]
+enable = true
+level = 1
+
+[output.html.playground]
+editable = false
+copyable = true
+copy-js = true
+line-numbers = true
+
+[output.html.search]
+enable = true
+limit-results = 30
+teaser-word-count = 30
+use-boolean-and = true
+boost-title = 2
+boost-hierarchy = 1
+boost-paragraph = 1
+expand = true
+heading-split-level = 3
+
+[output.html.print]
+enable = true
+page-break = true

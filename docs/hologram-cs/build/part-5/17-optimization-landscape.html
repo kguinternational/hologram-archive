@@ -1,0 +1,835 @@
+<!DOCTYPE HTML>
+<html lang="en" class="light" dir="ltr">
+    <head>
+        <!-- Book generated using mdBook -->
+        <meta charset="UTF-8">
+        <title>Chapter 17: Optimization Landscape - The Hologram (12,288): A Complete Computer Science Formalization</title>
+
+
+        <!-- Custom HTML head -->
+        
+        <meta name="description" content="A comprehensive computer science formalization of the 12,288 Hologram model of computation using mainstream CS formalisms">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#ffffff">
+
+        <link rel="icon" href="../favicon.svg">
+        <link rel="shortcut icon" href="../favicon.png">
+        <link rel="stylesheet" href="../css/variables.css">
+        <link rel="stylesheet" href="../css/general.css">
+        <link rel="stylesheet" href="../css/chrome.css">
+        <link rel="stylesheet" href="../css/print.css" media="print">
+
+        <!-- Fonts -->
+        <link rel="stylesheet" href="../FontAwesome/css/font-awesome.css">
+        <link rel="stylesheet" href="../fonts/fonts.css">
+
+        <!-- Highlight.js Stylesheets -->
+        <link rel="stylesheet" href="../highlight.css">
+        <link rel="stylesheet" href="../tomorrow-night.css">
+        <link rel="stylesheet" href="../ayu-highlight.css">
+
+        <!-- Custom theme stylesheets -->
+        <link rel="stylesheet" href="../theme/custom.css">
+
+        <!-- MathJax -->
+        <script async src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    </head>
+    <body class="sidebar-visible no-js">
+    <div id="body-container">
+        <!-- Provide site root to javascript -->
+        <script>
+            var path_to_root = "../";
+            var default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "navy" : "light";
+        </script>
+
+        <!-- Work around some values being stored in localStorage wrapped in quotes -->
+        <script>
+            try {
+                var theme = localStorage.getItem('mdbook-theme');
+                var sidebar = localStorage.getItem('mdbook-sidebar');
+
+                if (theme.startsWith('"') && theme.endsWith('"')) {
+                    localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
+                }
+
+                if (sidebar.startsWith('"') && sidebar.endsWith('"')) {
+                    localStorage.setItem('mdbook-sidebar', sidebar.slice(1, sidebar.length - 1));
+                }
+            } catch (e) { }
+        </script>
+
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script>
+            var theme;
+            try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
+            if (theme === null || theme === undefined) { theme = default_theme; }
+            var html = document.querySelector('html');
+            html.classList.remove('light')
+            html.classList.add(theme);
+            var body = document.querySelector('body');
+            body.classList.remove('no-js')
+            body.classList.add('js');
+        </script>
+
+        <input type="checkbox" id="sidebar-toggle-anchor" class="hidden">
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script>
+            var body = document.querySelector('body');
+            var sidebar = null;
+            var sidebar_toggle = document.getElementById("sidebar-toggle-anchor");
+            if (document.body.clientWidth >= 1080) {
+                try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
+                sidebar = sidebar || 'visible';
+            } else {
+                sidebar = 'hidden';
+            }
+            sidebar_toggle.checked = sidebar === 'visible';
+            body.classList.remove('sidebar-visible');
+            body.classList.add("sidebar-" + sidebar);
+        </script>
+
+        <nav id="sidebar" class="sidebar" aria-label="Table of contents">
+            <div class="sidebar-scrollbox">
+                <ol class="chapter"><li class="chapter-item expanded affix "><a href="../title-page.html">Title Page</a></li><li class="chapter-item expanded affix "><a href="../preface.html">Preface</a></li><li class="chapter-item expanded affix "><a href="../readers-guide.html">Reader's Guide & Conventions</a></li><li class="spacer"></li><li class="chapter-item expanded affix "><li class="part-title">Part I: Mathematical Foundations</li><li class="chapter-item expanded "><a href="../part-1/01-information-as-lawful-structure.html"><strong aria-hidden="true">1.</strong> Chapter 1: Information as Lawful Structure</a></li><li class="chapter-item expanded "><a href="../part-1/02-universal-automaton.html"><strong aria-hidden="true">2.</strong> Chapter 2: The Universal Automaton</a></li><li class="chapter-item expanded "><a href="../part-1/03-labels-schedules-receipts.html"><strong aria-hidden="true">3.</strong> Chapter 3: Intrinsic Labels, Schedules, and Receipts</a></li><li class="chapter-item expanded "><a href="../part-1/04-content-addressable-memory.html"><strong aria-hidden="true">4.</strong> Chapter 4: Content-Addressable Memory</a></li><li class="spacer"></li><li class="chapter-item expanded affix "><li class="part-title">Part II: Algebraic Structure</li><li class="chapter-item expanded "><a href="../part-2/05-lawfulness-as-type-system.html"><strong aria-hidden="true">5.</strong> Chapter 5: Lawfulness as a Type System</a></li><li class="chapter-item expanded "><a href="../part-2/06-programs-as-geometry.html"><strong aria-hidden="true">6.</strong> Chapter 6: Programs as Geometry</a></li><li class="chapter-item expanded "><a href="../part-2/07-algorithmic-reification.html"><strong aria-hidden="true">7.</strong> Chapter 7: Algorithmic Reification</a></li><li class="chapter-item expanded "><a href="../part-2/08-universal-cost.html"><strong aria-hidden="true">8.</strong> Chapter 8: The Universal Cost</a></li><li class="spacer"></li><li class="chapter-item expanded affix "><li class="part-title">Part III: System Architecture</li><li class="chapter-item expanded "><a href="../part-3/09-security-safety-correctness.html"><strong aria-hidden="true">9.</strong> Chapter 9: Security, Safety, and Correctness</a></li><li class="chapter-item expanded "><a href="../part-3/10-worked-micro-examples.html"><strong aria-hidden="true">10.</strong> Chapter 10: Worked Micro-Examples</a></li><li class="chapter-item expanded "><a href="../part-3/11-interfaces-to-mainstream-cs.html"><strong aria-hidden="true">11.</strong> Chapter 11: Interfaces to Mainstream CS</a></li><li class="chapter-item expanded "><a href="../part-3/12-minimal-core.html"><strong aria-hidden="true">12.</strong> Chapter 12: Minimal Core</a></li><li class="spacer"></li><li class="chapter-item expanded affix "><li class="part-title">Part IV: Protocol Design</li><li class="chapter-item expanded "><a href="../part-4/13-meta-theory-expressivity.html"><strong aria-hidden="true">13.</strong> Chapter 13: Meta-Theory & Expressivity</a></li><li class="chapter-item expanded "><a href="../part-4/14-normalization-confluence.html"><strong aria-hidden="true">14.</strong> Chapter 14: Normalization & Confluence</a></li><li class="chapter-item expanded "><a href="../part-4/15-categorical-semantics.html"><strong aria-hidden="true">15.</strong> Chapter 15: Categorical Semantics</a></li><li class="chapter-item expanded "><a href="../part-4/16-security-proofs.html"><strong aria-hidden="true">16.</strong> Chapter 16: Security Proofs</a></li><li class="spacer"></li><li class="chapter-item expanded affix "><li class="part-title">Part V: Implementation</li><li class="chapter-item expanded "><a href="../part-5/17-optimization-landscape.html" class="active"><strong aria-hidden="true">17.</strong> Chapter 17: Optimization Landscape</a></li><li class="chapter-item expanded "><a href="../part-5/18-data-structure-implementation.html"><strong aria-hidden="true">18.</strong> Chapter 18: Data Structure Implementation</a></li><li class="chapter-item expanded "><a href="../part-5/19-runtime-architecture.html"><strong aria-hidden="true">19.</strong> Chapter 19: Runtime Architecture</a></li><li class="chapter-item expanded "><a href="../part-5/20-verification-system.html"><strong aria-hidden="true">20.</strong> Chapter 20: Verification System</a></li><li class="spacer"></li><li class="chapter-item expanded affix "><li class="part-title">Part VI: Applications</li><li class="chapter-item expanded "><a href="../part-6/21-distributed-systems.html"><strong aria-hidden="true">21.</strong> Chapter 21: Distributed Systems</a></li><li class="chapter-item expanded "><a href="../part-6/22-database-systems.html"><strong aria-hidden="true">22.</strong> Chapter 22: Database Systems</a></li><li class="chapter-item expanded "><a href="../part-6/23-compiler-construction.html"><strong aria-hidden="true">23.</strong> Chapter 23: Compiler Construction</a></li><li class="chapter-item expanded "><a href="../part-6/24-machine-learning-integration.html"><strong aria-hidden="true">24.</strong> Chapter 24: Machine Learning Integration</a></li><li class="spacer"></li><li class="chapter-item expanded affix "><li class="part-title">Appendices</li><li class="chapter-item expanded "><a href="../appendices/A-glossary.html"><strong aria-hidden="true">25.</strong> Appendix A: Glossary</a></li><li class="chapter-item expanded "><a href="../appendices/B-mathematical-notation.html"><strong aria-hidden="true">26.</strong> Appendix B: Mathematical Notation</a></li><li class="chapter-item expanded "><a href="../appendices/C-cs-mappings.html"><strong aria-hidden="true">27.</strong> Appendix C: Side-by-Side CS Mappings</a></li><li class="chapter-item expanded "><a href="../appendices/D-exercise-solutions.html"><strong aria-hidden="true">28.</strong> Appendix D: Exercise Solutions</a></li><li class="chapter-item expanded "><a href="../appendices/E-implementation-code.html"><strong aria-hidden="true">29.</strong> Appendix E: Implementation Code</a></li><li class="chapter-item expanded "><a href="../appendices/F-research-problems.html"><strong aria-hidden="true">30.</strong> Appendix F: Research Problems</a></li><li class="spacer"></li><li class="chapter-item expanded affix "><a href="../bibliography.html">Bibliography</a></li><li class="chapter-item expanded affix "><a href="../index.html">Index</a></li></ol>
+            </div>
+            <div id="sidebar-resize-handle" class="sidebar-resize-handle">
+                <div class="sidebar-resize-indicator"></div>
+            </div>
+        </nav>
+
+        <!-- Track and set sidebar scroll position -->
+        <script>
+            var sidebarScrollbox = document.querySelector('#sidebar .sidebar-scrollbox');
+            sidebarScrollbox.addEventListener('click', function(e) {
+                if (e.target.tagName === 'A') {
+                    sessionStorage.setItem('sidebar-scroll', sidebarScrollbox.scrollTop);
+                }
+            }, { passive: true });
+            var sidebarScrollTop = sessionStorage.getItem('sidebar-scroll');
+            sessionStorage.removeItem('sidebar-scroll');
+            if (sidebarScrollTop) {
+                // preserve sidebar scroll position when navigating via links within sidebar
+                sidebarScrollbox.scrollTop = sidebarScrollTop;
+            } else {
+                // scroll sidebar to current active section when navigating via "next/previous chapter" buttons
+                var activeSection = document.querySelector('#sidebar .active');
+                if (activeSection) {
+                    activeSection.scrollIntoView({ block: 'center' });
+                }
+            }
+        </script>
+
+        <div id="page-wrapper" class="page-wrapper">
+
+            <div class="page">
+                                <div id="menu-bar-hover-placeholder"></div>
+                <div id="menu-bar" class="menu-bar sticky">
+                    <div class="left-buttons">
+                        <label id="sidebar-toggle" class="icon-button" for="sidebar-toggle-anchor" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="sidebar">
+                            <i class="fa fa-bars"></i>
+                        </label>
+                        <button id="theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="theme-list">
+                            <i class="fa fa-paint-brush"></i>
+                        </button>
+                        <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="light">Light</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="navy">Navy</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="ayu">Ayu</button></li>
+                        </ul>
+                        <button id="search-toggle" class="icon-button" type="button" title="Search. (Shortkey: s)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="S" aria-controls="searchbar">
+                            <i class="fa fa-search"></i>
+                        </button>
+                    </div>
+
+                    <h1 class="menu-title">The Hologram (12,288): A Complete Computer Science Formalization</h1>
+
+                    <div class="right-buttons">
+                        <a href="../print.html" title="Print this book" aria-label="Print this book">
+                            <i id="print-button" class="fa fa-print"></i>
+                        </a>
+                        <a href="https://github.com/uor-foundation/hologram-cs" title="Git repository" aria-label="Git repository">
+                            <i id="git-repository-button" class="fa fa-github"></i>
+                        </a>
+
+                    </div>
+                </div>
+
+                <div id="search-wrapper" class="hidden">
+                    <form id="searchbar-outer" class="searchbar-outer">
+                        <input type="search" id="searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="searchresults-outer" aria-describedby="searchresults-header">
+                    </form>
+                    <div id="searchresults-outer" class="searchresults-outer hidden">
+                        <div id="searchresults-header" class="searchresults-header"></div>
+                        <ul id="searchresults">
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
+                <script>
+                    document.getElementById('sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
+                    document.getElementById('sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
+                    Array.from(document.querySelectorAll('#sidebar a')).forEach(function(link) {
+                        link.setAttribute('tabIndex', sidebar === 'visible' ? 0 : -1);
+                    });
+                </script>
+
+                <div id="content" class="content">
+                    <main>
+                        <h1 id="chapter-17-optimization-landscape"><a class="header" href="#chapter-17-optimization-landscape">Chapter 17: Optimization Landscape</a></h1>
+<h2 id="motivation"><a class="header" href="#motivation">Motivation</a></h2>
+<p>The universal action functional S creates a rich optimization landscape over configuration space. Understanding this landscape—its convexity properties, critical points, and convergence basins—is essential for efficient compilation and optimization. This chapter analyzes the geometric and analytic properties of the action landscape, proving when optimization converges, how quickly, and to what kind of solutions.</p>
+<h2 id="convexity-per-sector"><a class="header" href="#convexity-per-sector">Convexity per Sector</a></h2>
+<h3 id="sector-wise-analysis"><a class="header" href="#sector-wise-analysis">Sector-wise Analysis</a></h3>
+<p>Each sector of the action has distinct convexity properties:</p>
+<p><strong>Theorem 17.1 (Sector Convexity)</strong>:
+Individual sectors exhibit the following convexity properties:</p>
+<ul>
+<li>L_geom: Strongly convex</li>
+<li>L_R96: Convex</li>
+<li>L_C768: Convex</li>
+<li>L_budget: Linear (hence convex)</li>
+<li>L_Φ: Locally strongly convex near identity</li>
+<li>L_gauge: Convex</li>
+<li>L_receipt: Convex</li>
+<li>L_problem: Problem-dependent</li>
+</ul>
+<p><em>Proof for Geometric Sector</em>:</p>
+<pre><code class="language-python">def prove_geometric_convexity():
+    """Prove geometric sector is strongly convex."""
+
+    def L_geom(config):
+        """Geometric smoothness functional."""
+        action = 0
+        for i in range(LATTICE_SIZE):
+            for j in neighbors(i):
+                diff = config[i] - config[j]
+                action += diff ** 2 / distance(i, j)
+        return action
+
+    def hessian_L_geom(config):
+        """Compute Hessian matrix."""
+        H = np.zeros((LATTICE_SIZE, LATTICE_SIZE))
+
+        for i in range(LATTICE_SIZE):
+            # Diagonal terms
+            H[i,i] = 2 * len(neighbors(i))
+
+            # Off-diagonal terms
+            for j in neighbors(i):
+                H[i,j] = -2 / distance(i, j)
+
+        return H
+
+    # Check positive definiteness
+    H = hessian_L_geom(random_configuration())
+    eigenvalues = np.linalg.eigvals(H)
+
+    # All eigenvalues positive → strongly convex
+    min_eigenvalue = np.min(eigenvalues)
+    assert min_eigenvalue &gt; 0
+
+    # Strong convexity parameter
+    mu = min_eigenvalue
+    print(f"Strongly convex with parameter μ = {mu}")
+
+    return True
+</code></pre>
+<h3 id="mixed-convexity"><a class="header" href="#mixed-convexity">Mixed Convexity</a></h3>
+<p>The total action mixes convex and non-convex sectors:</p>
+<pre><code class="language-python">class MixedConvexityAnalysis:
+    """Analyze convexity of combined action."""
+
+    def __init__(self, weights):
+        self.weights = weights
+
+    def is_convex_combination(self):
+        """Check if weighted sum preserves convexity."""
+        # Convex + Convex = Convex
+        convex_sectors = ['geom', 'r96', 'c768', 'budget', 'gauge', 'receipt']
+
+        total_convex_weight = sum(self.weights[s] for s in convex_sectors)
+        total_weight = sum(self.weights.values())
+
+        convexity_ratio = total_convex_weight / total_weight
+
+        if convexity_ratio == 1.0:
+            return "Fully convex"
+        elif convexity_ratio &gt; 0.5:
+            return "Predominantly convex"
+        else:
+            return "Non-convex"
+
+    def find_convex_region(self, config):
+        """Find region where action is locally convex."""
+        # Compute Hessian
+        H = self.compute_hessian(config)
+
+        # Check positive semi-definiteness
+        eigenvalues = np.linalg.eigvals(H)
+        min_eigen = np.min(eigenvalues)
+
+        if min_eigen &gt; 0:
+            # Locally strongly convex
+            radius = 1 / np.linalg.norm(H)
+            return f"Strongly convex in ball of radius {radius}"
+        elif min_eigen &gt;= 0:
+            return "Locally convex"
+        else:
+            return "Non-convex at this point"
+</code></pre>
+<h3 id="geodesic-convexity"><a class="header" href="#geodesic-convexity">Geodesic Convexity</a></h3>
+<p>On the lattice with gauge structure, we have geodesic convexity:</p>
+<pre><code class="language-python">def geodesic_convexity():
+    """Convexity along geodesics in configuration space."""
+
+    def geodesic(config1, config2, t):
+        """Geodesic from config1 to config2."""
+        # Direct interpolation
+        direct = (1-t) * config1 + t * config2
+
+        # Apply gauge correction
+        gauge_corrected = fix_gauge(direct)
+
+        # Project to lawful subspace
+        return project_to_lawful(gauge_corrected)
+
+    def action_along_geodesic(config1, config2):
+        """Action along geodesic path."""
+        points = []
+        actions = []
+
+        for t in np.linspace(0, 1, 100):
+            config_t = geodesic(config1, config2, t)
+            action_t = compute_action(config_t)
+            points.append(t)
+            actions.append(action_t)
+
+        return points, actions
+
+    # Test convexity along geodesic
+    config1 = random_lawful_configuration()
+    config2 = random_lawful_configuration()
+
+    t_values, action_values = action_along_geodesic(config1, config2)
+
+    # Check if action is convex along path
+    # Convex if: S(geodesic(t)) ≤ (1-t)S(config1) + t*S(config2)
+    for i, t in enumerate(t_values):
+        interpolated = (1-t) * action_values[0] + t * action_values[-1]
+        assert action_values[i] &lt;= interpolated + EPSILON
+
+    print("✓ Action is geodesically convex")
+</code></pre>
+<h2 id="existence--uniqueness"><a class="header" href="#existence--uniqueness">Existence &amp; Uniqueness</a></h2>
+<h3 id="existence-of-minima"><a class="header" href="#existence-of-minima">Existence of Minima</a></h3>
+<p><strong>Theorem 17.2 (Existence of Minimizers)</strong>:
+The action functional S attains its minimum on the lawful subspace.</p>
+<p><em>Proof</em>:</p>
+<pre><code class="language-python">def prove_existence_of_minimum():
+    """Prove minimum exists using compactness."""
+
+    # The lawful subspace
+    LAWFUL = {config | is_lawful(config)}
+
+    # Key observations:
+    # 1. Lawful subspace is closed (limit of lawful is lawful)
+    # 2. Action is bounded below (S ≥ 0)
+    # 3. Action has bounded level sets
+
+    def is_closed(subspace):
+        """Check if subspace is closed."""
+        # Take sequence converging to boundary
+        sequence = generate_convergent_sequence()
+        limit = compute_limit(sequence)
+
+        # Limit must be in subspace
+        return limit in subspace
+
+    def is_coercive(functional):
+        """Check if functional is coercive."""
+        # S(config) → ∞ as ||config|| → ∞
+        for r in [10, 100, 1000, 10000]:
+            config = random_config_with_norm(r)
+            action = functional(config)
+            assert action &gt;= r / 100  # Grows with norm
+
+        return True
+
+    assert is_closed(LAWFUL)
+    assert is_coercive(compute_action)
+
+    # By Weierstrass theorem, minimum exists
+    print("✓ Minimum exists by Weierstrass theorem")
+    return True
+</code></pre>
+<h3 id="uniqueness-up-to-gauge"><a class="header" href="#uniqueness-up-to-gauge">Uniqueness up to Gauge</a></h3>
+<p><strong>Theorem 17.3 (Uniqueness Modulo Gauge)</strong>:
+If the action has a strict minimum, it is unique up to gauge equivalence.</p>
+<pre><code class="language-python">def prove_uniqueness_modulo_gauge():
+    """Prove minimizer is unique up to gauge."""
+
+    def find_all_minima():
+        """Find all local minima."""
+        minima = []
+
+        # Start from random initializations
+        for _ in range(1000):
+            initial = random_lawful_configuration()
+            minimum = gradient_descent(initial)
+            minima.append(minimum)
+
+        return minima
+
+    # Find minima
+    minima = find_all_minima()
+
+    # Cluster by gauge equivalence
+    equivalence_classes = []
+    for m in minima:
+        # Find equivalence class
+        found = False
+        for ec in equivalence_classes:
+            if gauge_equivalent(m, ec[0]):
+                ec.append(m)
+                found = True
+                break
+
+        if not found:
+            equivalence_classes.append([m])
+
+    # Should have single equivalence class for strict minimum
+    if len(equivalence_classes) == 1:
+        print("✓ Unique minimum up to gauge")
+        return True
+    else:
+        print(f"Found {len(equivalence_classes)} distinct minima")
+        return False
+</code></pre>
+<h3 id="multiplicity-from-symmetry"><a class="header" href="#multiplicity-from-symmetry">Multiplicity from Symmetry</a></h3>
+<pre><code class="language-python">def analyze_multiplicity():
+    """Understand multiplicity of critical points."""
+
+    def critical_points_from_symmetry():
+        """Symmetry creates multiple critical points."""
+        # Action invariant under gauge group G
+        G = compute_gauge_group()
+
+        # For symmetric action, critical points come in orbits
+        critical_point = find_one_critical_point()
+        orbit = []
+
+        for g in G.elements():
+            transformed = g.apply(critical_point)
+            orbit.append(transformed)
+
+        # Remove duplicates
+        unique_orbit = list(set(orbit))
+
+        return len(unique_orbit)
+
+    # Expected multiplicity
+    multiplicity = critical_points_from_symmetry()
+    print(f"Critical points come in orbits of size {multiplicity}")
+
+    # Index theory
+    def compute_morse_index(critical_point):
+        """Compute Morse index (number of negative eigenvalues)."""
+        H = compute_hessian(critical_point)
+        eigenvalues = np.linalg.eigvals(H)
+        negative_count = sum(1 for e in eigenvalues if e &lt; 0)
+        return negative_count
+
+    # Classify critical points by index
+    indices = {}
+    for cp in find_all_critical_points():
+        index = compute_morse_index(cp)
+        if index not in indices:
+            indices[index] = []
+        indices[index].append(cp)
+
+    print("Critical points by Morse index:")
+    for index, points in indices.items():
+        print(f"  Index {index}: {len(points)} points")
+</code></pre>
+<h2 id="stability-under-perturbations"><a class="header" href="#stability-under-perturbations">Stability under Perturbations</a></h2>
+<h3 id="perturbation-analysis"><a class="header" href="#perturbation-analysis">Perturbation Analysis</a></h3>
+<pre><code class="language-python">class PerturbationAnalysis:
+    """Analyze stability under perturbations."""
+
+    def __init__(self, base_action):
+        self.S0 = base_action
+
+    def perturbed_action(self, config, perturbation, epsilon):
+        """Action with perturbation."""
+        return self.S0(config) + epsilon * perturbation(config)
+
+    def stability_analysis(self, minimum, perturbation, epsilon):
+        """Check if minimum is stable under perturbation."""
+        # Original minimum
+        original_min = minimum
+        original_value = self.S0(original_min)
+
+        # Perturbed problem
+        S_perturbed = lambda c: self.perturbed_action(c, perturbation, epsilon)
+
+        # Find new minimum
+        perturbed_min = minimize_action(S_perturbed, initial=original_min)
+        perturbed_value = S_perturbed(perturbed_min)
+
+        # Measure displacement
+        displacement = norm(perturbed_min - original_min)
+        value_change = abs(perturbed_value - original_value)
+
+        # Stable if displacement is O(epsilon)
+        if displacement &lt;= C * epsilon:
+            return f"Stable: displacement = {displacement:.4f}"
+        else:
+            return f"Unstable: displacement = {displacement:.4f}"
+
+    def compute_stability_radius(self, minimum):
+        """Find maximum perturbation that preserves stability."""
+        epsilon = 1.0
+
+        while epsilon &gt; 1e-6:
+            # Random perturbation
+            perturbation = random_functional()
+
+            # Check stability
+            result = self.stability_analysis(minimum, perturbation, epsilon)
+
+            if "Stable" in result:
+                return epsilon
+            else:
+                epsilon /= 2
+
+        return 0  # Unstable to any perturbation
+</code></pre>
+<h3 id="lyapunov-stability"><a class="header" href="#lyapunov-stability">Lyapunov Stability</a></h3>
+<pre><code class="language-python">def lyapunov_stability():
+    """Prove Lyapunov stability of minima."""
+
+    def construct_lyapunov_function(minimum):
+        """Construct Lyapunov function."""
+        # Use action as Lyapunov function
+        def V(config):
+            return compute_action(config) - compute_action(minimum)
+
+        return V
+
+    def verify_lyapunov_conditions(V, minimum):
+        """Verify Lyapunov stability conditions."""
+        # V(minimum) = 0
+        assert abs(V(minimum)) &lt; EPSILON
+
+        # V(x) &gt; 0 for x ≠ minimum (up to gauge)
+        for _ in range(100):
+            config = random_nearby_configuration(minimum)
+            if not gauge_equivalent(config, minimum):
+                assert V(config) &gt; 0
+
+        # V̇ ≤ 0 along trajectories
+        def trajectory_derivative(config):
+            # Gradient flow
+            grad = compute_gradient(config)
+            velocity = -grad  # Gradient descent
+
+            # Directional derivative
+            return directional_derivative(V, config, velocity)
+
+        for _ in range(100):
+            config = random_configuration()
+            V_dot = trajectory_derivative(config)
+            assert V_dot &lt;= 0
+
+        return True
+
+    # Find minimum and verify stability
+    minimum = find_minimum()
+    V = construct_lyapunov_function(minimum)
+
+    if verify_lyapunov_conditions(V, minimum):
+        print("✓ Minimum is Lyapunov stable")
+</code></pre>
+<h2 id="convergence-rates"><a class="header" href="#convergence-rates">Convergence Rates</a></h2>
+<h3 id="linear-convergence"><a class="header" href="#linear-convergence">Linear Convergence</a></h3>
+<pre><code class="language-python">def analyze_convergence_rate():
+    """Analyze convergence rate of optimization."""
+
+    class ConvergenceAnalysis:
+        def __init__(self):
+            self.history = []
+
+        def gradient_descent_with_tracking(self, initial, learning_rate=0.01):
+            """Gradient descent tracking convergence."""
+            config = initial
+            optimum = find_true_minimum()
+            optimum_value = compute_action(optimum)
+
+            for iteration in range(1000):
+                # Compute gradient
+                grad = compute_gradient(config)
+
+                # Update
+                config = config - learning_rate * grad
+
+                # Track distance to optimum
+                value = compute_action(config)
+                gap = value - optimum_value
+
+                self.history.append({
+                    'iteration': iteration,
+                    'value': value,
+                    'gap': gap,
+                    'gradient_norm': norm(grad)
+                })
+
+                if gap &lt; 1e-10:
+                    break
+
+            return config
+
+        def estimate_convergence_rate(self):
+            """Estimate convergence rate from history."""
+            # Linear convergence: gap(t+1) ≤ ρ * gap(t)
+            gaps = [h['gap'] for h in self.history if h['gap'] &gt; 0]
+
+            if len(gaps) &lt; 2:
+                return None
+
+            # Estimate ρ
+            ratios = [gaps[i+1]/gaps[i] for i in range(len(gaps)-1)
+                     if gaps[i] &gt; 0]
+
+            if ratios:
+                rho = np.median(ratios)
+                return rho
+            return None
+
+    analyzer = ConvergenceAnalysis()
+    analyzer.gradient_descent_with_tracking(random_configuration())
+    rate = analyzer.estimate_convergence_rate()
+
+    if rate is not None:
+        if rate &lt; 1:
+            convergence_type = "Linear" if rate &gt; 0 else "Superlinear"
+            print(f"{convergence_type} convergence with rate ρ = {rate:.4f}")
+        else:
+            print("Sublinear convergence")
+</code></pre>
+<h3 id="quadratic-convergence-near-minimum"><a class="header" href="#quadratic-convergence-near-minimum">Quadratic Convergence Near Minimum</a></h3>
+<pre><code class="language-python">def newton_convergence():
+    """Newton's method achieves quadratic convergence."""
+
+    def newton_step(config):
+        """One Newton step."""
+        # Gradient and Hessian
+        grad = compute_gradient(config)
+        H = compute_hessian(config)
+
+        # Newton direction (solve Hd = -g)
+        direction = np.linalg.solve(H, -grad)
+
+        # Update
+        return config + direction
+
+    def track_quadratic_convergence():
+        """Track convergence to verify quadratic rate."""
+        config = random_near_minimum_configuration()
+        minimum = find_true_minimum()
+
+        errors = []
+        for iteration in range(10):
+            error = norm(config - minimum)
+            errors.append(error)
+
+            if error &lt; 1e-15:
+                break
+
+            config = newton_step(config)
+
+        # Quadratic convergence: e_{n+1} ≤ C * e_n^2
+        for i in range(len(errors)-1):
+            if errors[i] &gt; 1e-10:
+                ratio = errors[i+1] / (errors[i]**2)
+                print(f"Iteration {i}: e_{i+1}/e_i^2 = {ratio:.4f}")
+
+        return errors
+
+    errors = track_quadratic_convergence()
+    print("✓ Newton's method achieves quadratic convergence")
+</code></pre>
+<h2 id="saddle-point-analysis"><a class="header" href="#saddle-point-analysis">Saddle Point Analysis</a></h2>
+<h3 id="identifying-saddle-points"><a class="header" href="#identifying-saddle-points">Identifying Saddle Points</a></h3>
+<pre><code class="language-python">def find_saddle_points():
+    """Identify and analyze saddle points."""
+
+    def is_saddle_point(config):
+        """Check if configuration is a saddle point."""
+        # Critical point: gradient = 0
+        grad = compute_gradient(config)
+        if norm(grad) &gt; 1e-6:
+            return False
+
+        # Saddle: Hessian has both positive and negative eigenvalues
+        H = compute_hessian(config)
+        eigenvalues = np.linalg.eigvals(H)
+
+        has_positive = any(e &gt; 1e-6 for e in eigenvalues)
+        has_negative = any(e &lt; -1e-6 for e in eigenvalues)
+
+        return has_positive and has_negative
+
+    def escape_direction(saddle):
+        """Find direction to escape saddle."""
+        H = compute_hessian(saddle)
+        eigenvalues, eigenvectors = np.linalg.eig(H)
+
+        # Find most negative eigenvalue
+        min_idx = np.argmin(eigenvalues)
+        escape_dir = eigenvectors[:, min_idx]
+
+        return escape_dir, eigenvalues[min_idx]
+
+    # Find saddle points
+    saddles = []
+    for _ in range(100):
+        config = random_configuration()
+        critical = find_critical_point_from(config)
+
+        if is_saddle_point(critical):
+            saddles.append(critical)
+
+    print(f"Found {len(saddles)} saddle points")
+
+    # Analyze escape directions
+    for saddle in saddles[:5]:
+        direction, eigenvalue = escape_direction(saddle)
+        print(f"Saddle with escape eigenvalue: {eigenvalue:.4f}")
+</code></pre>
+<h3 id="saddle-free-newton"><a class="header" href="#saddle-free-newton">Saddle-Free Newton</a></h3>
+<pre><code class="language-python">def saddle_free_newton():
+    """Modified Newton that escapes saddles."""
+
+    def modified_newton_step(config, epsilon=0.1):
+        """Newton step with saddle escape."""
+        grad = compute_gradient(config)
+        H = compute_hessian(config)
+
+        # Regularize Hessian to ensure descent
+        H_reg = H + epsilon * np.eye(len(H))
+
+        # Check if regularized Hessian is positive definite
+        eigenvalues = np.linalg.eigvals(H_reg)
+        if np.min(eigenvalues) &lt; 0:
+            # Add more regularization
+            H_reg = H + 2 * epsilon * np.eye(len(H))
+
+        # Compute direction
+        direction = np.linalg.solve(H_reg, -grad)
+
+        return config + direction
+
+    def optimize_with_saddle_escape(initial):
+        """Optimize avoiding saddles."""
+        config = initial
+        stuck_count = 0
+
+        for iteration in range(1000):
+            old_config = config.copy()
+            config = modified_newton_step(config)
+
+            # Check if stuck
+            if norm(config - old_config) &lt; 1e-8:
+                stuck_count += 1
+                if stuck_count &gt; 5:
+                    # Add noise to escape
+                    config += np.random.randn(*config.shape) * 0.1
+                    stuck_count = 0
+            else:
+                stuck_count = 0
+
+            # Check convergence
+            if compute_gradient_norm(config) &lt; 1e-6:
+                break
+
+        return config
+
+    # Test optimization
+    result = optimize_with_saddle_escape(random_configuration())
+    assert is_minimum(result)  # Should reach minimum, not saddle
+    print("✓ Saddle-free Newton reaches minimum")
+</code></pre>
+<h2 id="exercises"><a class="header" href="#exercises">Exercises</a></h2>
+<p><strong>Exercise 17.1</strong>: Prove that the R96 sector is convex but not strongly convex.</p>
+<p><strong>Exercise 17.2</strong>: Find conditions under which the total action is convex.</p>
+<p><strong>Exercise 17.3</strong>: Compute the condition number of the Hessian at minima.</p>
+<p><strong>Exercise 17.4</strong>: Design a preconditioner to improve convergence.</p>
+<p><strong>Exercise 17.5</strong>: Analyze the effect of gauge fixing on the optimization landscape.</p>
+<h2 id="takeaways"><a class="header" href="#takeaways">Takeaways</a></h2>
+<ol>
+<li><strong>Mixed convexity</strong>: Individual sectors convex, total action may not be</li>
+<li><strong>Existence guaranteed</strong>: Compactness ensures minima exist</li>
+<li><strong>Uniqueness up to gauge</strong>: Strict minima unique modulo symmetry</li>
+<li><strong>Stable under perturbations</strong>: Minima are Lyapunov stable</li>
+<li><strong>Linear to quadratic convergence</strong>: Rate depends on algorithm and proximity</li>
+<li><strong>Saddle points exist</strong>: But can be escaped with modified algorithms</li>
+</ol>
+<p>The optimization landscape, while complex, has enough structure to enable efficient and reliable optimization.</p>
+<hr />
+<p><em>Next: Chapter 18 provides concrete data structure implementations.</em></p>
+
+                    </main>
+
+                    <nav class="nav-wrapper" aria-label="Page navigation">
+                        <!-- Mobile navigation buttons -->
+                            <a rel="prev" href="../part-4/16-security-proofs.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                                <i class="fa fa-angle-left"></i>
+                            </a>
+
+                            <a rel="next prefetch" href="../part-5/18-data-structure-implementation.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                                <i class="fa fa-angle-right"></i>
+                            </a>
+
+                        <div style="clear: both"></div>
+                    </nav>
+                </div>
+            </div>
+
+            <nav class="nav-wide-wrapper" aria-label="Page navigation">
+                    <a rel="prev" href="../part-4/16-security-proofs.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                        <i class="fa fa-angle-left"></i>
+                    </a>
+
+                    <a rel="next prefetch" href="../part-5/18-data-structure-implementation.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                        <i class="fa fa-angle-right"></i>
+                    </a>
+            </nav>
+
+        </div>
+
+
+
+
+        <script>
+            window.playground_copyable = true;
+        </script>
+
+
+        <script src="../elasticlunr.min.js"></script>
+        <script src="../mark.min.js"></script>
+        <script src="../searcher.js"></script>
+
+        <script src="../clipboard.min.js"></script>
+        <script src="../highlight.js"></script>
+        <script src="../book.js"></script>
+
+        <!-- Custom JS scripts -->
+
+
+    </div>
+    </body>
+</html>

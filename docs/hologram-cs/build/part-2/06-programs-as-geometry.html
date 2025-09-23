@@ -1,0 +1,501 @@
+<!DOCTYPE HTML>
+<html lang="en" class="light" dir="ltr">
+    <head>
+        <!-- Book generated using mdBook -->
+        <meta charset="UTF-8">
+        <title>Chapter 6: Programs as Geometry - The Hologram (12,288): A Complete Computer Science Formalization</title>
+
+
+        <!-- Custom HTML head -->
+        
+        <meta name="description" content="A comprehensive computer science formalization of the 12,288 Hologram model of computation using mainstream CS formalisms">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#ffffff">
+
+        <link rel="icon" href="../favicon.svg">
+        <link rel="shortcut icon" href="../favicon.png">
+        <link rel="stylesheet" href="../css/variables.css">
+        <link rel="stylesheet" href="../css/general.css">
+        <link rel="stylesheet" href="../css/chrome.css">
+        <link rel="stylesheet" href="../css/print.css" media="print">
+
+        <!-- Fonts -->
+        <link rel="stylesheet" href="../FontAwesome/css/font-awesome.css">
+        <link rel="stylesheet" href="../fonts/fonts.css">
+
+        <!-- Highlight.js Stylesheets -->
+        <link rel="stylesheet" href="../highlight.css">
+        <link rel="stylesheet" href="../tomorrow-night.css">
+        <link rel="stylesheet" href="../ayu-highlight.css">
+
+        <!-- Custom theme stylesheets -->
+        <link rel="stylesheet" href="../theme/custom.css">
+
+        <!-- MathJax -->
+        <script async src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    </head>
+    <body class="sidebar-visible no-js">
+    <div id="body-container">
+        <!-- Provide site root to javascript -->
+        <script>
+            var path_to_root = "../";
+            var default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "navy" : "light";
+        </script>
+
+        <!-- Work around some values being stored in localStorage wrapped in quotes -->
+        <script>
+            try {
+                var theme = localStorage.getItem('mdbook-theme');
+                var sidebar = localStorage.getItem('mdbook-sidebar');
+
+                if (theme.startsWith('"') && theme.endsWith('"')) {
+                    localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
+                }
+
+                if (sidebar.startsWith('"') && sidebar.endsWith('"')) {
+                    localStorage.setItem('mdbook-sidebar', sidebar.slice(1, sidebar.length - 1));
+                }
+            } catch (e) { }
+        </script>
+
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script>
+            var theme;
+            try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
+            if (theme === null || theme === undefined) { theme = default_theme; }
+            var html = document.querySelector('html');
+            html.classList.remove('light')
+            html.classList.add(theme);
+            var body = document.querySelector('body');
+            body.classList.remove('no-js')
+            body.classList.add('js');
+        </script>
+
+        <input type="checkbox" id="sidebar-toggle-anchor" class="hidden">
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script>
+            var body = document.querySelector('body');
+            var sidebar = null;
+            var sidebar_toggle = document.getElementById("sidebar-toggle-anchor");
+            if (document.body.clientWidth >= 1080) {
+                try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
+                sidebar = sidebar || 'visible';
+            } else {
+                sidebar = 'hidden';
+            }
+            sidebar_toggle.checked = sidebar === 'visible';
+            body.classList.remove('sidebar-visible');
+            body.classList.add("sidebar-" + sidebar);
+        </script>
+
+        <nav id="sidebar" class="sidebar" aria-label="Table of contents">
+            <div class="sidebar-scrollbox">
+                <ol class="chapter"><li class="chapter-item expanded affix "><a href="../title-page.html">Title Page</a></li><li class="chapter-item expanded affix "><a href="../preface.html">Preface</a></li><li class="chapter-item expanded affix "><a href="../readers-guide.html">Reader's Guide & Conventions</a></li><li class="spacer"></li><li class="chapter-item expanded affix "><li class="part-title">Part I: Mathematical Foundations</li><li class="chapter-item expanded "><a href="../part-1/01-information-as-lawful-structure.html"><strong aria-hidden="true">1.</strong> Chapter 1: Information as Lawful Structure</a></li><li class="chapter-item expanded "><a href="../part-1/02-universal-automaton.html"><strong aria-hidden="true">2.</strong> Chapter 2: The Universal Automaton</a></li><li class="chapter-item expanded "><a href="../part-1/03-labels-schedules-receipts.html"><strong aria-hidden="true">3.</strong> Chapter 3: Intrinsic Labels, Schedules, and Receipts</a></li><li class="chapter-item expanded "><a href="../part-1/04-content-addressable-memory.html"><strong aria-hidden="true">4.</strong> Chapter 4: Content-Addressable Memory</a></li><li class="spacer"></li><li class="chapter-item expanded affix "><li class="part-title">Part II: Algebraic Structure</li><li class="chapter-item expanded "><a href="../part-2/05-lawfulness-as-type-system.html"><strong aria-hidden="true">5.</strong> Chapter 5: Lawfulness as a Type System</a></li><li class="chapter-item expanded "><a href="../part-2/06-programs-as-geometry.html" class="active"><strong aria-hidden="true">6.</strong> Chapter 6: Programs as Geometry</a></li><li class="chapter-item expanded "><a href="../part-2/07-algorithmic-reification.html"><strong aria-hidden="true">7.</strong> Chapter 7: Algorithmic Reification</a></li><li class="chapter-item expanded "><a href="../part-2/08-universal-cost.html"><strong aria-hidden="true">8.</strong> Chapter 8: The Universal Cost</a></li><li class="spacer"></li><li class="chapter-item expanded affix "><li class="part-title">Part III: System Architecture</li><li class="chapter-item expanded "><a href="../part-3/09-security-safety-correctness.html"><strong aria-hidden="true">9.</strong> Chapter 9: Security, Safety, and Correctness</a></li><li class="chapter-item expanded "><a href="../part-3/10-worked-micro-examples.html"><strong aria-hidden="true">10.</strong> Chapter 10: Worked Micro-Examples</a></li><li class="chapter-item expanded "><a href="../part-3/11-interfaces-to-mainstream-cs.html"><strong aria-hidden="true">11.</strong> Chapter 11: Interfaces to Mainstream CS</a></li><li class="chapter-item expanded "><a href="../part-3/12-minimal-core.html"><strong aria-hidden="true">12.</strong> Chapter 12: Minimal Core</a></li><li class="spacer"></li><li class="chapter-item expanded affix "><li class="part-title">Part IV: Protocol Design</li><li class="chapter-item expanded "><a href="../part-4/13-meta-theory-expressivity.html"><strong aria-hidden="true">13.</strong> Chapter 13: Meta-Theory & Expressivity</a></li><li class="chapter-item expanded "><a href="../part-4/14-normalization-confluence.html"><strong aria-hidden="true">14.</strong> Chapter 14: Normalization & Confluence</a></li><li class="chapter-item expanded "><a href="../part-4/15-categorical-semantics.html"><strong aria-hidden="true">15.</strong> Chapter 15: Categorical Semantics</a></li><li class="chapter-item expanded "><a href="../part-4/16-security-proofs.html"><strong aria-hidden="true">16.</strong> Chapter 16: Security Proofs</a></li><li class="spacer"></li><li class="chapter-item expanded affix "><li class="part-title">Part V: Implementation</li><li class="chapter-item expanded "><a href="../part-5/17-optimization-landscape.html"><strong aria-hidden="true">17.</strong> Chapter 17: Optimization Landscape</a></li><li class="chapter-item expanded "><a href="../part-5/18-data-structure-implementation.html"><strong aria-hidden="true">18.</strong> Chapter 18: Data Structure Implementation</a></li><li class="chapter-item expanded "><a href="../part-5/19-runtime-architecture.html"><strong aria-hidden="true">19.</strong> Chapter 19: Runtime Architecture</a></li><li class="chapter-item expanded "><a href="../part-5/20-verification-system.html"><strong aria-hidden="true">20.</strong> Chapter 20: Verification System</a></li><li class="spacer"></li><li class="chapter-item expanded affix "><li class="part-title">Part VI: Applications</li><li class="chapter-item expanded "><a href="../part-6/21-distributed-systems.html"><strong aria-hidden="true">21.</strong> Chapter 21: Distributed Systems</a></li><li class="chapter-item expanded "><a href="../part-6/22-database-systems.html"><strong aria-hidden="true">22.</strong> Chapter 22: Database Systems</a></li><li class="chapter-item expanded "><a href="../part-6/23-compiler-construction.html"><strong aria-hidden="true">23.</strong> Chapter 23: Compiler Construction</a></li><li class="chapter-item expanded "><a href="../part-6/24-machine-learning-integration.html"><strong aria-hidden="true">24.</strong> Chapter 24: Machine Learning Integration</a></li><li class="spacer"></li><li class="chapter-item expanded affix "><li class="part-title">Appendices</li><li class="chapter-item expanded "><a href="../appendices/A-glossary.html"><strong aria-hidden="true">25.</strong> Appendix A: Glossary</a></li><li class="chapter-item expanded "><a href="../appendices/B-mathematical-notation.html"><strong aria-hidden="true">26.</strong> Appendix B: Mathematical Notation</a></li><li class="chapter-item expanded "><a href="../appendices/C-cs-mappings.html"><strong aria-hidden="true">27.</strong> Appendix C: Side-by-Side CS Mappings</a></li><li class="chapter-item expanded "><a href="../appendices/D-exercise-solutions.html"><strong aria-hidden="true">28.</strong> Appendix D: Exercise Solutions</a></li><li class="chapter-item expanded "><a href="../appendices/E-implementation-code.html"><strong aria-hidden="true">29.</strong> Appendix E: Implementation Code</a></li><li class="chapter-item expanded "><a href="../appendices/F-research-problems.html"><strong aria-hidden="true">30.</strong> Appendix F: Research Problems</a></li><li class="spacer"></li><li class="chapter-item expanded affix "><a href="../bibliography.html">Bibliography</a></li><li class="chapter-item expanded affix "><a href="../index.html">Index</a></li></ol>
+            </div>
+            <div id="sidebar-resize-handle" class="sidebar-resize-handle">
+                <div class="sidebar-resize-indicator"></div>
+            </div>
+        </nav>
+
+        <!-- Track and set sidebar scroll position -->
+        <script>
+            var sidebarScrollbox = document.querySelector('#sidebar .sidebar-scrollbox');
+            sidebarScrollbox.addEventListener('click', function(e) {
+                if (e.target.tagName === 'A') {
+                    sessionStorage.setItem('sidebar-scroll', sidebarScrollbox.scrollTop);
+                }
+            }, { passive: true });
+            var sidebarScrollTop = sessionStorage.getItem('sidebar-scroll');
+            sessionStorage.removeItem('sidebar-scroll');
+            if (sidebarScrollTop) {
+                // preserve sidebar scroll position when navigating via links within sidebar
+                sidebarScrollbox.scrollTop = sidebarScrollTop;
+            } else {
+                // scroll sidebar to current active section when navigating via "next/previous chapter" buttons
+                var activeSection = document.querySelector('#sidebar .active');
+                if (activeSection) {
+                    activeSection.scrollIntoView({ block: 'center' });
+                }
+            }
+        </script>
+
+        <div id="page-wrapper" class="page-wrapper">
+
+            <div class="page">
+                                <div id="menu-bar-hover-placeholder"></div>
+                <div id="menu-bar" class="menu-bar sticky">
+                    <div class="left-buttons">
+                        <label id="sidebar-toggle" class="icon-button" for="sidebar-toggle-anchor" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="sidebar">
+                            <i class="fa fa-bars"></i>
+                        </label>
+                        <button id="theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="theme-list">
+                            <i class="fa fa-paint-brush"></i>
+                        </button>
+                        <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="light">Light</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="navy">Navy</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="ayu">Ayu</button></li>
+                        </ul>
+                        <button id="search-toggle" class="icon-button" type="button" title="Search. (Shortkey: s)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="S" aria-controls="searchbar">
+                            <i class="fa fa-search"></i>
+                        </button>
+                    </div>
+
+                    <h1 class="menu-title">The Hologram (12,288): A Complete Computer Science Formalization</h1>
+
+                    <div class="right-buttons">
+                        <a href="../print.html" title="Print this book" aria-label="Print this book">
+                            <i id="print-button" class="fa fa-print"></i>
+                        </a>
+                        <a href="https://github.com/uor-foundation/hologram-cs" title="Git repository" aria-label="Git repository">
+                            <i id="git-repository-button" class="fa fa-github"></i>
+                        </a>
+
+                    </div>
+                </div>
+
+                <div id="search-wrapper" class="hidden">
+                    <form id="searchbar-outer" class="searchbar-outer">
+                        <input type="search" id="searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="searchresults-outer" aria-describedby="searchresults-header">
+                    </form>
+                    <div id="searchresults-outer" class="searchresults-outer hidden">
+                        <div id="searchresults-header" class="searchresults-header"></div>
+                        <ul id="searchresults">
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
+                <script>
+                    document.getElementById('sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
+                    document.getElementById('sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
+                    Array.from(document.querySelectorAll('#sidebar a')).forEach(function(link) {
+                        link.setAttribute('tabIndex', sidebar === 'visible' ? 0 : -1);
+                    });
+                </script>
+
+                <div id="content" class="content">
+                    <main>
+                        <h1 id="chapter-6-programs-as-geometry"><a class="header" href="#chapter-6-programs-as-geometry">Chapter 6: Programs as Geometry</a></h1>
+<h2 id="motivation"><a class="header" href="#motivation">Motivation</a></h2>
+<p>Traditional models treat programs as sequences of instructions to be executed step-by-step. The Hologram model takes a radically different view: programs are static geometric objects—paths through the configuration space—that exist as complete entities before any “execution” occurs. This isn’t just a mathematical curiosity; it fundamentally changes how we reason about composition, optimization, and correctness.</p>
+<h2 id="denotational-semantics"><a class="header" href="#denotational-semantics">Denotational Semantics</a></h2>
+<h3 id="programs-as-static-objects"><a class="header" href="#programs-as-static-objects">Programs as Static Objects</a></h3>
+<p><strong>Definition 6.1 (Process Object)</strong>:
+A process object P is a lawful configuration on T representing a complete computation path.</p>
+<p>Instead of:</p>
+<pre><code>execute: Program → State → State
+</code></pre>
+<p>We have:</p>
+<pre><code>denote: Program → ProcessObject
+</code></pre>
+<p>The denotation [[P]] IS the program—not instructions to be executed, but a geometric path to be verified.</p>
+<h3 id="the-process-grammar"><a class="header" href="#the-process-grammar">The Process Grammar</a></h3>
+<p><strong>Definition 6.2 (Process Language)</strong>:</p>
+<pre><code>P ::= id                   (identity morphism)
+    | morph_i              (primitive morphism)
+    | P₁ ∘ P₂              (sequential composition)
+    | P₁ ⊗ P₂              (parallel composition)
+    | rotate_σ             (schedule rotation)
+    | lift_Φ               (boundary→interior lift)
+    | proj_Φ               (interior→boundary projection)
+</code></pre>
+<p>Each construct denotes a geometric transformation on T.</p>
+<h2 id="process-objects"><a class="header" href="#process-objects">Process Objects</a></h2>
+<h3 id="geometric-interpretation"><a class="header" href="#geometric-interpretation">Geometric Interpretation</a></h3>
+<p>Each program construct has a geometric meaning:</p>
+<ul>
+<li><strong>id</strong>: The trivial path (stay in place)</li>
+<li><strong>morph_i</strong>: A local deformation within resonance class i</li>
+<li><strong>P₁ ∘ P₂</strong>: Path concatenation</li>
+<li><strong>P₁ ⊗ P₂</strong>: Parallel paths in disjoint regions</li>
+<li><strong>rotate_σ</strong>: Following the schedule spiral</li>
+<li><strong>lift_Φ/proj_Φ</strong>: Movement between boundary and interior</li>
+</ul>
+<h3 id="path-properties"><a class="header" href="#path-properties">Path Properties</a></h3>
+<p><strong>Definition 6.3 (Path Receipt)</strong>:
+Every path P has a receipt:</p>
+<pre><code>receipt(P) = (r96_path, c768_path, phi_path, budget_path)
+</code></pre>
+<p>The receipt captures the path’s geometric invariants.</p>
+<h3 id="observational-equivalence"><a class="header" href="#observational-equivalence">Observational Equivalence</a></h3>
+<p><strong>Definition 6.4 (Path Equivalence)</strong>:</p>
+<pre><code>P₁ ≡ P₂ ⟺ receipt(P₁) = receipt(P₂) modulo gauge
+</code></pre>
+<p>Paths are equivalent if they have the same geometric effect.</p>
+<h2 id="budget-calculus"><a class="header" href="#budget-calculus">Budget Calculus</a></h2>
+<h3 id="cost-accounting"><a class="header" href="#cost-accounting">Cost Accounting</a></h3>
+<p><strong>Typing Rules with Budgets</strong>:</p>
+<pre><code>Sequential Composition:
+  Γ ⊢ P₁ : τ₁ → τ₂ [β₁]    Γ ⊢ P₂ : τ₂ → τ₃ [β₂]
+  ------------------------------------------------
+  Γ ⊢ P₁ ∘ P₂ : τ₁ → τ₃ [β₁ + β₂]
+
+Parallel Composition:
+  Γ ⊢ P₁ : τ₁ → τ₁' [β₁]    Γ ⊢ P₂ : τ₂ → τ₂' [β₂]
+  ------------------------------------------------
+  Γ ⊢ P₁ ⊗ P₂ : τ₁ × τ₂ → τ₁' × τ₂' [max(β₁, β₂)]
+</code></pre>
+<p>Note: Parallel composition takes the maximum budget, not the sum—parallelism doesn’t add cost!</p>
+<h3 id="budget-optimization"><a class="header" href="#budget-optimization">Budget Optimization</a></h3>
+<p><strong>Theorem 6.1 (Optimal Parallelization)</strong>:
+For independent processes P₁, P₂:</p>
+<pre><code>budget(P₁ ∘ P₂) = β₁ + β₂
+budget(P₁ ⊗ P₂) = max(β₁, β₂)
+</code></pre>
+<p>Always parallelize when possible to minimize budget.</p>
+<h2 id="equational-theory"><a class="header" href="#equational-theory">Equational Theory</a></h2>
+<h3 id="algebraic-laws"><a class="header" href="#algebraic-laws">Algebraic Laws</a></h3>
+<p>Process objects obey algebraic laws:</p>
+<p><strong>Associativity</strong>:</p>
+<pre><code>(P₁ ∘ P₂) ∘ P₃ ≡ P₁ ∘ (P₂ ∘ P₃)
+</code></pre>
+<p><strong>Identity</strong>:</p>
+<pre><code>id ∘ P ≡ P ≡ P ∘ id
+</code></pre>
+<p><strong>Parallel Commutativity</strong> (when disjoint):</p>
+<pre><code>P₁ ⊗ P₂ ≡ P₂ ⊗ P₁  (if footprint(P₁) ∩ footprint(P₂) = ∅)
+</code></pre>
+<p><strong>Interchange Law</strong>:</p>
+<pre><code>(P₁ ⊗ P₂) ∘ (P₃ ⊗ P₄) ≡ (P₁ ∘ P₃) ⊗ (P₂ ∘ P₄)
+</code></pre>
+<p>(when footprints are compatible)</p>
+<h3 id="commuting-diagrams"><a class="header" href="#commuting-diagrams">Commuting Diagrams</a></h3>
+<p>Process equivalences form commuting diagrams:</p>
+<pre><code>     P₁
+A -------&gt; B
+|          |
+|P₂        |P₃
+v          v
+C -------&gt; D
+     P₄
+
+P₁ ∘ P₃ ≡ P₂ ∘ P₄ (if diagram commutes)
+</code></pre>
+<h3 id="normal-forms"><a class="header" href="#normal-forms">Normal Forms</a></h3>
+<p><strong>Theorem 6.2 (Process Normal Form)</strong>:
+Every process has a normal form:</p>
+<pre><code>NF(P) = parallel₁ ∘ parallel₂ ∘ ... ∘ parallelₙ
+</code></pre>
+<p>where each parallel_i is a maximal parallel composition.</p>
+<p>This normal form minimizes total budget.</p>
+<h2 id="running-example-parallel-sort"><a class="header" href="#running-example-parallel-sort">Running Example: Parallel Sort</a></h2>
+<p>Let’s see how sorting becomes a geometric object:</p>
+<pre><code class="language-python"># Traditional imperative sort
+def bubble_sort(arr):
+    n = len(arr)
+    for i in range(n):
+        for j in range(0, n-i-1):
+            if arr[j] &gt; arr[j+1]:
+                arr[j], arr[j+1] = arr[j+1], arr[j]
+
+# Hologram geometric sort
+def geometric_sort(config):
+    # Define comparison morphisms
+    compare_morphisms = []
+    for i in range(n):
+        for j in range(0, n-i-1):
+            m = create_compare_swap(j, j+1)
+            compare_morphisms.append(m)
+
+    # Identify parallel opportunities
+    parallel_groups = []
+    for i in range(n):
+        # Even-odd parallelization
+        if i % 2 == 0:
+            group = parallel_compose([
+                compare_swap(2*j, 2*j+1)
+                for j in range(n//2)
+            ])
+        else:
+            group = parallel_compose([
+                compare_swap(2*j+1, 2*j+2)
+                for j in range(n//2-1)
+            ])
+        parallel_groups.append(group)
+
+    # Compose into single geometric object
+    sort_path = sequential_compose(parallel_groups)
+
+    # The path IS the sort - no execution needed
+    return sort_path
+
+# Verify sort correctness
+sort_path = geometric_sort(initial_config)
+receipt = compute_receipt(sort_path)
+assert receipt.preserves_multiset()  # Same elements
+assert receipt.ensures_sorted()       # Correct order
+assert receipt.budget &lt;= O(n²)        # Complexity bound
+</code></pre>
+<h2 id="geometric-optimization"><a class="header" href="#geometric-optimization">Geometric Optimization</a></h2>
+<h3 id="path-straightening"><a class="header" href="#path-straightening">Path Straightening</a></h3>
+<p>Optimization becomes geometric path straightening:</p>
+<pre><code class="language-python">def optimize_path(path):
+    # Find redundant loops
+    loops = find_loops(path)
+    for loop in loops:
+        if is_null_effect(loop):
+            path = remove_loop(path, loop)
+
+    # Identify parallel opportunities
+    sequential_segments = decompose_sequential(path)
+    parallel_segments = []
+    for seg in sequential_segments:
+        parallel_segments.append(maximize_parallelism(seg))
+
+    return compose(parallel_segments)
+</code></pre>
+<h3 id="geodesics"><a class="header" href="#geodesics">Geodesics</a></h3>
+<p><strong>Definition 6.5 (Computational Geodesic)</strong>:
+The shortest path between configurations with respect to budget metric.</p>
+<p><strong>Theorem 6.3 (Geodesic Optimality)</strong>:
+For lawful configs A,B, the geodesic from A to B minimizes budget.</p>
+<h2 id="category-theoretic-view"><a class="header" href="#category-theoretic-view">Category-Theoretic View</a></h2>
+<h3 id="the-process-category"><a class="header" href="#the-process-category">The Process Category</a></h3>
+<p>Process objects form a category:</p>
+<ul>
+<li><strong>Objects</strong>: Lawful configurations</li>
+<li><strong>Morphisms</strong>: Process paths</li>
+<li><strong>Composition</strong>: Path concatenation (∘)</li>
+<li><strong>Identity</strong>: Trivial path (id)</li>
+</ul>
+<h3 id="functoriality"><a class="header" href="#functoriality">Functoriality</a></h3>
+<p>The receipt map is functorial:</p>
+<pre><code>receipt: Process → Receipt
+receipt(P ∘ Q) = receipt(P) ⊕ receipt(Q)
+receipt(id) = neutral_receipt
+</code></pre>
+<h3 id="natural-transformations"><a class="header" href="#natural-transformations">Natural Transformations</a></h3>
+<p>Gauge transformations are natural:</p>
+<pre><code>   P
+A ---&gt; B
+|      |
+g      g
+v      v
+A' --&gt; B'
+  g(P)
+
+g(P) ≡ᵍ P (naturality)
+</code></pre>
+<h2 id="exercises"><a class="header" href="#exercises">Exercises</a></h2>
+<p><strong>Exercise 6.1</strong>: Prove the interchange law for process composition.</p>
+<p><strong>Exercise 6.2</strong>: Find the geodesic path for transposing a matrix on T.</p>
+<p><strong>Exercise 6.3</strong>: Show that every iterative algorithm has an equivalent geometric path.</p>
+<p><strong>Exercise 6.4</strong>: Design a path that computes factorial without iteration.</p>
+<p><strong>Exercise 6.5</strong>: Prove that path straightening preserves receipts.</p>
+<h2 id="implementation-notes"><a class="header" href="#implementation-notes">Implementation Notes</a></h2>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>#[derive(Clone)]
+pub enum Process {
+    Identity,
+    Morphism(MorphismId),
+    Sequential(Box&lt;Process&gt;, Box&lt;Process&gt;),
+    Parallel(Box&lt;Process&gt;, Box&lt;Process&gt;),
+    Rotate(u16),  // Number of σ rotations
+    LiftPhi,
+    ProjPhi,
+}
+
+impl Process {
+    pub fn receipt(&amp;self) -&gt; Receipt {
+        match self {
+            Process::Identity =&gt; Receipt::identity(),
+            Process::Morphism(id) =&gt; morphism_receipt(*id),
+            Process::Sequential(p1, p2) =&gt; {
+                p1.receipt().compose_sequential(&amp;p2.receipt())
+            }
+            Process::Parallel(p1, p2) =&gt; {
+                p1.receipt().compose_parallel(&amp;p2.receipt())
+            }
+            Process::Rotate(n) =&gt; rotation_receipt(*n),
+            Process::LiftPhi =&gt; phi_lift_receipt(),
+            Process::ProjPhi =&gt; phi_proj_receipt(),
+        }
+    }
+
+    pub fn optimize(self) -&gt; Process {
+        match self {
+            Process::Sequential(p1, p2) =&gt; {
+                // Check for parallelization opportunity
+                if p1.footprint().disjoint(&amp;p2.footprint()) {
+                    Process::Parallel(p1, p2)
+                } else {
+                    Process::Sequential(
+                        Box::new(p1.optimize()),
+                        Box::new(p2.optimize())
+                    )
+                }
+            }
+            other =&gt; other,
+        }
+    }
+}
+<span class="boring">}</span></code></pre></pre>
+<h2 id="takeaways"><a class="header" href="#takeaways">Takeaways</a></h2>
+<ol>
+<li><strong>Programs are geometric paths</strong>: Static objects, not dynamic executions</li>
+<li><strong>Denotation IS the program</strong>: No gap between meaning and implementation</li>
+<li><strong>Composition is path concatenation</strong>: Sequential and parallel have geometric meaning</li>
+<li><strong>Budgets compose algebraically</strong>: Addition for sequential, max for parallel</li>
+<li><strong>Optimization is geometric</strong>: Path straightening and geodesic finding</li>
+<li><strong>Equivalence is geometric</strong>: Same receipts = same computational effect</li>
+</ol>
+<p>Programs aren’t instructions—they’re geometric objects with algebraic structure.</p>
+<hr />
+<p><em>Next: Chapter 7 explores algorithmic reification—how these geometric programs become verifiable proofs.</em></p>
+
+                    </main>
+
+                    <nav class="nav-wrapper" aria-label="Page navigation">
+                        <!-- Mobile navigation buttons -->
+                            <a rel="prev" href="../part-2/05-lawfulness-as-type-system.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                                <i class="fa fa-angle-left"></i>
+                            </a>
+
+                            <a rel="next prefetch" href="../part-2/07-algorithmic-reification.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                                <i class="fa fa-angle-right"></i>
+                            </a>
+
+                        <div style="clear: both"></div>
+                    </nav>
+                </div>
+            </div>
+
+            <nav class="nav-wide-wrapper" aria-label="Page navigation">
+                    <a rel="prev" href="../part-2/05-lawfulness-as-type-system.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                        <i class="fa fa-angle-left"></i>
+                    </a>
+
+                    <a rel="next prefetch" href="../part-2/07-algorithmic-reification.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                        <i class="fa fa-angle-right"></i>
+                    </a>
+            </nav>
+
+        </div>
+
+
+
+
+        <script>
+            window.playground_copyable = true;
+        </script>
+
+
+        <script src="../elasticlunr.min.js"></script>
+        <script src="../mark.min.js"></script>
+        <script src="../searcher.js"></script>
+
+        <script src="../clipboard.min.js"></script>
+        <script src="../highlight.js"></script>
+        <script src="../book.js"></script>
+
+        <!-- Custom JS scripts -->
+
+
+    </div>
+    </body>
+</html>

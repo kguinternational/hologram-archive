@@ -1,0 +1,810 @@
+<!DOCTYPE HTML>
+<html lang="en" class="light" dir="ltr">
+    <head>
+        <!-- Book generated using mdBook -->
+        <meta charset="UTF-8">
+        <title>Chapter 21: Distributed Systems - The Hologram (12,288): A Complete Computer Science Formalization</title>
+
+
+        <!-- Custom HTML head -->
+        
+        <meta name="description" content="A comprehensive computer science formalization of the 12,288 Hologram model of computation using mainstream CS formalisms">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#ffffff">
+
+        <link rel="icon" href="../favicon.svg">
+        <link rel="shortcut icon" href="../favicon.png">
+        <link rel="stylesheet" href="../css/variables.css">
+        <link rel="stylesheet" href="../css/general.css">
+        <link rel="stylesheet" href="../css/chrome.css">
+        <link rel="stylesheet" href="../css/print.css" media="print">
+
+        <!-- Fonts -->
+        <link rel="stylesheet" href="../FontAwesome/css/font-awesome.css">
+        <link rel="stylesheet" href="../fonts/fonts.css">
+
+        <!-- Highlight.js Stylesheets -->
+        <link rel="stylesheet" href="../highlight.css">
+        <link rel="stylesheet" href="../tomorrow-night.css">
+        <link rel="stylesheet" href="../ayu-highlight.css">
+
+        <!-- Custom theme stylesheets -->
+        <link rel="stylesheet" href="../theme/custom.css">
+
+        <!-- MathJax -->
+        <script async src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    </head>
+    <body class="sidebar-visible no-js">
+    <div id="body-container">
+        <!-- Provide site root to javascript -->
+        <script>
+            var path_to_root = "../";
+            var default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "navy" : "light";
+        </script>
+
+        <!-- Work around some values being stored in localStorage wrapped in quotes -->
+        <script>
+            try {
+                var theme = localStorage.getItem('mdbook-theme');
+                var sidebar = localStorage.getItem('mdbook-sidebar');
+
+                if (theme.startsWith('"') && theme.endsWith('"')) {
+                    localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
+                }
+
+                if (sidebar.startsWith('"') && sidebar.endsWith('"')) {
+                    localStorage.setItem('mdbook-sidebar', sidebar.slice(1, sidebar.length - 1));
+                }
+            } catch (e) { }
+        </script>
+
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script>
+            var theme;
+            try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
+            if (theme === null || theme === undefined) { theme = default_theme; }
+            var html = document.querySelector('html');
+            html.classList.remove('light')
+            html.classList.add(theme);
+            var body = document.querySelector('body');
+            body.classList.remove('no-js')
+            body.classList.add('js');
+        </script>
+
+        <input type="checkbox" id="sidebar-toggle-anchor" class="hidden">
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script>
+            var body = document.querySelector('body');
+            var sidebar = null;
+            var sidebar_toggle = document.getElementById("sidebar-toggle-anchor");
+            if (document.body.clientWidth >= 1080) {
+                try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
+                sidebar = sidebar || 'visible';
+            } else {
+                sidebar = 'hidden';
+            }
+            sidebar_toggle.checked = sidebar === 'visible';
+            body.classList.remove('sidebar-visible');
+            body.classList.add("sidebar-" + sidebar);
+        </script>
+
+        <nav id="sidebar" class="sidebar" aria-label="Table of contents">
+            <div class="sidebar-scrollbox">
+                <ol class="chapter"><li class="chapter-item expanded affix "><a href="../title-page.html">Title Page</a></li><li class="chapter-item expanded affix "><a href="../preface.html">Preface</a></li><li class="chapter-item expanded affix "><a href="../readers-guide.html">Reader's Guide & Conventions</a></li><li class="spacer"></li><li class="chapter-item expanded affix "><li class="part-title">Part I: Mathematical Foundations</li><li class="chapter-item expanded "><a href="../part-1/01-information-as-lawful-structure.html"><strong aria-hidden="true">1.</strong> Chapter 1: Information as Lawful Structure</a></li><li class="chapter-item expanded "><a href="../part-1/02-universal-automaton.html"><strong aria-hidden="true">2.</strong> Chapter 2: The Universal Automaton</a></li><li class="chapter-item expanded "><a href="../part-1/03-labels-schedules-receipts.html"><strong aria-hidden="true">3.</strong> Chapter 3: Intrinsic Labels, Schedules, and Receipts</a></li><li class="chapter-item expanded "><a href="../part-1/04-content-addressable-memory.html"><strong aria-hidden="true">4.</strong> Chapter 4: Content-Addressable Memory</a></li><li class="spacer"></li><li class="chapter-item expanded affix "><li class="part-title">Part II: Algebraic Structure</li><li class="chapter-item expanded "><a href="../part-2/05-lawfulness-as-type-system.html"><strong aria-hidden="true">5.</strong> Chapter 5: Lawfulness as a Type System</a></li><li class="chapter-item expanded "><a href="../part-2/06-programs-as-geometry.html"><strong aria-hidden="true">6.</strong> Chapter 6: Programs as Geometry</a></li><li class="chapter-item expanded "><a href="../part-2/07-algorithmic-reification.html"><strong aria-hidden="true">7.</strong> Chapter 7: Algorithmic Reification</a></li><li class="chapter-item expanded "><a href="../part-2/08-universal-cost.html"><strong aria-hidden="true">8.</strong> Chapter 8: The Universal Cost</a></li><li class="spacer"></li><li class="chapter-item expanded affix "><li class="part-title">Part III: System Architecture</li><li class="chapter-item expanded "><a href="../part-3/09-security-safety-correctness.html"><strong aria-hidden="true">9.</strong> Chapter 9: Security, Safety, and Correctness</a></li><li class="chapter-item expanded "><a href="../part-3/10-worked-micro-examples.html"><strong aria-hidden="true">10.</strong> Chapter 10: Worked Micro-Examples</a></li><li class="chapter-item expanded "><a href="../part-3/11-interfaces-to-mainstream-cs.html"><strong aria-hidden="true">11.</strong> Chapter 11: Interfaces to Mainstream CS</a></li><li class="chapter-item expanded "><a href="../part-3/12-minimal-core.html"><strong aria-hidden="true">12.</strong> Chapter 12: Minimal Core</a></li><li class="spacer"></li><li class="chapter-item expanded affix "><li class="part-title">Part IV: Protocol Design</li><li class="chapter-item expanded "><a href="../part-4/13-meta-theory-expressivity.html"><strong aria-hidden="true">13.</strong> Chapter 13: Meta-Theory & Expressivity</a></li><li class="chapter-item expanded "><a href="../part-4/14-normalization-confluence.html"><strong aria-hidden="true">14.</strong> Chapter 14: Normalization & Confluence</a></li><li class="chapter-item expanded "><a href="../part-4/15-categorical-semantics.html"><strong aria-hidden="true">15.</strong> Chapter 15: Categorical Semantics</a></li><li class="chapter-item expanded "><a href="../part-4/16-security-proofs.html"><strong aria-hidden="true">16.</strong> Chapter 16: Security Proofs</a></li><li class="spacer"></li><li class="chapter-item expanded affix "><li class="part-title">Part V: Implementation</li><li class="chapter-item expanded "><a href="../part-5/17-optimization-landscape.html"><strong aria-hidden="true">17.</strong> Chapter 17: Optimization Landscape</a></li><li class="chapter-item expanded "><a href="../part-5/18-data-structure-implementation.html"><strong aria-hidden="true">18.</strong> Chapter 18: Data Structure Implementation</a></li><li class="chapter-item expanded "><a href="../part-5/19-runtime-architecture.html"><strong aria-hidden="true">19.</strong> Chapter 19: Runtime Architecture</a></li><li class="chapter-item expanded "><a href="../part-5/20-verification-system.html"><strong aria-hidden="true">20.</strong> Chapter 20: Verification System</a></li><li class="spacer"></li><li class="chapter-item expanded affix "><li class="part-title">Part VI: Applications</li><li class="chapter-item expanded "><a href="../part-6/21-distributed-systems.html" class="active"><strong aria-hidden="true">21.</strong> Chapter 21: Distributed Systems</a></li><li class="chapter-item expanded "><a href="../part-6/22-database-systems.html"><strong aria-hidden="true">22.</strong> Chapter 22: Database Systems</a></li><li class="chapter-item expanded "><a href="../part-6/23-compiler-construction.html"><strong aria-hidden="true">23.</strong> Chapter 23: Compiler Construction</a></li><li class="chapter-item expanded "><a href="../part-6/24-machine-learning-integration.html"><strong aria-hidden="true">24.</strong> Chapter 24: Machine Learning Integration</a></li><li class="spacer"></li><li class="chapter-item expanded affix "><li class="part-title">Appendices</li><li class="chapter-item expanded "><a href="../appendices/A-glossary.html"><strong aria-hidden="true">25.</strong> Appendix A: Glossary</a></li><li class="chapter-item expanded "><a href="../appendices/B-mathematical-notation.html"><strong aria-hidden="true">26.</strong> Appendix B: Mathematical Notation</a></li><li class="chapter-item expanded "><a href="../appendices/C-cs-mappings.html"><strong aria-hidden="true">27.</strong> Appendix C: Side-by-Side CS Mappings</a></li><li class="chapter-item expanded "><a href="../appendices/D-exercise-solutions.html"><strong aria-hidden="true">28.</strong> Appendix D: Exercise Solutions</a></li><li class="chapter-item expanded "><a href="../appendices/E-implementation-code.html"><strong aria-hidden="true">29.</strong> Appendix E: Implementation Code</a></li><li class="chapter-item expanded "><a href="../appendices/F-research-problems.html"><strong aria-hidden="true">30.</strong> Appendix F: Research Problems</a></li><li class="spacer"></li><li class="chapter-item expanded affix "><a href="../bibliography.html">Bibliography</a></li><li class="chapter-item expanded affix "><a href="../index.html">Index</a></li></ol>
+            </div>
+            <div id="sidebar-resize-handle" class="sidebar-resize-handle">
+                <div class="sidebar-resize-indicator"></div>
+            </div>
+        </nav>
+
+        <!-- Track and set sidebar scroll position -->
+        <script>
+            var sidebarScrollbox = document.querySelector('#sidebar .sidebar-scrollbox');
+            sidebarScrollbox.addEventListener('click', function(e) {
+                if (e.target.tagName === 'A') {
+                    sessionStorage.setItem('sidebar-scroll', sidebarScrollbox.scrollTop);
+                }
+            }, { passive: true });
+            var sidebarScrollTop = sessionStorage.getItem('sidebar-scroll');
+            sessionStorage.removeItem('sidebar-scroll');
+            if (sidebarScrollTop) {
+                // preserve sidebar scroll position when navigating via links within sidebar
+                sidebarScrollbox.scrollTop = sidebarScrollTop;
+            } else {
+                // scroll sidebar to current active section when navigating via "next/previous chapter" buttons
+                var activeSection = document.querySelector('#sidebar .active');
+                if (activeSection) {
+                    activeSection.scrollIntoView({ block: 'center' });
+                }
+            }
+        </script>
+
+        <div id="page-wrapper" class="page-wrapper">
+
+            <div class="page">
+                                <div id="menu-bar-hover-placeholder"></div>
+                <div id="menu-bar" class="menu-bar sticky">
+                    <div class="left-buttons">
+                        <label id="sidebar-toggle" class="icon-button" for="sidebar-toggle-anchor" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="sidebar">
+                            <i class="fa fa-bars"></i>
+                        </label>
+                        <button id="theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="theme-list">
+                            <i class="fa fa-paint-brush"></i>
+                        </button>
+                        <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="light">Light</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="navy">Navy</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="ayu">Ayu</button></li>
+                        </ul>
+                        <button id="search-toggle" class="icon-button" type="button" title="Search. (Shortkey: s)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="S" aria-controls="searchbar">
+                            <i class="fa fa-search"></i>
+                        </button>
+                    </div>
+
+                    <h1 class="menu-title">The Hologram (12,288): A Complete Computer Science Formalization</h1>
+
+                    <div class="right-buttons">
+                        <a href="../print.html" title="Print this book" aria-label="Print this book">
+                            <i id="print-button" class="fa fa-print"></i>
+                        </a>
+                        <a href="https://github.com/uor-foundation/hologram-cs" title="Git repository" aria-label="Git repository">
+                            <i id="git-repository-button" class="fa fa-github"></i>
+                        </a>
+
+                    </div>
+                </div>
+
+                <div id="search-wrapper" class="hidden">
+                    <form id="searchbar-outer" class="searchbar-outer">
+                        <input type="search" id="searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="searchresults-outer" aria-describedby="searchresults-header">
+                    </form>
+                    <div id="searchresults-outer" class="searchresults-outer hidden">
+                        <div id="searchresults-header" class="searchresults-header"></div>
+                        <ul id="searchresults">
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
+                <script>
+                    document.getElementById('sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
+                    document.getElementById('sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
+                    Array.from(document.querySelectorAll('#sidebar a')).forEach(function(link) {
+                        link.setAttribute('tabIndex', sidebar === 'visible' ? 0 : -1);
+                    });
+                </script>
+
+                <div id="content" class="content">
+                    <main>
+                        <h1 id="chapter-21-distributed-systems"><a class="header" href="#chapter-21-distributed-systems">Chapter 21: Distributed Systems</a></h1>
+<h2 id="introduction"><a class="header" href="#introduction">Introduction</a></h2>
+<p>The Hologram’s content-addressable memory and receipt-based verification naturally extend to distributed systems. This chapter explores how the 12,288 model enables novel approaches to distributed storage, consensus, and network protocols, all while maintaining the same lawfulness guarantees that apply to local computation.</p>
+<h2 id="content-addressed-storage"><a class="header" href="#content-addressed-storage">Content-Addressed Storage</a></h2>
+<h3 id="universal-address-space"><a class="header" href="#universal-address-space">Universal Address Space</a></h3>
+<p>In the Hologram, every lawful object has a unique address determined by its content:</p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>pub struct DistributedCAM {
+    local_store: LocalStore,
+    peer_registry: PeerRegistry,
+    address_resolver: AddressResolver,
+}
+
+impl DistributedCAM {
+    pub async fn get(&amp;self, address: Address) -&gt; Result&lt;Object, CamError&gt; {
+        // Check local store first
+        if let Some(obj) = self.local_store.get(&amp;address) {
+            return Ok(obj);
+        }
+
+        // Query peer network
+        let peer = self.address_resolver.find_peer(&amp;address)?;
+        let obj = peer.fetch(address).await?;
+
+        // Verify object matches address
+        if self.compute_address(&amp;obj) != address {
+            return Err(CamError::AddressMismatch);
+        }
+
+        // Cache locally
+        self.local_store.put(address, &amp;obj);
+        Ok(obj)
+    }
+
+    pub async fn put(&amp;mut self, obj: Object) -&gt; Address {
+        // Compute canonical address
+        let address = self.compute_address(&amp;obj);
+
+        // Store locally
+        self.local_store.put(address, &amp;obj);
+
+        // Announce to peers
+        self.peer_registry.announce(address, self.local_id()).await;
+
+        address
+    }
+}
+<span class="boring">}</span></code></pre></pre>
+<h3 id="deduplication-network"><a class="header" href="#deduplication-network">Deduplication Network</a></h3>
+<p>Content addressing enables perfect deduplication across the network:</p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>pub struct DeduplicationNetwork {
+    shard_map: ConsistentHash&lt;Address, PeerId&gt;,
+    replication_factor: usize,
+}
+
+impl DeduplicationNetwork {
+    pub async fn store_unique(&amp;mut self, obj: Object) -&gt; StoreResult {
+        let address = Address::from_object(&amp;obj);
+
+        // Check if already exists in network
+        if self.exists(address).await {
+            return StoreResult::Duplicate(address);
+        }
+
+        // Determine storage shards
+        let primary_shard = self.shard_map.get_node(&amp;address);
+        let replicas = self.shard_map.get_replicas(&amp;address, self.replication_factor);
+
+        // Store with replication
+        let mut futures = Vec::new();
+        futures.push(primary_shard.store(address, obj.clone()));
+        for replica in replicas {
+            futures.push(replica.store(address, obj.clone()));
+        }
+
+        // Wait for quorum
+        let results = join_all(futures).await;
+        let successes = results.iter().filter(|r| r.is_ok()).count();
+
+        if successes &gt; self.replication_factor / 2 {
+            StoreResult::Stored(address, successes)
+        } else {
+            StoreResult::Failed(address)
+        }
+    }
+}
+<span class="boring">}</span></code></pre></pre>
+<h3 id="content-routing"><a class="header" href="#content-routing">Content Routing</a></h3>
+<p>The DHT-based routing leverages the lattice structure:</p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>pub struct LatticeRouter {
+    routing_table: RoutingTable,
+    lattice_coords: (u8, u8), // (page, byte) coordinates
+}
+
+impl LatticeRouter {
+    pub fn route_to_address(&amp;self, target: Address) -&gt; Vec&lt;PeerId&gt; {
+        let target_coords = target.to_lattice_coords();
+        let mut candidates = Vec::new();
+
+        // Find peers in same page
+        let page_peers = self.routing_table.get_page_peers(target_coords.0);
+        candidates.extend(page_peers);
+
+        // Find peers in adjacent pages (toroidal wrap)
+        for offset in [-1, 1] {
+            let adjacent_page = (target_coords.0 as i16 + offset).rem_euclid(48) as u8;
+            candidates.extend(self.routing_table.get_page_peers(adjacent_page));
+        }
+
+        // Sort by distance in lattice
+        candidates.sort_by_key(|peer| {
+            self.lattice_distance(peer.coords(), target_coords)
+        });
+
+        candidates.truncate(3); // Return 3 closest peers
+        candidates
+    }
+
+    fn lattice_distance(&amp;self, a: (u8, u8), b: (u8, u8)) -&gt; u16 {
+        // Toroidal distance metric
+        let page_dist = ((a.0 as i16 - b.0 as i16).abs()).min(
+            48 - (a.0 as i16 - b.0 as i16).abs()
+        );
+        let byte_dist = ((a.1 as i16 - b.1 as i16).abs()).min(
+            256 - (a.1 as i16 - b.1 as i16).abs()
+        );
+        (page_dist * 256 + byte_dist) as u16
+    }
+}
+<span class="boring">}</span></code></pre></pre>
+<h2 id="consensus-via-receipts"><a class="header" href="#consensus-via-receipts">Consensus via Receipts</a></h2>
+<h3 id="receipt-based-consensus"><a class="header" href="#receipt-based-consensus">Receipt-Based Consensus</a></h3>
+<p>Receipts provide a natural consensus mechanism:</p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>pub struct ReceiptConsensus {
+    validators: Vec&lt;ValidatorNode&gt;,
+    threshold: usize, // Byzantine fault tolerance threshold
+}
+
+impl ReceiptConsensus {
+    pub async fn achieve_consensus(&amp;self, proposal: Proposal) -&gt; ConsensusResult {
+        // Phase 1: Proposal broadcast
+        let proposal_receipt = proposal.compute_receipt();
+        let mut prepare_votes = Vec::new();
+
+        for validator in &amp;self.validators {
+            let vote = validator.prepare_vote(proposal.clone()).await;
+            prepare_votes.push(vote);
+        }
+
+        // Phase 2: Receipt validation
+        let valid_receipts: Vec&lt;_&gt; = prepare_votes
+            .into_iter()
+            .filter(|vote| self.verify_receipt(&amp;vote.receipt))
+            .collect();
+
+        if valid_receipts.len() &lt; self.threshold {
+            return ConsensusResult::InsufficientVotes;
+        }
+
+        // Phase 3: Commit if receipts match
+        let canonical_receipt = self.compute_canonical_receipt(&amp;valid_receipts);
+        let commit_futures: Vec&lt;_&gt; = self.validators
+            .iter()
+            .map(|v| v.commit(canonical_receipt.clone()))
+            .collect();
+
+        let commits = join_all(commit_futures).await;
+        let committed_count = commits.iter().filter(|c| c.is_ok()).count();
+
+        if committed_count &gt;= self.threshold {
+            ConsensusResult::Committed(canonical_receipt)
+        } else {
+            ConsensusResult::Failed
+        }
+    }
+
+    fn compute_canonical_receipt(&amp;self, receipts: &amp;[Vote]) -&gt; Receipt {
+        // Deterministic selection of canonical receipt
+        // All valid receipts should be identical for lawful proposals
+        receipts[0].receipt.clone()
+    }
+}
+<span class="boring">}</span></code></pre></pre>
+<h3 id="byzantine-fault-tolerance"><a class="header" href="#byzantine-fault-tolerance">Byzantine Fault Tolerance</a></h3>
+<p>The receipt system naturally handles Byzantine faults:</p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>pub struct ByzantineDetector {
+    history: ReceiptHistory,
+    fault_threshold: f64,
+}
+
+impl ByzantineDetector {
+    pub fn detect_byzantine_node(&amp;self, node_id: NodeId, receipt: &amp;Receipt) -&gt; bool {
+        // Check receipt validity
+        if !receipt.verify() {
+            return true; // Invalid receipt = Byzantine
+        }
+
+        // Check for equivocation
+        if let Some(previous) = self.history.get_last_receipt(node_id) {
+            if previous.conflicts_with(receipt) {
+                return true; // Conflicting receipts = Byzantine
+            }
+        }
+
+        // Check for impossible claims
+        if receipt.budget_ledger &gt; 47 {
+            return true; // Negative budget = Byzantine
+        }
+
+        // Statistical anomaly detection
+        let node_stats = self.history.get_stats(node_id);
+        if node_stats.deviation_score() &gt; self.fault_threshold {
+            return true; // Statistical outlier = likely Byzantine
+        }
+
+        false
+    }
+}
+<span class="boring">}</span></code></pre></pre>
+<h3 id="consensus-optimization"><a class="header" href="#consensus-optimization">Consensus Optimization</a></h3>
+<p>Optimizations for high-throughput consensus:</p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>pub struct OptimizedConsensus {
+    pipelined_rounds: VecDeque&lt;ConsensusRound&gt;,
+    max_pipeline_depth: usize,
+}
+
+impl OptimizedConsensus {
+    pub async fn pipelined_consensus(&amp;mut self, proposals: Vec&lt;Proposal&gt;) -&gt; Vec&lt;ConsensusResult&gt; {
+        let mut results = Vec::new();
+
+        for proposal in proposals {
+            // Start new round if pipeline not full
+            if self.pipelined_rounds.len() &lt; self.max_pipeline_depth {
+                let round = self.start_round(proposal);
+                self.pipelined_rounds.push_back(round);
+            }
+
+            // Process pipeline stages in parallel
+            let mut completed = Vec::new();
+            for round in &amp;mut self.pipelined_rounds {
+                round.advance_stage().await;
+                if round.is_complete() {
+                    completed.push(round.id());
+                    results.push(round.result());
+                }
+            }
+
+            // Remove completed rounds
+            self.pipelined_rounds.retain(|r| !completed.contains(&amp;r.id()));
+        }
+
+        results
+    }
+}
+<span class="boring">}</span></code></pre></pre>
+<h2 id="network-protocol-design"><a class="header" href="#network-protocol-design">Network Protocol Design</a></h2>
+<h3 id="lattice-aware-networking"><a class="header" href="#lattice-aware-networking">Lattice-Aware Networking</a></h3>
+<p>Network protocols that exploit lattice structure:</p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>pub struct LatticeProtocol {
+    local_page: u8,
+    page_neighbors: Vec&lt;PeerId&gt;,
+    gossip_fanout: usize,
+}
+
+impl LatticeProtocol {
+    pub async fn broadcast(&amp;self, message: Message) -&gt; BroadcastResult {
+        // Compute message receipt
+        let receipt = message.compute_receipt();
+
+        // Phase 1: Broadcast to page neighbors
+        let page_broadcast = self.broadcast_to_page(message.clone(), receipt.clone()).await;
+
+        // Phase 2: Inter-page gossip
+        let selected_pages = self.select_gossip_targets();
+        let gossip_futures: Vec&lt;_&gt; = selected_pages
+            .iter()
+            .map(|page| self.gossip_to_page(*page, message.clone(), receipt.clone()))
+            .collect();
+
+        let gossip_results = join_all(gossip_futures).await;
+
+        BroadcastResult {
+            page_coverage: page_broadcast.coverage,
+            network_coverage: self.estimate_coverage(&amp;gossip_results),
+            receipt,
+        }
+    }
+
+    fn select_gossip_targets(&amp;self) -&gt; Vec&lt;u8&gt; {
+        // Use schedule rotation for deterministic gossip
+        let mut targets = Vec::new();
+        let rotation = ScheduleRotation::at_time(SystemTime::now());
+
+        for i in 0..self.gossip_fanout {
+            let target_page = rotation.map_page(self.local_page, i);
+            targets.push(target_page);
+        }
+
+        targets
+    }
+}
+<span class="boring">}</span></code></pre></pre>
+<h3 id="receipt-authenticated-messages"><a class="header" href="#receipt-authenticated-messages">Receipt-Authenticated Messages</a></h3>
+<p>All network messages carry verifiable receipts:</p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>pub struct AuthenticatedMessage {
+    payload: Vec&lt;u8&gt;,
+    sender_id: NodeId,
+    receipt: Receipt,
+    witness: Witness,
+}
+
+impl AuthenticatedMessage {
+    pub fn verify(&amp;self) -&gt; bool {
+        // Verify receipt matches payload
+        let computed_receipt = Receipt::from_bytes(&amp;self.payload);
+        if computed_receipt != self.receipt {
+            return false;
+        }
+
+        // Verify witness chain
+        if !self.witness.verify() {
+            return false;
+        }
+
+        // Verify sender authorization
+        self.witness.authorizes(self.sender_id)
+    }
+
+    pub fn forward(&amp;self, next_hop: NodeId) -&gt; AuthenticatedMessage {
+        // Extend witness chain for forwarding
+        let forward_witness = self.witness.extend(next_hop);
+
+        AuthenticatedMessage {
+            payload: self.payload.clone(),
+            sender_id: self.sender_id,
+            receipt: self.receipt.clone(),
+            witness: forward_witness,
+        }
+    }
+}
+<span class="boring">}</span></code></pre></pre>
+<h3 id="adaptive-topology"><a class="header" href="#adaptive-topology">Adaptive Topology</a></h3>
+<p>The network topology adapts based on receipts:</p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>pub struct AdaptiveTopology {
+    connections: HashMap&lt;NodeId, Connection&gt;,
+    performance_tracker: PerformanceTracker,
+}
+
+impl AdaptiveTopology {
+    pub async fn optimize_topology(&amp;mut self) {
+        // Collect performance receipts
+        let mut performance_receipts = Vec::new();
+        for (node_id, conn) in &amp;self.connections {
+            let perf = self.performance_tracker.get_metrics(node_id);
+            performance_receipts.push((*node_id, perf));
+        }
+
+        // Sort by performance (receipt-based)
+        performance_receipts.sort_by_key(|(_, perf)| perf.latency_percentile(95));
+
+        // Drop poor performers
+        let drop_threshold = performance_receipts.len() * 3 / 4;
+        for (node_id, _) in &amp;performance_receipts[drop_threshold..] {
+            self.connections.remove(node_id);
+        }
+
+        // Discover new peers
+        let new_peers = self.discover_peers().await;
+        for peer in new_peers.iter().take(5) {
+            self.connect_to_peer(peer).await;
+        }
+    }
+}
+<span class="boring">}</span></code></pre></pre>
+<h2 id="distributed-transactions"><a class="header" href="#distributed-transactions">Distributed Transactions</a></h2>
+<h3 id="receipt-coordinated-transactions"><a class="header" href="#receipt-coordinated-transactions">Receipt-Coordinated Transactions</a></h3>
+<p>Distributed transactions using receipt coordination:</p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>pub struct DistributedTransaction {
+    transaction_id: TransactionId,
+    participants: Vec&lt;Participant&gt;,
+    coordinator_receipt: Receipt,
+}
+
+impl DistributedTransaction {
+    pub async fn execute(&amp;mut self) -&gt; TransactionResult {
+        // Phase 1: Prepare
+        let prepare_futures: Vec&lt;_&gt; = self.participants
+            .iter()
+            .map(|p| p.prepare(self.transaction_id))
+            .collect();
+
+        let prepare_results = join_all(prepare_futures).await;
+
+        // Check all participants ready
+        let all_prepared = prepare_results.iter().all(|r| r.is_ok());
+        if !all_prepared {
+            return self.abort().await;
+        }
+
+        // Collect prepare receipts
+        let prepare_receipts: Vec&lt;_&gt; = prepare_results
+            .into_iter()
+            .map(|r| r.unwrap())
+            .collect();
+
+        // Phase 2: Commit with coordinated receipt
+        let commit_receipt = self.compute_commit_receipt(&amp;prepare_receipts);
+        let commit_futures: Vec&lt;_&gt; = self.participants
+            .iter()
+            .map(|p| p.commit(self.transaction_id, commit_receipt.clone()))
+            .collect();
+
+        let commit_results = join_all(commit_futures).await;
+
+        // Verify commit receipts match
+        let all_committed = commit_results.iter().all(|r| {
+            r.as_ref().map(|receipt| receipt == &amp;commit_receipt).unwrap_or(false)
+        });
+
+        if all_committed {
+            TransactionResult::Committed(commit_receipt)
+        } else {
+            self.abort().await
+        }
+    }
+
+    async fn abort(&amp;mut self) -&gt; TransactionResult {
+        let abort_futures: Vec&lt;_&gt; = self.participants
+            .iter()
+            .map(|p| p.abort(self.transaction_id))
+            .collect();
+
+        join_all(abort_futures).await;
+        TransactionResult::Aborted
+    }
+}
+<span class="boring">}</span></code></pre></pre>
+<h2 id="state-machine-replication"><a class="header" href="#state-machine-replication">State Machine Replication</a></h2>
+<h3 id="deterministic-state-machines"><a class="header" href="#deterministic-state-machines">Deterministic State Machines</a></h3>
+<p>State machines with receipt-based determinism:</p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>pub struct ReplicatedStateMachine {
+    state: State,
+    log: Vec&lt;LogEntry&gt;,
+    receipt_chain: ReceiptChain,
+}
+
+impl ReplicatedStateMachine {
+    pub fn apply_command(&amp;mut self, command: Command) -&gt; Receipt {
+        // Compute command receipt
+        let command_receipt = command.compute_receipt();
+
+        // Apply to state
+        let new_state = self.state.apply(&amp;command);
+
+        // Compute state transition receipt
+        let transition_receipt = Receipt::from_transition(
+            &amp;self.state,
+            &amp;new_state,
+            &amp;command_receipt
+        );
+
+        // Update state and log
+        self.state = new_state;
+        self.log.push(LogEntry {
+            command,
+            receipt: transition_receipt.clone(),
+            timestamp: SystemTime::now(),
+        });
+
+        // Extend receipt chain
+        self.receipt_chain.extend(transition_receipt.clone());
+
+        transition_receipt
+    }
+
+    pub fn verify_replica(&amp;self, other: &amp;ReplicatedStateMachine) -&gt; bool {
+        // Replicas are consistent if receipt chains match
+        self.receipt_chain == other.receipt_chain
+    }
+}
+<span class="boring">}</span></code></pre></pre>
+<h2 id="network-sharding"><a class="header" href="#network-sharding">Network Sharding</a></h2>
+<h3 id="receipt-based-sharding"><a class="header" href="#receipt-based-sharding">Receipt-Based Sharding</a></h3>
+<p>Sharding strategy based on receipt distribution:</p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>pub struct ReceiptSharding {
+    shard_count: usize,
+    shard_map: HashMap&lt;ShardId, ShardInfo&gt;,
+}
+
+impl ReceiptSharding {
+    pub fn compute_shard(&amp;self, receipt: &amp;Receipt) -&gt; ShardId {
+        // Use R96 digest for shard assignment
+        let digest_hash = receipt.r96_digest.as_u64();
+        (digest_hash % self.shard_count as u64) as ShardId
+    }
+
+    pub fn rebalance_shards(&amp;mut self, load_stats: &amp;LoadStatistics) {
+        // Compute target load per shard
+        let total_load = load_stats.total_load();
+        let target_load = total_load / self.shard_count;
+
+        // Identify overloaded shards
+        let overloaded: Vec&lt;_&gt; = self.shard_map
+            .iter()
+            .filter(|(_, info)| info.load &gt; target_load * 1.2)
+            .map(|(id, _)| *id)
+            .collect();
+
+        // Split overloaded shards
+        for shard_id in overloaded {
+            self.split_shard(shard_id);
+        }
+    }
+
+    fn split_shard(&amp;mut self, shard_id: ShardId) {
+        let new_shard_id = self.shard_count;
+        self.shard_count += 1;
+
+        // Update shard map with split point
+        let split_receipt = self.compute_split_point(shard_id);
+        self.shard_map.insert(new_shard_id, ShardInfo {
+            range: ReceiptRange::from_split(split_receipt),
+            load: 0,
+        });
+    }
+}
+<span class="boring">}</span></code></pre></pre>
+<h2 id="exercises"><a class="header" href="#exercises">Exercises</a></h2>
+<ol>
+<li>
+<p><strong>Epidemic Broadcast</strong>: Design an epidemic broadcast protocol that uses receipts to prove message delivery to a threshold of nodes.</p>
+</li>
+<li>
+<p><strong>Sybil Resistance</strong>: Implement a Sybil-resistant peer discovery mechanism using receipt-based proof of work.</p>
+</li>
+<li>
+<p><strong>Cross-Shard Transactions</strong>: Design a protocol for atomic transactions across multiple shards using two-phase commit with receipts.</p>
+</li>
+<li>
+<p><strong>Network Partitioning</strong>: Implement a partition-tolerant consensus algorithm that can merge decisions when partitions heal.</p>
+</li>
+<li>
+<p><strong>Load Balancing</strong>: Create a dynamic load balancing algorithm that migrates objects between nodes based on access patterns recorded in receipts.</p>
+</li>
+</ol>
+<h2 id="summary"><a class="header" href="#summary">Summary</a></h2>
+<p>The Hologram’s foundations naturally extend to distributed systems, providing content-addressed storage with perfect deduplication, receipt-based consensus that handles Byzantine faults, and network protocols that exploit the lattice structure. The receipt system serves as both a verification mechanism and a coordination primitive, enabling novel approaches to distributed transactions, state machine replication, and network sharding. These patterns demonstrate that the same lawfulness principles governing local computation can orchestrate global distributed systems.</p>
+<h2 id="further-reading"><a class="header" href="#further-reading">Further Reading</a></h2>
+<ul>
+<li>Chapter 4: Content-Addressable Memory - For CAM foundations</li>
+<li>Chapter 9: Security, Safety, and Correctness - For Byzantine fault tolerance</li>
+<li>Chapter 20: Verification System - For receipt verification</li>
+<li>Chapter 22: Database Systems - For storage patterns</li>
+</ul>
+
+                    </main>
+
+                    <nav class="nav-wrapper" aria-label="Page navigation">
+                        <!-- Mobile navigation buttons -->
+                            <a rel="prev" href="../part-5/20-verification-system.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                                <i class="fa fa-angle-left"></i>
+                            </a>
+
+                            <a rel="next prefetch" href="../part-6/22-database-systems.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                                <i class="fa fa-angle-right"></i>
+                            </a>
+
+                        <div style="clear: both"></div>
+                    </nav>
+                </div>
+            </div>
+
+            <nav class="nav-wide-wrapper" aria-label="Page navigation">
+                    <a rel="prev" href="../part-5/20-verification-system.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                        <i class="fa fa-angle-left"></i>
+                    </a>
+
+                    <a rel="next prefetch" href="../part-6/22-database-systems.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                        <i class="fa fa-angle-right"></i>
+                    </a>
+            </nav>
+
+        </div>
+
+
+
+
+        <script>
+            window.playground_copyable = true;
+        </script>
+
+
+        <script src="../elasticlunr.min.js"></script>
+        <script src="../mark.min.js"></script>
+        <script src="../searcher.js"></script>
+
+        <script src="../clipboard.min.js"></script>
+        <script src="../highlight.js"></script>
+        <script src="../book.js"></script>
+
+        <!-- Custom JS scripts -->
+
+
+    </div>
+    </body>
+</html>

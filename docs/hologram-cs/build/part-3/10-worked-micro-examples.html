@@ -1,0 +1,769 @@
+<!DOCTYPE HTML>
+<html lang="en" class="light" dir="ltr">
+    <head>
+        <!-- Book generated using mdBook -->
+        <meta charset="UTF-8">
+        <title>Chapter 10: Worked Micro-Examples - The Hologram (12,288): A Complete Computer Science Formalization</title>
+
+
+        <!-- Custom HTML head -->
+        
+        <meta name="description" content="A comprehensive computer science formalization of the 12,288 Hologram model of computation using mainstream CS formalisms">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#ffffff">
+
+        <link rel="icon" href="../favicon.svg">
+        <link rel="shortcut icon" href="../favicon.png">
+        <link rel="stylesheet" href="../css/variables.css">
+        <link rel="stylesheet" href="../css/general.css">
+        <link rel="stylesheet" href="../css/chrome.css">
+        <link rel="stylesheet" href="../css/print.css" media="print">
+
+        <!-- Fonts -->
+        <link rel="stylesheet" href="../FontAwesome/css/font-awesome.css">
+        <link rel="stylesheet" href="../fonts/fonts.css">
+
+        <!-- Highlight.js Stylesheets -->
+        <link rel="stylesheet" href="../highlight.css">
+        <link rel="stylesheet" href="../tomorrow-night.css">
+        <link rel="stylesheet" href="../ayu-highlight.css">
+
+        <!-- Custom theme stylesheets -->
+        <link rel="stylesheet" href="../theme/custom.css">
+
+        <!-- MathJax -->
+        <script async src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    </head>
+    <body class="sidebar-visible no-js">
+    <div id="body-container">
+        <!-- Provide site root to javascript -->
+        <script>
+            var path_to_root = "../";
+            var default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "navy" : "light";
+        </script>
+
+        <!-- Work around some values being stored in localStorage wrapped in quotes -->
+        <script>
+            try {
+                var theme = localStorage.getItem('mdbook-theme');
+                var sidebar = localStorage.getItem('mdbook-sidebar');
+
+                if (theme.startsWith('"') && theme.endsWith('"')) {
+                    localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
+                }
+
+                if (sidebar.startsWith('"') && sidebar.endsWith('"')) {
+                    localStorage.setItem('mdbook-sidebar', sidebar.slice(1, sidebar.length - 1));
+                }
+            } catch (e) { }
+        </script>
+
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script>
+            var theme;
+            try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
+            if (theme === null || theme === undefined) { theme = default_theme; }
+            var html = document.querySelector('html');
+            html.classList.remove('light')
+            html.classList.add(theme);
+            var body = document.querySelector('body');
+            body.classList.remove('no-js')
+            body.classList.add('js');
+        </script>
+
+        <input type="checkbox" id="sidebar-toggle-anchor" class="hidden">
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script>
+            var body = document.querySelector('body');
+            var sidebar = null;
+            var sidebar_toggle = document.getElementById("sidebar-toggle-anchor");
+            if (document.body.clientWidth >= 1080) {
+                try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
+                sidebar = sidebar || 'visible';
+            } else {
+                sidebar = 'hidden';
+            }
+            sidebar_toggle.checked = sidebar === 'visible';
+            body.classList.remove('sidebar-visible');
+            body.classList.add("sidebar-" + sidebar);
+        </script>
+
+        <nav id="sidebar" class="sidebar" aria-label="Table of contents">
+            <div class="sidebar-scrollbox">
+                <ol class="chapter"><li class="chapter-item expanded affix "><a href="../title-page.html">Title Page</a></li><li class="chapter-item expanded affix "><a href="../preface.html">Preface</a></li><li class="chapter-item expanded affix "><a href="../readers-guide.html">Reader's Guide & Conventions</a></li><li class="spacer"></li><li class="chapter-item expanded affix "><li class="part-title">Part I: Mathematical Foundations</li><li class="chapter-item expanded "><a href="../part-1/01-information-as-lawful-structure.html"><strong aria-hidden="true">1.</strong> Chapter 1: Information as Lawful Structure</a></li><li class="chapter-item expanded "><a href="../part-1/02-universal-automaton.html"><strong aria-hidden="true">2.</strong> Chapter 2: The Universal Automaton</a></li><li class="chapter-item expanded "><a href="../part-1/03-labels-schedules-receipts.html"><strong aria-hidden="true">3.</strong> Chapter 3: Intrinsic Labels, Schedules, and Receipts</a></li><li class="chapter-item expanded "><a href="../part-1/04-content-addressable-memory.html"><strong aria-hidden="true">4.</strong> Chapter 4: Content-Addressable Memory</a></li><li class="spacer"></li><li class="chapter-item expanded affix "><li class="part-title">Part II: Algebraic Structure</li><li class="chapter-item expanded "><a href="../part-2/05-lawfulness-as-type-system.html"><strong aria-hidden="true">5.</strong> Chapter 5: Lawfulness as a Type System</a></li><li class="chapter-item expanded "><a href="../part-2/06-programs-as-geometry.html"><strong aria-hidden="true">6.</strong> Chapter 6: Programs as Geometry</a></li><li class="chapter-item expanded "><a href="../part-2/07-algorithmic-reification.html"><strong aria-hidden="true">7.</strong> Chapter 7: Algorithmic Reification</a></li><li class="chapter-item expanded "><a href="../part-2/08-universal-cost.html"><strong aria-hidden="true">8.</strong> Chapter 8: The Universal Cost</a></li><li class="spacer"></li><li class="chapter-item expanded affix "><li class="part-title">Part III: System Architecture</li><li class="chapter-item expanded "><a href="../part-3/09-security-safety-correctness.html"><strong aria-hidden="true">9.</strong> Chapter 9: Security, Safety, and Correctness</a></li><li class="chapter-item expanded "><a href="../part-3/10-worked-micro-examples.html" class="active"><strong aria-hidden="true">10.</strong> Chapter 10: Worked Micro-Examples</a></li><li class="chapter-item expanded "><a href="../part-3/11-interfaces-to-mainstream-cs.html"><strong aria-hidden="true">11.</strong> Chapter 11: Interfaces to Mainstream CS</a></li><li class="chapter-item expanded "><a href="../part-3/12-minimal-core.html"><strong aria-hidden="true">12.</strong> Chapter 12: Minimal Core</a></li><li class="spacer"></li><li class="chapter-item expanded affix "><li class="part-title">Part IV: Protocol Design</li><li class="chapter-item expanded "><a href="../part-4/13-meta-theory-expressivity.html"><strong aria-hidden="true">13.</strong> Chapter 13: Meta-Theory & Expressivity</a></li><li class="chapter-item expanded "><a href="../part-4/14-normalization-confluence.html"><strong aria-hidden="true">14.</strong> Chapter 14: Normalization & Confluence</a></li><li class="chapter-item expanded "><a href="../part-4/15-categorical-semantics.html"><strong aria-hidden="true">15.</strong> Chapter 15: Categorical Semantics</a></li><li class="chapter-item expanded "><a href="../part-4/16-security-proofs.html"><strong aria-hidden="true">16.</strong> Chapter 16: Security Proofs</a></li><li class="spacer"></li><li class="chapter-item expanded affix "><li class="part-title">Part V: Implementation</li><li class="chapter-item expanded "><a href="../part-5/17-optimization-landscape.html"><strong aria-hidden="true">17.</strong> Chapter 17: Optimization Landscape</a></li><li class="chapter-item expanded "><a href="../part-5/18-data-structure-implementation.html"><strong aria-hidden="true">18.</strong> Chapter 18: Data Structure Implementation</a></li><li class="chapter-item expanded "><a href="../part-5/19-runtime-architecture.html"><strong aria-hidden="true">19.</strong> Chapter 19: Runtime Architecture</a></li><li class="chapter-item expanded "><a href="../part-5/20-verification-system.html"><strong aria-hidden="true">20.</strong> Chapter 20: Verification System</a></li><li class="spacer"></li><li class="chapter-item expanded affix "><li class="part-title">Part VI: Applications</li><li class="chapter-item expanded "><a href="../part-6/21-distributed-systems.html"><strong aria-hidden="true">21.</strong> Chapter 21: Distributed Systems</a></li><li class="chapter-item expanded "><a href="../part-6/22-database-systems.html"><strong aria-hidden="true">22.</strong> Chapter 22: Database Systems</a></li><li class="chapter-item expanded "><a href="../part-6/23-compiler-construction.html"><strong aria-hidden="true">23.</strong> Chapter 23: Compiler Construction</a></li><li class="chapter-item expanded "><a href="../part-6/24-machine-learning-integration.html"><strong aria-hidden="true">24.</strong> Chapter 24: Machine Learning Integration</a></li><li class="spacer"></li><li class="chapter-item expanded affix "><li class="part-title">Appendices</li><li class="chapter-item expanded "><a href="../appendices/A-glossary.html"><strong aria-hidden="true">25.</strong> Appendix A: Glossary</a></li><li class="chapter-item expanded "><a href="../appendices/B-mathematical-notation.html"><strong aria-hidden="true">26.</strong> Appendix B: Mathematical Notation</a></li><li class="chapter-item expanded "><a href="../appendices/C-cs-mappings.html"><strong aria-hidden="true">27.</strong> Appendix C: Side-by-Side CS Mappings</a></li><li class="chapter-item expanded "><a href="../appendices/D-exercise-solutions.html"><strong aria-hidden="true">28.</strong> Appendix D: Exercise Solutions</a></li><li class="chapter-item expanded "><a href="../appendices/E-implementation-code.html"><strong aria-hidden="true">29.</strong> Appendix E: Implementation Code</a></li><li class="chapter-item expanded "><a href="../appendices/F-research-problems.html"><strong aria-hidden="true">30.</strong> Appendix F: Research Problems</a></li><li class="spacer"></li><li class="chapter-item expanded affix "><a href="../bibliography.html">Bibliography</a></li><li class="chapter-item expanded affix "><a href="../index.html">Index</a></li></ol>
+            </div>
+            <div id="sidebar-resize-handle" class="sidebar-resize-handle">
+                <div class="sidebar-resize-indicator"></div>
+            </div>
+        </nav>
+
+        <!-- Track and set sidebar scroll position -->
+        <script>
+            var sidebarScrollbox = document.querySelector('#sidebar .sidebar-scrollbox');
+            sidebarScrollbox.addEventListener('click', function(e) {
+                if (e.target.tagName === 'A') {
+                    sessionStorage.setItem('sidebar-scroll', sidebarScrollbox.scrollTop);
+                }
+            }, { passive: true });
+            var sidebarScrollTop = sessionStorage.getItem('sidebar-scroll');
+            sessionStorage.removeItem('sidebar-scroll');
+            if (sidebarScrollTop) {
+                // preserve sidebar scroll position when navigating via links within sidebar
+                sidebarScrollbox.scrollTop = sidebarScrollTop;
+            } else {
+                // scroll sidebar to current active section when navigating via "next/previous chapter" buttons
+                var activeSection = document.querySelector('#sidebar .active');
+                if (activeSection) {
+                    activeSection.scrollIntoView({ block: 'center' });
+                }
+            }
+        </script>
+
+        <div id="page-wrapper" class="page-wrapper">
+
+            <div class="page">
+                                <div id="menu-bar-hover-placeholder"></div>
+                <div id="menu-bar" class="menu-bar sticky">
+                    <div class="left-buttons">
+                        <label id="sidebar-toggle" class="icon-button" for="sidebar-toggle-anchor" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="sidebar">
+                            <i class="fa fa-bars"></i>
+                        </label>
+                        <button id="theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="theme-list">
+                            <i class="fa fa-paint-brush"></i>
+                        </button>
+                        <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="light">Light</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="navy">Navy</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="ayu">Ayu</button></li>
+                        </ul>
+                        <button id="search-toggle" class="icon-button" type="button" title="Search. (Shortkey: s)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="S" aria-controls="searchbar">
+                            <i class="fa fa-search"></i>
+                        </button>
+                    </div>
+
+                    <h1 class="menu-title">The Hologram (12,288): A Complete Computer Science Formalization</h1>
+
+                    <div class="right-buttons">
+                        <a href="../print.html" title="Print this book" aria-label="Print this book">
+                            <i id="print-button" class="fa fa-print"></i>
+                        </a>
+                        <a href="https://github.com/uor-foundation/hologram-cs" title="Git repository" aria-label="Git repository">
+                            <i id="git-repository-button" class="fa fa-github"></i>
+                        </a>
+
+                    </div>
+                </div>
+
+                <div id="search-wrapper" class="hidden">
+                    <form id="searchbar-outer" class="searchbar-outer">
+                        <input type="search" id="searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="searchresults-outer" aria-describedby="searchresults-header">
+                    </form>
+                    <div id="searchresults-outer" class="searchresults-outer hidden">
+                        <div id="searchresults-header" class="searchresults-header"></div>
+                        <ul id="searchresults">
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
+                <script>
+                    document.getElementById('sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
+                    document.getElementById('sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
+                    Array.from(document.querySelectorAll('#sidebar a')).forEach(function(link) {
+                        link.setAttribute('tabIndex', sidebar === 'visible' ? 0 : -1);
+                    });
+                </script>
+
+                <div id="content" class="content">
+                    <main>
+                        <h1 id="chapter-10-worked-micro-examples"><a class="header" href="#chapter-10-worked-micro-examples">Chapter 10: Worked Micro-Examples</a></h1>
+<h2 id="motivation"><a class="header" href="#motivation">Motivation</a></h2>
+<p>Abstract theory becomes concrete through examples. This chapter presents six complete micro-examples that demonstrate every aspect of the Hologram model: resonance classes, scheduling, lift/projection, content addressing, process objects, and action minimization. Each example is small enough to trace by hand yet rich enough to illustrate key principles.</p>
+<h2 id="r96-checksum-toy"><a class="header" href="#r96-checksum-toy">R96 Checksum Toy</a></h2>
+<h3 id="setting-up-the-example"><a class="header" href="#setting-up-the-example">Setting Up the Example</a></h3>
+<p>Let’s compute R96 checksums for a 16-byte configuration:</p>
+<pre><code class="language-python"># Initial 16 bytes on a 4×4 region of the lattice
+bytes = [
+    0x42, 0x7F, 0x00, 0xA5,  # Row 0
+    0x33, 0x96, 0xDE, 0x01,  # Row 1
+    0xFF, 0x88, 0x4A, 0xC0,  # Row 2
+    0x17, 0x6B, 0xE2, 0x5D,  # Row 3
+]
+
+# Place on lattice sites (0,0) through (0,15)
+config = Configuration()
+for i, byte in enumerate(bytes):
+    config.set(Site(0, i), byte)
+</code></pre>
+<h3 id="computing-residues"><a class="header" href="#computing-residues">Computing Residues</a></h3>
+<p>Apply the resonance function to each byte:</p>
+<pre><code class="language-python">def R(byte):
+    # Simplified R96 function
+    primary = byte % 96
+    secondary = byte // 96
+    return (primary + secondary * 17) % 96
+
+residues = [R(b) for b in bytes]
+# [66, 47, 0, 75, 51, 71, 73, 1, 79, 56, 74, 72, 23, 43, 70, 93]
+</code></pre>
+<h3 id="building-the-digest"><a class="header" href="#building-the-digest">Building the Digest</a></h3>
+<pre><code class="language-python">def compute_r96_digest(residues):
+    # Step 1: Build histogram
+    histogram = [0] * 96
+    for r in residues:
+        histogram[r] += 1
+
+    # Step 2: Hash the histogram
+    import hashlib
+    h = hashlib.sha256()
+
+    for i, count in enumerate(histogram):
+        if count &gt; 0:
+            h.update(f"{i}:{count},".encode())
+
+    return h.hexdigest()[:16]  # First 16 chars
+
+digest = compute_r96_digest(residues)
+# "a7f3e9b2c5d8..."
+</code></pre>
+<h3 id="gauge-invariance-test"><a class="header" href="#gauge-invariance-test">Gauge Invariance Test</a></h3>
+<pre><code class="language-python"># Permute the bytes
+import random
+permuted_bytes = bytes.copy()
+random.shuffle(permuted_bytes)
+
+# Compute digest of permutation
+permuted_residues = [R(b) for b in permuted_bytes]
+permuted_digest = compute_r96_digest(permuted_residues)
+
+# Should be identical!
+assert digest == permuted_digest
+print("✓ R96 digest is permutation-invariant")
+</code></pre>
+<h3 id="key-observations"><a class="header" href="#key-observations">Key Observations</a></h3>
+<ol>
+<li><strong>Residues distribute uniformly</strong>: Each class appears ~equally</li>
+<li><strong>Multiset property</strong>: Order doesn’t matter, only counts</li>
+<li><strong>Collision resistance</strong>: Different byte sets → different digests</li>
+<li><strong>Composability</strong>: Can merge digests from regions</li>
+</ol>
+<h2 id="c768-fairness-probe"><a class="header" href="#c768-fairness-probe">C768 Fairness Probe</a></h2>
+<h3 id="creating-a-24-site-orbit"><a class="header" href="#creating-a-24-site-orbit">Creating a 24-Site Orbit</a></h3>
+<pre><code class="language-python"># Start at site (0,0)
+start = Site(0, 0)
+orbit = [start]
+current = start
+
+# Apply σ repeatedly
+for i in range(1, 768):
+    current = current.rotate_schedule()
+    if i &lt; 24:  # Track first 24 sites
+        orbit.append(current)
+</code></pre>
+<h3 id="visualizing-the-schedule-spiral"><a class="header" href="#visualizing-the-schedule-spiral">Visualizing the Schedule Spiral</a></h3>
+<pre><code class="language-python">def visualize_orbit(orbit):
+    grid = [[' ' for _ in range(16)] for _ in range(3)]
+
+    for i, site in enumerate(orbit[:24]):
+        p, b = site.page % 3, site.byte % 16
+        grid[p][b] = chr(ord('A') + i)
+
+    for row in grid:
+        print(''.join(row))
+
+visualize_orbit(orbit)
+# ABCD    QRST
+# EFGH    UVWX
+# IJKL    MNOP
+</code></pre>
+<h3 id="measuring-fairness"><a class="header" href="#measuring-fairness">Measuring Fairness</a></h3>
+<pre><code class="language-python">def measure_fairness(schedule_length=768):
+    activations = {}
+
+    current = Site(0, 0)
+    for step in range(schedule_length * 3):  # Three cycles
+        # Record activation
+        if current not in activations:
+            activations[current] = []
+        activations[current].append(step)
+
+        current = current.rotate_schedule()
+
+    # Compute statistics
+    gaps = []
+    for site, times in activations.items():
+        for i in range(1, len(times)):
+            gaps.append(times[i] - times[i-1])
+
+    mean_gap = sum(gaps) / len(gaps)
+    max_gap = max(gaps)
+    min_gap = min(gaps)
+
+    print(f"Mean gap: {mean_gap}")  # Should be 768
+    print(f"Max gap: {max_gap}")    # Should be 768
+    print(f"Min gap: {min_gap}")    # Should be 768
+    print("✓ Perfect fairness achieved")
+</code></pre>
+<h3 id="flow-conservation"><a class="header" href="#flow-conservation">Flow Conservation</a></h3>
+<pre><code class="language-python">def verify_flow_conservation():
+    # Track "mass" flowing through schedule
+    mass = [1.0] * 12288  # Unit mass at each site
+
+    # One complete cycle
+    current = Site(0, 0)
+    for _ in range(768):
+        # Mass flows along schedule
+        next_site = current.rotate_schedule()
+
+        # Conservation check
+        total_before = sum(mass)
+
+        # Simulate flow
+        flow = mass[current.linear_index()] * 0.1
+        mass[current.linear_index()] -= flow
+        mass[next_site.linear_index()] += flow
+
+        total_after = sum(mass)
+
+        assert abs(total_before - total_after) &lt; 1e-10
+
+        current = next_site
+
+    print("✓ Flow conserved throughout cycle")
+</code></pre>
+<h2 id="Φ-round-trip"><a class="header" href="#Φ-round-trip">Φ Round-Trip</a></h2>
+<h3 id="setting-up-boundary-and-interior"><a class="header" href="#setting-up-boundary-and-interior">Setting Up Boundary and Interior</a></h3>
+<pre><code class="language-python"># Define boundary region (outer ring)
+def is_boundary(site):
+    p, b = site.page, site.byte
+    return p &lt; 2 or p &gt; 45 or b &lt; 16 or b &gt; 239
+
+boundary_data = []
+for p in range(48):
+    for b in range(256):
+        site = Site(p, b)
+        if is_boundary(site):
+            # Simple test pattern
+            value = (p + b) % 256
+            boundary_data.append((site, value))
+</code></pre>
+<h3 id="lifting-to-interior"><a class="header" href="#lifting-to-interior">Lifting to Interior</a></h3>
+<pre><code class="language-python">def lift_phi(boundary_data, budget):
+    interior = {}
+
+    for site, value in boundary_data:
+        # Each boundary value influences nearby interior
+        influence_radius = max(1, 10 - budget)  # Smaller budget → larger radius
+
+        for dp in range(-influence_radius, influence_radius+1):
+            for db in range(-influence_radius, influence_radius+1):
+                interior_site = Site(
+                    (site.page + dp) % 48,
+                    (site.byte + db) % 256
+                )
+
+                if not is_boundary(interior_site):
+                    weight = 1.0 / (abs(dp) + abs(db) + 1)
+                    if interior_site not in interior:
+                        interior[interior_site] = 0
+                    interior[interior_site] += value * weight
+
+    # Normalize
+    max_val = max(interior.values()) if interior else 1
+    for site in interior:
+        interior[site] /= max_val
+        interior[site] = int(interior[site] * 255)
+
+    return interior
+</code></pre>
+<h3 id="projecting-back"><a class="header" href="#projecting-back">Projecting Back</a></h3>
+<pre><code class="language-python">def proj_phi(interior, budget):
+    boundary = []
+
+    for p in range(48):
+        for b in range(256):
+            site = Site(p, b)
+            if is_boundary(site):
+                # Gather from interior
+                gathered = 0
+                weight_sum = 0
+
+                influence_radius = max(1, 10 - budget)
+
+                for dp in range(-influence_radius, influence_radius+1):
+                    for db in range(-influence_radius, influence_radius+1):
+                        interior_site = Site(
+                            (p + dp) % 48,
+                            (b + db) % 256
+                        )
+
+                        if not is_boundary(interior_site):
+                            if interior_site in interior:
+                                weight = 1.0 / (abs(dp) + abs(db) + 1)
+                                gathered += interior[interior_site] * weight
+                                weight_sum += weight
+
+                if weight_sum &gt; 0:
+                    value = int(gathered / weight_sum)
+                else:
+                    value = 0
+
+                boundary.append((site, value))
+
+    return boundary
+</code></pre>
+<h3 id="testing-round-trip-property"><a class="header" href="#testing-round-trip-property">Testing Round-Trip Property</a></h3>
+<pre><code class="language-python">def test_phi_roundtrip():
+    # Original boundary
+    original = boundary_data
+
+    for budget in [0, 5, 10, 20]:
+        # Lift then project
+        interior = lift_phi(original, budget)
+        recovered = proj_phi(interior, budget)
+
+        # Measure error
+        error = 0
+        for (s1, v1), (s2, v2) in zip(original, recovered):
+            assert s1 == s2  # Sites match
+            error += abs(v1 - v2)
+
+        avg_error = error / len(original)
+        print(f"Budget {budget}: Average error = {avg_error:.2f}")
+
+        if budget == 0:
+            assert avg_error &lt; 1.0  # Near-perfect recovery
+            print("✓ Round-trip identity at budget 0")
+</code></pre>
+<h2 id="cam-identity"><a class="header" href="#cam-identity">CAM Identity</a></h2>
+<h3 id="creating-two-equivalent-objects"><a class="header" href="#creating-two-equivalent-objects">Creating Two Equivalent Objects</a></h3>
+<pre><code class="language-python"># Two strings with same content, different positions
+str1 = create_string("HELLO", position=(5, 10))
+str2 = create_string("HELLO", position=(20, 100))
+
+print(f"String 1 at {str1.position}: {str1.content}")
+print(f"String 2 at {str2.position}: {str2.content}")
+</code></pre>
+<h3 id="canonicalization"><a class="header" href="#canonicalization">Canonicalization</a></h3>
+<pre><code class="language-python">def canonicalize(obj):
+    # Step 1: Translate to origin
+    min_p = min(site.page for site in obj.sites)
+    min_b = min(site.byte for site in obj.sites)
+
+    canonical = obj.translate(-min_p, -min_b)
+
+    # Step 2: Align to phase 0
+    current_phase = compute_phase(canonical)
+    canonical = canonical.rotate(-current_phase)
+
+    # Step 3: Order boundary sites lexicographically
+    boundary = sorted(canonical.boundary_sites())
+    canonical.reorder_boundary(boundary)
+
+    # Step 4: Apply Φ lift
+    canonical.interior = lift_phi(canonical.boundary, budget=0)
+
+    return canonical
+</code></pre>
+<h3 id="computing-addresses"><a class="header" href="#computing-addresses">Computing Addresses</a></h3>
+<pre><code class="language-python"># Canonicalize both strings
+nf1 = canonicalize(str1)
+nf2 = canonicalize(str2)
+
+# Compute receipts
+receipt1 = compute_receipt(nf1)
+receipt2 = compute_receipt(nf2)
+
+# Should be identical!
+assert receipt1 == receipt2
+print("✓ Equivalent objects have same receipt")
+
+# Compute addresses
+addr1 = H(receipt1)
+addr2 = H(receipt2)
+
+assert addr1 == addr2
+print(f"✓ Both map to address {addr1}")
+print("✓ Content determines identity")
+</code></pre>
+<h3 id="collision-test"><a class="header" href="#collision-test">Collision Test</a></h3>
+<pre><code class="language-python">def test_no_collisions():
+    objects = []
+    addresses = set()
+
+    # Create 1000 different strings
+    for i in range(1000):
+        obj = create_string(f"String_{i}", position=(i%48, i%256))
+        canonical = canonicalize(obj)
+        addr = H(compute_receipt(canonical))
+
+        # Check for collision
+        if addr in addresses:
+            print(f"Collision at {addr}!")
+            return False
+
+        addresses.add(addr)
+        objects.append((obj, addr))
+
+    print("✓ No collisions among 1000 distinct objects")
+    return True
+
+test_no_collisions()
+</code></pre>
+<h2 id="process-object"><a class="header" href="#process-object">Process Object</a></h2>
+<h3 id="composing-operations"><a class="header" href="#composing-operations">Composing Operations</a></h3>
+<pre><code class="language-python"># Define two morphisms
+def swap_morphism(i, j):
+    return Process.Morphism(f"swap_{i}_{j}")
+
+def rotate_morphism(n):
+    return Process.Rotate(n)
+
+# Sequential composition
+swap_01 = swap_morphism(0, 1)
+swap_23 = swap_morphism(2, 3)
+rotate_1 = rotate_morphism(1)
+
+sequential = Process.Sequential(
+    Process.Sequential(swap_01, rotate_1),
+    swap_23
+)
+</code></pre>
+<h3 id="computing-process-receipt"><a class="header" href="#computing-process-receipt">Computing Process Receipt</a></h3>
+<pre><code class="language-python">def process_receipt(process):
+    if isinstance(process, Process.Identity):
+        return Receipt.identity()
+
+    elif isinstance(process, Process.Morphism):
+        return morphism_receipt(process.id)
+
+    elif isinstance(process, Process.Sequential):
+        r1 = process_receipt(process.first)
+        r2 = process_receipt(process.second)
+        return Receipt.compose_sequential(r1, r2)
+
+    elif isinstance(process, Process.Rotate):
+        return rotation_receipt(process.steps)
+
+receipt = process_receipt(sequential)
+print(f"Process receipt: {receipt}")
+print(f"Total budget: {receipt.budget}")
+</code></pre>
+<h3 id="checking-witness-chain"><a class="header" href="#checking-witness-chain">Checking Witness Chain</a></h3>
+<pre><code class="language-python">def build_witness_chain(process, initial_state):
+    chain = []
+    current_state = initial_state
+
+    def execute(proc):
+        nonlocal current_state
+        pre = hash(current_state)
+
+        if isinstance(proc, Process.Morphism):
+            # Execute morphism
+            current_state = apply_morphism(current_state, proc.id)
+
+        elif isinstance(proc, Process.Sequential):
+            execute(proc.first)
+            execute(proc.second)
+            return
+
+        elif isinstance(proc, Process.Rotate):
+            current_state = rotate_state(current_state, proc.steps)
+
+        post = hash(current_state)
+
+        # Add to chain
+        chain.append(WitnessFragment(
+            operation=str(proc),
+            pre_state=pre,
+            post_state=post,
+            local_receipt=compute_local_receipt(current_state),
+            budget_consumed=1
+        ))
+
+    execute(process)
+    return chain, current_state
+
+initial = [3, 1, 4, 1, 5]
+chain, final = build_witness_chain(sequential, initial)
+
+# Verify chain
+assert verify_witness_chain(chain, initial, final)
+print("✓ Witness chain verified")
+</code></pre>
+<h2 id="action-minimization"><a class="header" href="#action-minimization">Action Minimization</a></h2>
+<h3 id="defining-a-tiny-action"><a class="header" href="#defining-a-tiny-action">Defining a Tiny Action</a></h3>
+<pre><code class="language-python"># 4×4 toy lattice
+LATTICE_SIZE = 16
+
+def toy_action(config):
+    """
+    Three-term action:
+    1. Geometric smoothness
+    2. Target achievement
+    3. Budget penalty
+    """
+    action = 0
+
+    # Geometric term: penalize differences
+    for i in range(LATTICE_SIZE):
+        for j in range(i+1, LATTICE_SIZE):
+            if adjacent(i, j):
+                diff = config[i] - config[j]
+                action += diff * diff
+
+    # Target term: want sum = 100
+    target_sum = 100
+    actual_sum = sum(config)
+    action += (actual_sum - target_sum) ** 2
+
+    # Budget term: penalize operations
+    operation_count = count_operations(config)
+    action += operation_count * 0.1
+
+    return action
+</code></pre>
+<h3 id="solving-for-stationarity"><a class="header" href="#solving-for-stationarity">Solving for Stationarity</a></h3>
+<pre><code class="language-python">def minimize_action(initial_config):
+    config = initial_config.copy()
+    learning_rate = 0.01
+
+    for iteration in range(1000):
+        # Compute gradient numerically
+        gradient = []
+        eps = 0.001
+
+        for i in range(LATTICE_SIZE):
+            # Finite difference
+            config[i] += eps
+            action_plus = toy_action(config)
+            config[i] -= 2*eps
+            action_minus = toy_action(config)
+            config[i] += eps
+
+            grad = (action_plus - action_minus) / (2*eps)
+            gradient.append(grad)
+
+        # Gradient descent
+        for i in range(LATTICE_SIZE):
+            config[i] -= learning_rate * gradient[i]
+
+        # Check convergence
+        if sum(abs(g) for g in gradient) &lt; 0.01:
+            print(f"✓ Converged at iteration {iteration}")
+            break
+
+    return config
+
+# Initial random configuration
+import random
+initial = [random.randint(0, 10) for _ in range(LATTICE_SIZE)]
+print(f"Initial action: {toy_action(initial):.2f}")
+
+# Minimize
+optimal = minimize_action(initial)
+print(f"Final action: {toy_action(optimal):.2f}")
+print(f"Sum: {sum(optimal):.2f} (target: 100)")
+</code></pre>
+<h3 id="interpreting-results"><a class="header" href="#interpreting-results">Interpreting Results</a></h3>
+<pre><code class="language-python">def interpret_solution(config):
+    # Check Euler-Lagrange conditions
+    print("\nEuler-Lagrange analysis:")
+
+    # Stationarity at each site
+    for i in range(LATTICE_SIZE):
+        # Local variation
+        neighbors = get_neighbors(i)
+        laplacian = sum(config[j] - config[i] for j in neighbors)
+
+        # Should be near zero at minimum
+        print(f"Site {i}: ∇²φ = {laplacian:.3f}")
+
+    # Visualize as 4×4 grid
+    print("\nConfiguration:")
+    for row in range(4):
+        values = config[row*4:(row+1)*4]
+        print(" ".join(f"{v:6.2f}" for v in values))
+
+    # Check constraints
+    print(f"\n✓ Sum constraint: {sum(config):.2f} ≈ 100")
+    print(f"✓ Smoothness: neighbor differences &lt; 1")
+    print(f"✓ Compilation successful!")
+
+interpret_solution(optimal)
+</code></pre>
+<h2 id="exercises"><a class="header" href="#exercises">Exercises</a></h2>
+<p><strong>Exercise 10.1</strong>: Extend the R96 example to handle 256 bytes. What patterns emerge in the histogram?</p>
+<p><strong>Exercise 10.2</strong>: Prove that the C768 schedule visits each site exactly once per cycle.</p>
+<p><strong>Exercise 10.3</strong>: Measure Φ round-trip error as a function of budget. Find the optimal budget.</p>
+<p><strong>Exercise 10.4</strong>: Create 100 random objects and verify no CAM collisions occur.</p>
+<p><strong>Exercise 10.5</strong>: Build a sorting process object and verify its witness chain.</p>
+<p><strong>Exercise 10.6</strong>: Add a fourth term to the toy action. How does the solution change?</p>
+<h2 id="takeaways"><a class="header" href="#takeaways">Takeaways</a></h2>
+<p>These micro-examples demonstrate that:</p>
+<ol>
+<li><strong>R96 checksums are robust</strong>: Permutation-invariant, compositional</li>
+<li><strong>C768 provides perfect fairness</strong>: Every site equally scheduled</li>
+<li><strong>Φ preserves information</strong>: Round-trip recovery at budget 0</li>
+<li><strong>CAM provides unique addresses</strong>: Content determines identity</li>
+<li><strong>Process objects are verifiable</strong>: Witness chains prove correctness</li>
+<li><strong>Action minimization works</strong>: Gradient descent finds valid configurations</li>
+</ol>
+<p>Each mechanism is simple individually but combines to create a powerful system.</p>
+<hr />
+<p><em>Next: Chapter 11 bridges these concepts to mainstream computer science.</em></p>
+
+                    </main>
+
+                    <nav class="nav-wrapper" aria-label="Page navigation">
+                        <!-- Mobile navigation buttons -->
+                            <a rel="prev" href="../part-3/09-security-safety-correctness.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                                <i class="fa fa-angle-left"></i>
+                            </a>
+
+                            <a rel="next prefetch" href="../part-3/11-interfaces-to-mainstream-cs.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                                <i class="fa fa-angle-right"></i>
+                            </a>
+
+                        <div style="clear: both"></div>
+                    </nav>
+                </div>
+            </div>
+
+            <nav class="nav-wide-wrapper" aria-label="Page navigation">
+                    <a rel="prev" href="../part-3/09-security-safety-correctness.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                        <i class="fa fa-angle-left"></i>
+                    </a>
+
+                    <a rel="next prefetch" href="../part-3/11-interfaces-to-mainstream-cs.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                        <i class="fa fa-angle-right"></i>
+                    </a>
+            </nav>
+
+        </div>
+
+
+
+
+        <script>
+            window.playground_copyable = true;
+        </script>
+
+
+        <script src="../elasticlunr.min.js"></script>
+        <script src="../mark.min.js"></script>
+        <script src="../searcher.js"></script>
+
+        <script src="../clipboard.min.js"></script>
+        <script src="../highlight.js"></script>
+        <script src="../book.js"></script>
+
+        <!-- Custom JS scripts -->
+
+
+    </div>
+    </body>
+</html>

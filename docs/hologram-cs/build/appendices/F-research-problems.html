@@ -1,0 +1,595 @@
+<!DOCTYPE HTML>
+<html lang="en" class="light" dir="ltr">
+    <head>
+        <!-- Book generated using mdBook -->
+        <meta charset="UTF-8">
+        <title>Appendix F: Research Problems - The Hologram (12,288): A Complete Computer Science Formalization</title>
+
+
+        <!-- Custom HTML head -->
+        
+        <meta name="description" content="A comprehensive computer science formalization of the 12,288 Hologram model of computation using mainstream CS formalisms">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#ffffff">
+
+        <link rel="icon" href="../favicon.svg">
+        <link rel="shortcut icon" href="../favicon.png">
+        <link rel="stylesheet" href="../css/variables.css">
+        <link rel="stylesheet" href="../css/general.css">
+        <link rel="stylesheet" href="../css/chrome.css">
+        <link rel="stylesheet" href="../css/print.css" media="print">
+
+        <!-- Fonts -->
+        <link rel="stylesheet" href="../FontAwesome/css/font-awesome.css">
+        <link rel="stylesheet" href="../fonts/fonts.css">
+
+        <!-- Highlight.js Stylesheets -->
+        <link rel="stylesheet" href="../highlight.css">
+        <link rel="stylesheet" href="../tomorrow-night.css">
+        <link rel="stylesheet" href="../ayu-highlight.css">
+
+        <!-- Custom theme stylesheets -->
+        <link rel="stylesheet" href="../theme/custom.css">
+
+        <!-- MathJax -->
+        <script async src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    </head>
+    <body class="sidebar-visible no-js">
+    <div id="body-container">
+        <!-- Provide site root to javascript -->
+        <script>
+            var path_to_root = "../";
+            var default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "navy" : "light";
+        </script>
+
+        <!-- Work around some values being stored in localStorage wrapped in quotes -->
+        <script>
+            try {
+                var theme = localStorage.getItem('mdbook-theme');
+                var sidebar = localStorage.getItem('mdbook-sidebar');
+
+                if (theme.startsWith('"') && theme.endsWith('"')) {
+                    localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
+                }
+
+                if (sidebar.startsWith('"') && sidebar.endsWith('"')) {
+                    localStorage.setItem('mdbook-sidebar', sidebar.slice(1, sidebar.length - 1));
+                }
+            } catch (e) { }
+        </script>
+
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script>
+            var theme;
+            try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
+            if (theme === null || theme === undefined) { theme = default_theme; }
+            var html = document.querySelector('html');
+            html.classList.remove('light')
+            html.classList.add(theme);
+            var body = document.querySelector('body');
+            body.classList.remove('no-js')
+            body.classList.add('js');
+        </script>
+
+        <input type="checkbox" id="sidebar-toggle-anchor" class="hidden">
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script>
+            var body = document.querySelector('body');
+            var sidebar = null;
+            var sidebar_toggle = document.getElementById("sidebar-toggle-anchor");
+            if (document.body.clientWidth >= 1080) {
+                try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
+                sidebar = sidebar || 'visible';
+            } else {
+                sidebar = 'hidden';
+            }
+            sidebar_toggle.checked = sidebar === 'visible';
+            body.classList.remove('sidebar-visible');
+            body.classList.add("sidebar-" + sidebar);
+        </script>
+
+        <nav id="sidebar" class="sidebar" aria-label="Table of contents">
+            <div class="sidebar-scrollbox">
+                <ol class="chapter"><li class="chapter-item expanded affix "><a href="../title-page.html">Title Page</a></li><li class="chapter-item expanded affix "><a href="../preface.html">Preface</a></li><li class="chapter-item expanded affix "><a href="../readers-guide.html">Reader's Guide & Conventions</a></li><li class="spacer"></li><li class="chapter-item expanded affix "><li class="part-title">Part I: Mathematical Foundations</li><li class="chapter-item expanded "><a href="../part-1/01-information-as-lawful-structure.html"><strong aria-hidden="true">1.</strong> Chapter 1: Information as Lawful Structure</a></li><li class="chapter-item expanded "><a href="../part-1/02-universal-automaton.html"><strong aria-hidden="true">2.</strong> Chapter 2: The Universal Automaton</a></li><li class="chapter-item expanded "><a href="../part-1/03-labels-schedules-receipts.html"><strong aria-hidden="true">3.</strong> Chapter 3: Intrinsic Labels, Schedules, and Receipts</a></li><li class="chapter-item expanded "><a href="../part-1/04-content-addressable-memory.html"><strong aria-hidden="true">4.</strong> Chapter 4: Content-Addressable Memory</a></li><li class="spacer"></li><li class="chapter-item expanded affix "><li class="part-title">Part II: Algebraic Structure</li><li class="chapter-item expanded "><a href="../part-2/05-lawfulness-as-type-system.html"><strong aria-hidden="true">5.</strong> Chapter 5: Lawfulness as a Type System</a></li><li class="chapter-item expanded "><a href="../part-2/06-programs-as-geometry.html"><strong aria-hidden="true">6.</strong> Chapter 6: Programs as Geometry</a></li><li class="chapter-item expanded "><a href="../part-2/07-algorithmic-reification.html"><strong aria-hidden="true">7.</strong> Chapter 7: Algorithmic Reification</a></li><li class="chapter-item expanded "><a href="../part-2/08-universal-cost.html"><strong aria-hidden="true">8.</strong> Chapter 8: The Universal Cost</a></li><li class="spacer"></li><li class="chapter-item expanded affix "><li class="part-title">Part III: System Architecture</li><li class="chapter-item expanded "><a href="../part-3/09-security-safety-correctness.html"><strong aria-hidden="true">9.</strong> Chapter 9: Security, Safety, and Correctness</a></li><li class="chapter-item expanded "><a href="../part-3/10-worked-micro-examples.html"><strong aria-hidden="true">10.</strong> Chapter 10: Worked Micro-Examples</a></li><li class="chapter-item expanded "><a href="../part-3/11-interfaces-to-mainstream-cs.html"><strong aria-hidden="true">11.</strong> Chapter 11: Interfaces to Mainstream CS</a></li><li class="chapter-item expanded "><a href="../part-3/12-minimal-core.html"><strong aria-hidden="true">12.</strong> Chapter 12: Minimal Core</a></li><li class="spacer"></li><li class="chapter-item expanded affix "><li class="part-title">Part IV: Protocol Design</li><li class="chapter-item expanded "><a href="../part-4/13-meta-theory-expressivity.html"><strong aria-hidden="true">13.</strong> Chapter 13: Meta-Theory & Expressivity</a></li><li class="chapter-item expanded "><a href="../part-4/14-normalization-confluence.html"><strong aria-hidden="true">14.</strong> Chapter 14: Normalization & Confluence</a></li><li class="chapter-item expanded "><a href="../part-4/15-categorical-semantics.html"><strong aria-hidden="true">15.</strong> Chapter 15: Categorical Semantics</a></li><li class="chapter-item expanded "><a href="../part-4/16-security-proofs.html"><strong aria-hidden="true">16.</strong> Chapter 16: Security Proofs</a></li><li class="spacer"></li><li class="chapter-item expanded affix "><li class="part-title">Part V: Implementation</li><li class="chapter-item expanded "><a href="../part-5/17-optimization-landscape.html"><strong aria-hidden="true">17.</strong> Chapter 17: Optimization Landscape</a></li><li class="chapter-item expanded "><a href="../part-5/18-data-structure-implementation.html"><strong aria-hidden="true">18.</strong> Chapter 18: Data Structure Implementation</a></li><li class="chapter-item expanded "><a href="../part-5/19-runtime-architecture.html"><strong aria-hidden="true">19.</strong> Chapter 19: Runtime Architecture</a></li><li class="chapter-item expanded "><a href="../part-5/20-verification-system.html"><strong aria-hidden="true">20.</strong> Chapter 20: Verification System</a></li><li class="spacer"></li><li class="chapter-item expanded affix "><li class="part-title">Part VI: Applications</li><li class="chapter-item expanded "><a href="../part-6/21-distributed-systems.html"><strong aria-hidden="true">21.</strong> Chapter 21: Distributed Systems</a></li><li class="chapter-item expanded "><a href="../part-6/22-database-systems.html"><strong aria-hidden="true">22.</strong> Chapter 22: Database Systems</a></li><li class="chapter-item expanded "><a href="../part-6/23-compiler-construction.html"><strong aria-hidden="true">23.</strong> Chapter 23: Compiler Construction</a></li><li class="chapter-item expanded "><a href="../part-6/24-machine-learning-integration.html"><strong aria-hidden="true">24.</strong> Chapter 24: Machine Learning Integration</a></li><li class="spacer"></li><li class="chapter-item expanded affix "><li class="part-title">Appendices</li><li class="chapter-item expanded "><a href="../appendices/A-glossary.html"><strong aria-hidden="true">25.</strong> Appendix A: Glossary</a></li><li class="chapter-item expanded "><a href="../appendices/B-mathematical-notation.html"><strong aria-hidden="true">26.</strong> Appendix B: Mathematical Notation</a></li><li class="chapter-item expanded "><a href="../appendices/C-cs-mappings.html"><strong aria-hidden="true">27.</strong> Appendix C: Side-by-Side CS Mappings</a></li><li class="chapter-item expanded "><a href="../appendices/D-exercise-solutions.html"><strong aria-hidden="true">28.</strong> Appendix D: Exercise Solutions</a></li><li class="chapter-item expanded "><a href="../appendices/E-implementation-code.html"><strong aria-hidden="true">29.</strong> Appendix E: Implementation Code</a></li><li class="chapter-item expanded "><a href="../appendices/F-research-problems.html" class="active"><strong aria-hidden="true">30.</strong> Appendix F: Research Problems</a></li><li class="spacer"></li><li class="chapter-item expanded affix "><a href="../bibliography.html">Bibliography</a></li><li class="chapter-item expanded affix "><a href="../index.html">Index</a></li></ol>
+            </div>
+            <div id="sidebar-resize-handle" class="sidebar-resize-handle">
+                <div class="sidebar-resize-indicator"></div>
+            </div>
+        </nav>
+
+        <!-- Track and set sidebar scroll position -->
+        <script>
+            var sidebarScrollbox = document.querySelector('#sidebar .sidebar-scrollbox');
+            sidebarScrollbox.addEventListener('click', function(e) {
+                if (e.target.tagName === 'A') {
+                    sessionStorage.setItem('sidebar-scroll', sidebarScrollbox.scrollTop);
+                }
+            }, { passive: true });
+            var sidebarScrollTop = sessionStorage.getItem('sidebar-scroll');
+            sessionStorage.removeItem('sidebar-scroll');
+            if (sidebarScrollTop) {
+                // preserve sidebar scroll position when navigating via links within sidebar
+                sidebarScrollbox.scrollTop = sidebarScrollTop;
+            } else {
+                // scroll sidebar to current active section when navigating via "next/previous chapter" buttons
+                var activeSection = document.querySelector('#sidebar .active');
+                if (activeSection) {
+                    activeSection.scrollIntoView({ block: 'center' });
+                }
+            }
+        </script>
+
+        <div id="page-wrapper" class="page-wrapper">
+
+            <div class="page">
+                                <div id="menu-bar-hover-placeholder"></div>
+                <div id="menu-bar" class="menu-bar sticky">
+                    <div class="left-buttons">
+                        <label id="sidebar-toggle" class="icon-button" for="sidebar-toggle-anchor" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="sidebar">
+                            <i class="fa fa-bars"></i>
+                        </label>
+                        <button id="theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="theme-list">
+                            <i class="fa fa-paint-brush"></i>
+                        </button>
+                        <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="light">Light</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="navy">Navy</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="ayu">Ayu</button></li>
+                        </ul>
+                        <button id="search-toggle" class="icon-button" type="button" title="Search. (Shortkey: s)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="S" aria-controls="searchbar">
+                            <i class="fa fa-search"></i>
+                        </button>
+                    </div>
+
+                    <h1 class="menu-title">The Hologram (12,288): A Complete Computer Science Formalization</h1>
+
+                    <div class="right-buttons">
+                        <a href="../print.html" title="Print this book" aria-label="Print this book">
+                            <i id="print-button" class="fa fa-print"></i>
+                        </a>
+                        <a href="https://github.com/uor-foundation/hologram-cs" title="Git repository" aria-label="Git repository">
+                            <i id="git-repository-button" class="fa fa-github"></i>
+                        </a>
+
+                    </div>
+                </div>
+
+                <div id="search-wrapper" class="hidden">
+                    <form id="searchbar-outer" class="searchbar-outer">
+                        <input type="search" id="searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="searchresults-outer" aria-describedby="searchresults-header">
+                    </form>
+                    <div id="searchresults-outer" class="searchresults-outer hidden">
+                        <div id="searchresults-header" class="searchresults-header"></div>
+                        <ul id="searchresults">
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
+                <script>
+                    document.getElementById('sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
+                    document.getElementById('sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
+                    Array.from(document.querySelectorAll('#sidebar a')).forEach(function(link) {
+                        link.setAttribute('tabIndex', sidebar === 'visible' ? 0 : -1);
+                    });
+                </script>
+
+                <div id="content" class="content">
+                    <main>
+                        <h1 id="appendix-f-research-problems"><a class="header" href="#appendix-f-research-problems">Appendix F: Research Problems</a></h1>
+<h2 id="open-questions-in-hologram-theory"><a class="header" href="#open-questions-in-hologram-theory">Open Questions in Hologram Theory</a></h2>
+<p>This appendix presents open research problems arising from the Hologram model, organized by difficulty and impact. Each problem includes context, partial results, and suggested approaches.</p>
+<h2 id="fundamental-theory"><a class="header" href="#fundamental-theory">Fundamental Theory</a></h2>
+<h3 id="problem-1-complete-expressivity-characterization"><a class="header" href="#problem-1-complete-expressivity-characterization">Problem 1: Complete Expressivity Characterization</a></h3>
+<p><strong>Difficulty</strong>: ★★★★★
+<strong>Impact</strong>: ★★★★★</p>
+<p><strong>Statement</strong>: Precisely characterize the class of partial recursive functions that can be denoted and reified in the 12,288 model.</p>
+<p><strong>Known Results</strong>:</p>
+<ul>
+<li>All primitive recursive functions are denotable</li>
+<li>Some μ-recursive functions are denotable with bounded search</li>
+<li>The halting problem is decidable for lawful configurations</li>
+</ul>
+<p><strong>Open Questions</strong>:</p>
+<ul>
+<li>Is there a natural complexity class between PR and R that captures exactly the denotable functions?</li>
+<li>What is the relationship to elementary recursive functions?</li>
+<li>Can we embed the full λ-calculus or only linear variants?</li>
+</ul>
+<p><strong>Approach</strong>: Study the embedding of standard computational models (λ-calculus, Turing machines, cellular automata) and identify what aspects cannot be captured.</p>
+<h3 id="problem-2-gauge-classification"><a class="header" href="#problem-2-gauge-classification">Problem 2: Gauge Classification</a></h3>
+<p><strong>Difficulty</strong>: ★★★★☆
+<strong>Impact</strong>: ★★★★☆</p>
+<p><strong>Statement</strong>: Completely classify all gauge transformations that preserve lawfulness and determine the structure of the gauge group G.</p>
+<p><strong>Known</strong>:</p>
+<ul>
+<li>Translations form a normal subgroup</li>
+<li>Schedule rotation σ has order 768</li>
+<li>Boundary automorphisms form a finite subgroup G°</li>
+</ul>
+<p><strong>Unknown</strong>:</p>
+<ul>
+<li>Complete structure of G</li>
+<li>All discrete symmetries</li>
+<li>Continuous gauge transformations (if any)</li>
+</ul>
+<p><strong>Approach</strong>: Use group cohomology to study extensions and apply representation theory to classify irreducible gauge actions.</p>
+<h3 id="problem-3-action-landscape-convexity"><a class="header" href="#problem-3-action-landscape-convexity">Problem 3: Action Landscape Convexity</a></h3>
+<p><strong>Difficulty</strong>: ★★★★☆
+<strong>Impact</strong>: ★★★★★</p>
+<p><strong>Statement</strong>: Determine necessary and sufficient conditions for the action functional S to be convex on the lawful domain.</p>
+<p><strong>Partial Results</strong>:</p>
+<ul>
+<li>Geometric smoothness sector is convex</li>
+<li>R96 conformity can introduce non-convexity</li>
+<li>Empirically, most practical instances appear convex</li>
+</ul>
+<p><strong>Questions</strong>:</p>
+<ul>
+<li>When is S strongly convex?</li>
+<li>What is the modulus of convexity?</li>
+<li>Can we guarantee polynomial-time convergence to global minima?</li>
+</ul>
+<p><strong>Approach</strong>: Analyze the Hessian of S sector by sector and use techniques from convex analysis and optimization theory.</p>
+<h2 id="algorithmic-complexity"><a class="header" href="#algorithmic-complexity">Algorithmic Complexity</a></h2>
+<h3 id="problem-4-optimal-window-size"><a class="header" href="#problem-4-optimal-window-size">Problem 4: Optimal Window Size</a></h3>
+<p><strong>Difficulty</strong>: ★★★☆☆
+<strong>Impact</strong>: ★★★★☆</p>
+<p><strong>Statement</strong>: Determine the optimal active window size for various computational tasks that minimizes both space and verification time.</p>
+<p><strong>Trade-offs</strong>:</p>
+<ul>
+<li>Smaller windows: Less memory, more frequent verification</li>
+<li>Larger windows: Better locality, fewer boundaries</li>
+<li>Task-dependent optimal size</li>
+</ul>
+<p><strong>Open</strong>: Is there a universal window size that is within constant factor of optimal for all tasks?</p>
+<p><strong>Approach</strong>: Analyze specific algorithm classes (sorting, searching, graph algorithms) and derive task-specific bounds.</p>
+<h3 id="problem-5-parallel-complexity-classes"><a class="header" href="#problem-5-parallel-complexity-classes">Problem 5: Parallel Complexity Classes</a></h3>
+<p><strong>Difficulty</strong>: ★★★★☆
+<strong>Impact</strong>: ★★★☆☆</p>
+<p><strong>Statement</strong>: Define and relate parallel complexity classes (RC, HC, WC) to standard classes (NC, P, PSPACE).</p>
+<p><strong>Known</strong>:</p>
+<ul>
+<li>CC (Conservation-Checkable) ⊆ P</li>
+<li>RC (Resonance-Commutative) relates to NC</li>
+<li>WC (Window-Constrained) relates to streaming algorithms</li>
+</ul>
+<p><strong>Unknown</strong>:</p>
+<ul>
+<li>Exact relationships</li>
+<li>Separation results</li>
+<li>Complete problems for each class</li>
+</ul>
+<p><strong>Approach</strong>: Construct reductions between problems in different classes and identify natural complete problems.</p>
+<h3 id="problem-6-receipt-compression-limits"><a class="header" href="#problem-6-receipt-compression-limits">Problem 6: Receipt Compression Limits</a></h3>
+<p><strong>Difficulty</strong>: ★★★☆☆
+<strong>Impact</strong>: ★★★☆☆</p>
+<p><strong>Statement</strong>: Determine the information-theoretic limits of receipt compression while maintaining verifiability.</p>
+<p><strong>Current</strong>:</p>
+<ul>
+<li>Receipts have fixed size regardless of configuration size</li>
+<li>Some compression via Merkle trees and delta encoding</li>
+</ul>
+<p><strong>Questions</strong>:</p>
+<ul>
+<li>Minimal receipt size for ε-approximate verification?</li>
+<li>Trade-off between compression and verification time?</li>
+<li>Optimal encoding for receipt chains?</li>
+</ul>
+<p><strong>Approach</strong>: Apply information theory and compressed sensing techniques to receipt structures.</p>
+<h2 id="security-and-cryptography"><a class="header" href="#security-and-cryptography">Security and Cryptography</a></h2>
+<h3 id="problem-7-collision-complexity"><a class="header" href="#problem-7-collision-complexity">Problem 7: Collision Complexity</a></h3>
+<p><strong>Difficulty</strong>: ★★★★★
+<strong>Impact</strong>: ★★★★★</p>
+<p><strong>Statement</strong>: Prove that finding collisions in the address map H on the lawful domain requires exponential time.</p>
+<p><strong>Known</strong>:</p>
+<ul>
+<li>H is injective on lawful domain</li>
+<li>No collisions observed empirically</li>
+<li>Related to perfect hashing</li>
+</ul>
+<p><strong>Unknown</strong>:</p>
+<ul>
+<li>Computational hardness of finding near-collisions</li>
+<li>Relationship to standard cryptographic assumptions</li>
+<li>Post-quantum security</li>
+</ul>
+<p><strong>Approach</strong>: Reduce from known hard problems or show that efficient collision-finding would violate information-theoretic bounds.</p>
+<h3 id="problem-8-zero-knowledge-receipts"><a class="header" href="#problem-8-zero-knowledge-receipts">Problem 8: Zero-Knowledge Receipts</a></h3>
+<p><strong>Difficulty</strong>: ★★★★☆
+<strong>Impact</strong>: ★★★★☆</p>
+<p><strong>Statement</strong>: Design zero-knowledge proof systems for receipt verification that reveal nothing beyond validity.</p>
+<p><strong>Requirements</strong>:</p>
+<ul>
+<li>Prove receipt validity without revealing configuration</li>
+<li>Maintain composability of receipt chains</li>
+<li>Efficient verification</li>
+</ul>
+<p><strong>Challenges</strong>:</p>
+<ul>
+<li>Receipts inherently contain information</li>
+<li>Need to hide while preserving verification</li>
+<li>Composition must preserve zero-knowledge</li>
+</ul>
+<p><strong>Approach</strong>: Adapt zkSNARK techniques to receipt structure and explore homomorphic commitments.</p>
+<h3 id="problem-9-byzantine-fault-tolerance-threshold"><a class="header" href="#problem-9-byzantine-fault-tolerance-threshold">Problem 9: Byzantine Fault Tolerance Threshold</a></h3>
+<p><strong>Difficulty</strong>: ★★★☆☆
+<strong>Impact</strong>: ★★★★☆</p>
+<p><strong>Statement</strong>: Determine the optimal Byzantine fault tolerance threshold achievable with receipt-based consensus.</p>
+<p><strong>Known</strong>:</p>
+<ul>
+<li>Classical BFT achieves f &lt; n/3</li>
+<li>Receipts provide additional verification</li>
+<li>Some improvement possible</li>
+</ul>
+<p><strong>Unknown</strong>:</p>
+<ul>
+<li>Exact improvement factor</li>
+<li>Optimal protocol</li>
+<li>Trade-offs with communication complexity</li>
+</ul>
+<p><strong>Approach</strong>: Design new consensus protocols leveraging receipt properties and analyze their fault tolerance.</p>
+<h2 id="categorical-and-algebraic-structure"><a class="header" href="#categorical-and-algebraic-structure">Categorical and Algebraic Structure</a></h2>
+<h3 id="problem-10-category-of-lawful-configurations"><a class="header" href="#problem-10-category-of-lawful-configurations">Problem 10: Category of Lawful Configurations</a></h3>
+<p><strong>Difficulty</strong>: ★★★★☆
+<strong>Impact</strong>: ★★★☆☆</p>
+<p><strong>Statement</strong>: Fully characterize the category with lawful configurations as objects and budgeted morphisms as arrows.</p>
+<p><strong>Known Structure</strong>:</p>
+<ul>
+<li>Objects: Lawful configurations (β = 0)</li>
+<li>Morphisms: Budgeted transformations</li>
+<li>Composition: Budget addition mod 96</li>
+</ul>
+<p><strong>Unknown</strong>:</p>
+<ul>
+<li>Categorical limits and colimits</li>
+<li>Monoidal structure</li>
+<li>Relationship to other computational categories</li>
+</ul>
+<p><strong>Approach</strong>: Use category theory to study universal properties and construct adjunctions with known categories.</p>
+<h3 id="problem-11-poly-ontological-coherence"><a class="header" href="#problem-11-poly-ontological-coherence">Problem 11: Poly-Ontological Coherence</a></h3>
+<p><strong>Difficulty</strong>: ★★★★☆
+<strong>Impact</strong>: ★★★☆☆</p>
+<p><strong>Statement</strong>: Characterize all possible coherent poly-ontological structures and their morphisms.</p>
+<p><strong>Questions</strong>:</p>
+<ul>
+<li>When do multiple facets cohere?</li>
+<li>Classification of coherence morphisms</li>
+<li>Limits on number of simultaneous facets</li>
+</ul>
+<p><strong>Approach</strong>: Study using multicategory theory and higher-dimensional category theory.</p>
+<h3 id="problem-12-homological-invariants"><a class="header" href="#problem-12-homological-invariants">Problem 12: Homological Invariants</a></h3>
+<p><strong>Difficulty</strong>: ★★★★★
+<strong>Impact</strong>: ★★☆☆☆</p>
+<p><strong>Statement</strong>: Compute homological and homotopical invariants of configuration space modulo gauge.</p>
+<p><strong>Interest</strong>:</p>
+<ul>
+<li>Topological obstructions to transformations</li>
+<li>Persistent homology of process objects</li>
+<li>Spectral sequences for receipt chains</li>
+</ul>
+<p><strong>Approach</strong>: Apply algebraic topology to the quotient space 𝕋/G and compute invariants.</p>
+<h2 id="machine-learning-integration"><a class="header" href="#machine-learning-integration">Machine Learning Integration</a></h2>
+<h3 id="problem-13-sample-complexity-bounds"><a class="header" href="#problem-13-sample-complexity-bounds">Problem 13: Sample Complexity Bounds</a></h3>
+<p><strong>Difficulty</strong>: ★★★☆☆
+<strong>Impact</strong>: ★★★★☆</p>
+<p><strong>Statement</strong>: Derive tight PAC learning bounds for hypothesis classes defined by receipt constraints.</p>
+<p><strong>Known</strong>:</p>
+<ul>
+<li>Receipt dimension provides VC dimension upper bound</li>
+<li>Perfect hashing improves sample complexity</li>
+<li>Empirically very efficient</li>
+</ul>
+<p><strong>Unknown</strong>:</p>
+<ul>
+<li>Tight bounds</li>
+<li>Agnostic learning complexity</li>
+<li>Online learning regret bounds</li>
+</ul>
+<p><strong>Approach</strong>: Analyze Rademacher complexity of receipt-defined classes and apply statistical learning theory.</p>
+<h3 id="problem-14-gradient-free-optimization-convergence"><a class="header" href="#problem-14-gradient-free-optimization-convergence">Problem 14: Gradient-Free Optimization Convergence</a></h3>
+<p><strong>Difficulty</strong>: ★★★★☆
+<strong>Impact</strong>: ★★★★☆</p>
+<p><strong>Statement</strong>: Prove convergence rates for gradient-free optimization using only receipts.</p>
+<p><strong>Challenges</strong>:</p>
+<ul>
+<li>No explicit gradients</li>
+<li>Only ordinal information from receipts</li>
+<li>Need to bound iterations</li>
+</ul>
+<p><strong>Approach</strong>: Adapt convergence proofs from derivative-free optimization and evolutionary algorithms.</p>
+<h3 id="problem-15-phase-transition-prediction"><a class="header" href="#problem-15-phase-transition-prediction">Problem 15: Phase Transition Prediction</a></h3>
+<p><strong>Difficulty</strong>: ★★★★☆
+<strong>Impact</strong>: ★★★☆☆</p>
+<p><strong>Statement</strong>: Predict and characterize phase transitions in learning dynamics on the lattice.</p>
+<p><strong>Observed</strong>:</p>
+<ul>
+<li>Sudden changes in learning behavior</li>
+<li>Critical points in action landscape</li>
+<li>Symmetry breaking</li>
+</ul>
+<p><strong>Unknown</strong>:</p>
+<ul>
+<li>Predictive criteria</li>
+<li>Universal transition classes</li>
+<li>Control mechanisms</li>
+</ul>
+<p><strong>Approach</strong>: Apply statistical physics methods and study order parameters.</p>
+<h2 id="implementation-challenges"><a class="header" href="#implementation-challenges">Implementation Challenges</a></h2>
+<h3 id="problem-16-optimal-lattice-size"><a class="header" href="#problem-16-optimal-lattice-size">Problem 16: Optimal Lattice Size</a></h3>
+<p><strong>Difficulty</strong>: ★★☆☆☆
+<strong>Impact</strong>: ★★★★★</p>
+<p><strong>Statement</strong>: Determine if 12,288 is optimal or if other sizes preserve essential properties.</p>
+<p><strong>Considerations</strong>:</p>
+<ul>
+<li>12,288 = 48 × 256 has special factorization</li>
+<li>768 divides 12,288 (schedule period)</li>
+<li>96 resonance classes</li>
+</ul>
+<p><strong>Questions</strong>:</p>
+<ul>
+<li>Are there other “magic” sizes?</li>
+<li>Scaling laws for larger lattices?</li>
+<li>Minimal size for universality?</li>
+</ul>
+<p><strong>Approach</strong>: Systematically study lattices of different sizes and identify which properties are preserved.</p>
+<h3 id="problem-17-hardware-acceleration"><a class="header" href="#problem-17-hardware-acceleration">Problem 17: Hardware Acceleration</a></h3>
+<p><strong>Difficulty</strong>: ★★★☆☆
+<strong>Impact</strong>: ★★★★☆</p>
+<p><strong>Statement</strong>: Design optimal hardware architectures for Hologram computation.</p>
+<p><strong>Requirements</strong>:</p>
+<ul>
+<li>Efficient receipt computation</li>
+<li>Parallel morphism execution</li>
+<li>Content-addressable memory</li>
+<li>Gauge transformations</li>
+</ul>
+<p><strong>Challenges</strong>:</p>
+<ul>
+<li>Balance between specialization and flexibility</li>
+<li>Memory bandwidth limitations</li>
+<li>Power efficiency</li>
+</ul>
+<p><strong>Approach</strong>: Design custom ASIC/FPGA implementations and analyze performance/power trade-offs.</p>
+<h3 id="problem-18-quantum-implementation"><a class="header" href="#problem-18-quantum-implementation">Problem 18: Quantum Implementation</a></h3>
+<p><strong>Difficulty</strong>: ★★★★★
+<strong>Impact</strong>: ★★★☆☆</p>
+<p><strong>Statement</strong>: Implement Hologram computation on quantum hardware using the Φ operator for quantum-classical boundaries.</p>
+<p><strong>Questions</strong>:</p>
+<ul>
+<li>Quantum advantage for action minimization?</li>
+<li>Superposition of configurations?</li>
+<li>Quantum receipt verification?</li>
+</ul>
+<p><strong>Approach</strong>: Map lattice states to qubits and design quantum circuits for morphisms.</p>
+<h2 id="applications-and-extensions"><a class="header" href="#applications-and-extensions">Applications and Extensions</a></h2>
+<h3 id="problem-19-biological-computation"><a class="header" href="#problem-19-biological-computation">Problem 19: Biological Computation</a></h3>
+<p><strong>Difficulty</strong>: ★★★★☆
+<strong>Impact</strong>: ★★★☆☆</p>
+<p><strong>Statement</strong>: Model biological information processing (DNA, proteins, neural networks) using Hologram principles.</p>
+<p><strong>Analogies</strong>:</p>
+<ul>
+<li>DNA codons ↔ resonance classes</li>
+<li>Protein folding ↔ action minimization</li>
+<li>Neural plasticity ↔ gauge transformations</li>
+</ul>
+<p><strong>Approach</strong>: Identify biological conservation laws and map to receipt components.</p>
+<h3 id="problem-20-economics-and-game-theory"><a class="header" href="#problem-20-economics-and-game-theory">Problem 20: Economics and Game Theory</a></h3>
+<p><strong>Difficulty</strong>: ★★★☆☆
+<strong>Impact</strong>: ★★★☆☆</p>
+<p><strong>Statement</strong>: Apply Hologram model to economic systems and mechanism design.</p>
+<p><strong>Ideas</strong>:</p>
+<ul>
+<li>Budgets as economic costs</li>
+<li>Receipts as contracts</li>
+<li>Gauge as market equivalence</li>
+<li>Action as social welfare</li>
+</ul>
+<p><strong>Approach</strong>: Formulate economic problems in Hologram terms and analyze equilibria.</p>
+<h2 id="philosophical-questions"><a class="header" href="#philosophical-questions">Philosophical Questions</a></h2>
+<h3 id="problem-21-physical-reality"><a class="header" href="#problem-21-physical-reality">Problem 21: Physical Reality</a></h3>
+<p><strong>Difficulty</strong>: ★★★★★
+<strong>Impact</strong>: ★★☆☆☆</p>
+<p><strong>Statement</strong>: Is physical reality describable as a Hologram-like system with conservation laws as receipts?</p>
+<p><strong>Connections</strong>:</p>
+<ul>
+<li>Conservation laws ↔ Noether’s theorem</li>
+<li>Gauge invariance ↔ fundamental symmetries</li>
+<li>Action minimization ↔ least action principle</li>
+<li>Information preservation ↔ unitarity</li>
+</ul>
+<p><strong>Approach</strong>: Map physical theories to Hologram structures and test predictions.</p>
+<h2 id="research-directions"><a class="header" href="#research-directions">Research Directions</a></h2>
+<h3 id="near-term-1-2-years"><a class="header" href="#near-term-1-2-years">Near-term (1-2 years)</a></h3>
+<ul>
+<li>Problems 4, 6, 16, 17 (implementation)</li>
+<li>Problems 13, 14 (learning theory)</li>
+<li>Problem 19 (applications)</li>
+</ul>
+<h3 id="medium-term-3-5-years"><a class="header" href="#medium-term-3-5-years">Medium-term (3-5 years)</a></h3>
+<ul>
+<li>Problems 1, 5, 7 (complexity)</li>
+<li>Problems 8, 9 (security)</li>
+<li>Problems 10, 11 (algebra)</li>
+</ul>
+<h3 id="long-term-5-years"><a class="header" href="#long-term-5-years">Long-term (5+ years)</a></h3>
+<ul>
+<li>Problems 2, 3 (fundamental theory)</li>
+<li>Problems 12, 21 (deep theory)</li>
+<li>Problem 18 (quantum)</li>
+</ul>
+<h2 id="collaboration-opportunities"><a class="header" href="#collaboration-opportunities">Collaboration Opportunities</a></h2>
+<p>These problems span multiple disciplines:</p>
+<ul>
+<li><strong>Theoretical CS</strong>: Problems 1, 4, 5, 7</li>
+<li><strong>Mathematics</strong>: Problems 2, 3, 10, 11, 12</li>
+<li><strong>Machine Learning</strong>: Problems 13, 14, 15</li>
+<li><strong>Systems</strong>: Problems 16, 17</li>
+<li><strong>Physics</strong>: Problems 18, 21</li>
+<li><strong>Interdisciplinary</strong>: Problems 19, 20</li>
+</ul>
+<h2 id="getting-started"><a class="header" href="#getting-started">Getting Started</a></h2>
+<p>For researchers interested in these problems:</p>
+<ol>
+<li>Start with the implementation (Appendix E) to gain intuition</li>
+<li>Study specific chapters relevant to your problem</li>
+<li>Join the research community at hologram-research.org</li>
+<li>Collaborate on the open-source implementation</li>
+<li>Publish results in appropriate venues</li>
+</ol>
+<p>The Hologram model is young and these problems represent the frontier of our understanding. Solutions will advance both theory and practice of lawful computation.</p>
+
+                    </main>
+
+                    <nav class="nav-wrapper" aria-label="Page navigation">
+                        <!-- Mobile navigation buttons -->
+                            <a rel="prev" href="../appendices/E-implementation-code.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                                <i class="fa fa-angle-left"></i>
+                            </a>
+
+                            <a rel="next prefetch" href="../bibliography.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                                <i class="fa fa-angle-right"></i>
+                            </a>
+
+                        <div style="clear: both"></div>
+                    </nav>
+                </div>
+            </div>
+
+            <nav class="nav-wide-wrapper" aria-label="Page navigation">
+                    <a rel="prev" href="../appendices/E-implementation-code.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                        <i class="fa fa-angle-left"></i>
+                    </a>
+
+                    <a rel="next prefetch" href="../bibliography.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                        <i class="fa fa-angle-right"></i>
+                    </a>
+            </nav>
+
+        </div>
+
+
+
+
+        <script>
+            window.playground_copyable = true;
+        </script>
+
+
+        <script src="../elasticlunr.min.js"></script>
+        <script src="../mark.min.js"></script>
+        <script src="../searcher.js"></script>
+
+        <script src="../clipboard.min.js"></script>
+        <script src="../highlight.js"></script>
+        <script src="../book.js"></script>
+
+        <!-- Custom JS scripts -->
+
+
+    </div>
+    </body>
+</html>
