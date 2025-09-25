@@ -1,0 +1,10 @@
+{
+  "namespace": "hologram.validate",
+  "artifacts": {
+    "spec": "hologram.validate.60bc9e96dfb920abd9fd74f17a10ec5e4882348b47015617137cb2a6c2b7df05",
+    "interface": "hologram.validate.47784de4ae871a78db0db1a5ed6ec7e9d5a51c2571e10f4c84f2dfcf4c0fe431",
+    "docs": "hologram.validate.aed26aac75750051fa57df1b917fe32202b7d1916184d27e0a6e7581a931274e",
+    "test": "hologram.validate.fb05731c284cf00f5f2d47593e578ced5116eae64acd74d4c13876221bc2a27e",
+    "manager": "hologram.validate.269260f18b524e30c0023b198847cb08e9e642c291e7dc92f297358781c5a0e7"
+  }
+}

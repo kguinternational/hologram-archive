@@ -1,0 +1,10 @@
+{
+  "namespace": "hologram.component",
+  "artifacts": {
+    "spec": "hologram.component.8dc0ddb670c8f97a9c59bfb08bb8e37e63e0c45c939c47f87c1df956a685c0dc",
+    "manager": "hologram.component.2050582aade7d09a1e4b1dfa124277dfb505c9f56c5e5358971028bf264a8669",
+    "test": "hologram.component.566564e6f77173fd41f0c26444625db2f6faed2fd560ad05ffb78e1648411b46",
+    "interface": "hologram.component.53c37f3ab6fe2e6c24e89070be951103587d6f9111ca2b5f03d0ec91e8901705",
+    "docs": "hologram.component.a7e0765bce4bd7c1b37462a35b8922863cd8f23a806e4e432ca3c2817eb61c7e"
+  }
+}

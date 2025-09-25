@@ -1,0 +1,21 @@
+{
+  "namespace": "hologram.docs",
+  "parent": "hologram",
+  "conformance": true,
+  "version": "0.1.0",
+  "description": "Documentation conformance for hologram root component",
+  "docs": {
+    "version": "0.1.0",
+    "description": "Root component documentation",
+    "sections": [
+      {
+        "title": "Overview",
+        "content": "Hologram is a component-based system with strict JSON Schema validation."
+      },
+      {
+        "title": "Core Concepts",
+        "content": "Every component requires spec and conformance files."
+      }
+    ]
+  }
+}

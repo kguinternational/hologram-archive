@@ -1,0 +1,25 @@
+{
+  "namespace": "hologram.interface",
+  "parent": "hologram",
+  "conformance": true,
+  "version": "0.1.0",
+  "interface": {
+    "version": "0.1.0",
+    "description": "Root component of the Hologram system",
+    "methods": {
+      "validateComponent": {
+        "description": "Validates a component definition"
+      },
+      "registerComponent": {
+        "description": "Registers a validated component"
+      },
+      "getComponent": {
+        "description": "Retrieves a component"
+      },
+      "listComponents": {
+        "description": "Lists all components"
+      }
+    }
+  },
+  "description": "Interface for hologram"
+}

@@ -1,0 +1,21 @@
+{
+  "namespace": "hologram.test",
+  "parent": "hologram",
+  "conformance": true,
+  "version": "0.1.0",
+  "description": "Test conformance for hologram root component",
+  "test": {
+    "version": "0.1.0",
+    "description": "Root component tests",
+    "tests": [
+      {
+        "name": "namespace_validation",
+        "description": "Validate namespace pattern"
+      },
+      {
+        "name": "conformance_flag",
+        "description": "Validate conformance flag"
+      }
+    ]
+  }
+}

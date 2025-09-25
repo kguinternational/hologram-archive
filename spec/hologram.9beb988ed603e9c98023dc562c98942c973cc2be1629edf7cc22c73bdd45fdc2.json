@@ -1,0 +1,38 @@
+{
+  "namespace": "hologram.manager",
+  "parent": "hologram",
+  "conformance": true,
+  "version": "0.1.0",
+  "manages": "hologram",
+  "operations": {
+    "validate": {
+      "description": "Validates hologram component structure"
+    },
+    "create": {
+      "description": "Creates new hologram components",
+      "artifact_submission": {},
+      "manifest_submission": {}
+    },
+    "read": {
+      "description": "Reads hologram components"
+    },
+    "update": {
+      "description": "Updates hologram components"
+    },
+    "delete": {
+      "description": "Deletes hologram components"
+    }
+  },
+  "storage": {
+    "type": "filesystem"
+  },
+  "atlas": {
+    "canonical": true,
+    "deterministic": true,
+    "verifiable": true
+  },
+  "manager": {
+    "description": "Manager conformance data"
+  },
+  "description": "Manager for the hologram root component"
+}
