@@ -56,13 +56,16 @@ claude mcp remove hologram
 
 ## Component Files
 
-Each component has 6 required files:
+Each component requires:
 1. spec - Component specification
 2. interface - Interface conformance
 3. docs - Documentation conformance
 4. test - Test conformance
 5. manager - Manager conformance
-6. index - File mappings
+6. dependency - Dependency declarations
+7. build - Build instructions
+8. log - Logging configuration
+9. index - File mappings
 
 ## Validation
 
@@ -79,8 +82,6 @@ npm run gc:clean        # Remove orphaned files
 npm run clean           # Clean build artifacts
 ```
 
-## Test Coverage
+## Tests
 
-- 10 test files
-- 67 test cases
-- Core modules: 93%+ coverage
+Run tests with `npm test` to verify all functionality.

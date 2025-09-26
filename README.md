@@ -5,14 +5,14 @@ A component-based system defined through JSON Schema specifications with content
 ## Structure
 
 ```
-spec/           # Component definitions (72 files)
+spec/           # Component definitions
 src/            # MCP server and validation tools
 Makefile        # Build and maintenance commands
 ```
 
 ## Components
 
-The system currently contains 12 validated components:
+The system contains validated components including:
 - `hologram` - Root component
 - `hologram.component` - Component model definition
 - `hologram.spec` - Specification schema
@@ -20,19 +20,25 @@ The system currently contains 12 validated components:
 - `hologram.docs` - Documentation conformance
 - `hologram.test` - Test conformance
 - `hologram.manager` - Lifecycle management conformance
+- `hologram.dependency` - Dependency declarations
+- `hologram.build` - Build instructions
+- `hologram.log` - Logging interface
 - `hologram.create` - Create operation
 - `hologram.read` - Read operation
 - `hologram.update` - Update operation
 - `hologram.validate` - Validation operation
 - `hologram.index` - Index structure
 
-Each component has 6 files:
-- spec.json - Component specification
-- interface.json - Interface definition
-- docs.json - Documentation
-- test.json - Test specifications
-- manager.json - Lifecycle management
-- index.json - File mappings
+Each component includes:
+- spec - Component specification
+- interface - Interface definition
+- docs - Documentation
+- test - Test specifications
+- manager - Lifecycle management
+- dependency - Dependency declarations
+- build - Build instructions
+- log - Logging configuration
+- index - File mappings
 
 ## Usage
 
