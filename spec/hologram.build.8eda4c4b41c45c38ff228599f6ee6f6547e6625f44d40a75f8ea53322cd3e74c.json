@@ -1,0 +1,75 @@
+{
+  "namespace": "hologram.build.interface",
+  "parent": "hologram.build",
+  "conformance": true,
+  "version": "0.1.0",
+  "description": "Interface conformance for build component",
+  "interface": {
+    "version": "0.1.0",
+    "description": "Build system interface",
+    "methods": {
+      "build": {
+        "description": "Execute the build process",
+        "parameters": [
+          {
+            "name": "clean",
+            "type": "boolean",
+            "required": false
+          },
+          {
+            "name": "parallel",
+            "type": "boolean",
+            "required": false
+          },
+          {
+            "name": "target",
+            "type": "string",
+            "required": false
+          }
+        ],
+        "returns": "BuildResult"
+      },
+      "clean": {
+        "description": "Clean build artifacts",
+        "parameters": [],
+        "returns": "void"
+      },
+      "test": {
+        "description": "Run build tests",
+        "parameters": [
+          {
+            "name": "pattern",
+            "type": "string",
+            "required": false
+          }
+        ],
+        "returns": "TestResult"
+      },
+      "package": {
+        "description": "Package build artifacts",
+        "parameters": [
+          {
+            "name": "format",
+            "type": "string",
+            "required": false
+          }
+        ],
+        "returns": "PackageResult"
+      }
+    },
+    "events": {
+      "buildStarted": {
+        "description": "Emitted when build starts"
+      },
+      "buildCompleted": {
+        "description": "Emitted when build completes successfully"
+      },
+      "buildFailed": {
+        "description": "Emitted when build fails"
+      },
+      "stepCompleted": {
+        "description": "Emitted after each build step"
+      }
+    }
+  }
+}

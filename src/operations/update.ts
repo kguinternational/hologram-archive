@@ -60,7 +60,7 @@ export async function updateOperation(
       content.namespace = expectedNamespace;
 
       // Set conformance flag
-      const isConformance = ['interface', 'docs', 'test', 'manager'].includes(key);
+      const isConformance = ['interface', 'docs', 'test', 'manager', 'dependency', 'build', 'log'].includes(key);
       content.conformance = isConformance;
 
       // Set parent for conformance files

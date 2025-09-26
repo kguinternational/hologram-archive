@@ -34,7 +34,7 @@ export async function createOperation(
     // Phase 2: Implementation no longer required
 
     // Phase 3: Submit conformance artifacts
-    const conformanceTypes = ['interface', 'docs', 'test', 'manager'];
+    const conformanceTypes = ['interface', 'docs', 'test', 'manager', 'dependency', 'build', 'log'];
 
     for (const type of conformanceTypes) {
       if (files[type]) {

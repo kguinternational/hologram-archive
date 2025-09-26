@@ -159,7 +159,7 @@ export class SchemaValidator {
     }
 
     // Required conformance types based on model
-    const conformanceReqs = componentModel.component?.conformance_requirements || {};
+    const conformanceReqs = componentModel.conformance_requirements || {};
     const requiredConformance = Object.keys(conformanceReqs)
       .filter(key => conformanceReqs[key].required);
 

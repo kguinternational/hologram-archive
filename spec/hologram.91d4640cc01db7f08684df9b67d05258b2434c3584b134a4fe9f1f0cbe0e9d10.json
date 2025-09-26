@@ -1,0 +1,33 @@
+{
+  "namespace": "hologram.dependency",
+  "parent": "hologram.dependency",
+  "conformance": false,
+  "version": "0.1.0",
+  "description": "Dependency conformance for hologram root component",
+  "dependency": {
+    "required": [
+      {
+        "namespace": "hologram.spec",
+        "version": ">=0.1.0",
+        "type": "conformance",
+        "reason": "Required for JSON schema validation and base component structure"
+      }
+    ],
+    "optional": [],
+    "development": [],
+    "conflicts": []
+  },
+  "dependencies": {
+    "required": [
+      {
+        "namespace": "hologram.spec",
+        "version": ">=0.1.0",
+        "type": "conformance",
+        "reason": "Required for JSON schema validation and base component structure"
+      }
+    ],
+    "optional": [],
+    "development": [],
+    "conflicts": []
+  }
+}

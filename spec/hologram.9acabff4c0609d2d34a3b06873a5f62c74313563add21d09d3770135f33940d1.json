@@ -1,0 +1,49 @@
+{
+  "namespace": "hologram.build",
+  "parent": "hologram.build",
+  "conformance": false,
+  "version": "0.1.0",
+  "description": "Build conformance for hologram root component",
+  "build": {
+    "type": "npm",
+    "steps": [
+      {
+        "name": "install",
+        "command": "npm install"
+      },
+      {
+        "name": "build",
+        "command": "npm run build"
+      },
+      {
+        "name": "test",
+        "command": "npm test"
+      }
+    ],
+    "artifacts": {
+      "binaries": [
+        "dist/mcp-server.js",
+        "dist/cli-validate.js"
+      ],
+      "libraries": [],
+      "documentation": [
+        "README.md"
+      ],
+      "schemas": [
+        "spec/*.json"
+      ]
+    },
+    "requirements": {
+      "tools": [
+        {
+          "name": "node",
+          "version": ">=18.0.0"
+        },
+        {
+          "name": "npm",
+          "version": ">=9.0.0"
+        }
+      ]
+    }
+  }
+}

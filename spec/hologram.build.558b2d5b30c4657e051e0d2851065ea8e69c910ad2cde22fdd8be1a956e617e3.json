@@ -1,0 +1,217 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "hologram.build.spec",
+  "title": "Hologram Build Instructions",
+  "description": "Defines how components are built and compiled",
+  "type": "object",
+  "properties": {
+    "namespace": {
+      "type": "string",
+      "pattern": "^hologram(\\.[a-z][a-z0-9]*)*\\.build$"
+    },
+    "parent": {
+      "type": "string",
+      "pattern": "^hologram(\\.[a-z][a-z0-9]*)*$"
+    },
+    "conformance": {
+      "type": "boolean"
+    },
+    "version": {
+      "type": "string",
+      "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$"
+    },
+    "description": {
+      "type": "string"
+    },
+    "build": {
+      "type": "object",
+      "properties": {
+        "type": {
+          "type": "string",
+          "enum": [
+            "docker",
+            "make",
+            "npm",
+            "cargo",
+            "go",
+            "gradle",
+            "maven",
+            "script"
+          ],
+          "description": "Build system type"
+        },
+        "steps": {
+          "type": "array",
+          "description": "Ordered list of build commands",
+          "items": {
+            "type": "object",
+            "properties": {
+              "name": {
+                "type": "string",
+                "description": "Step name"
+              },
+              "command": {
+                "type": "string",
+                "description": "Command to execute"
+              },
+              "workdir": {
+                "type": "string",
+                "description": "Working directory for this step"
+              },
+              "env": {
+                "type": "object",
+                "description": "Environment variables for this step"
+              },
+              "condition": {
+                "type": "string",
+                "description": "Condition when this step should run"
+              }
+            },
+            "required": [
+              "name",
+              "command"
+            ]
+          }
+        },
+        "artifacts": {
+          "type": "object",
+          "description": "Build output artifacts",
+          "properties": {
+            "binaries": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "libraries": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "documentation": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "schemas": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          },
+          "additionalProperties": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "requirements": {
+          "type": "object",
+          "description": "Build requirements",
+          "properties": {
+            "tools": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string"
+                  },
+                  "version": {
+                    "type": "string"
+                  },
+                  "optional": {
+                    "type": "boolean"
+                  }
+                },
+                "required": [
+                  "name"
+                ]
+              }
+            },
+            "environment": {
+              "type": "object",
+              "properties": {
+                "required": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                "optional": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              }
+            },
+            "resources": {
+              "type": "object",
+              "properties": {
+                "memory": {
+                  "type": "string"
+                },
+                "cpu": {
+                  "type": "string"
+                },
+                "disk": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        },
+        "cache": {
+          "type": "object",
+          "description": "Build cache configuration",
+          "properties": {
+            "enabled": {
+              "type": "boolean"
+            },
+            "paths": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "key": {
+              "type": "string",
+              "description": "Cache key pattern"
+            }
+          }
+        },
+        "clean": {
+          "type": "object",
+          "description": "Clean build configuration",
+          "properties": {
+            "command": {
+              "type": "string"
+            },
+            "paths": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          }
+        }
+      },
+      "required": [
+        "type",
+        "steps",
+        "artifacts"
+      ]
+    }
+  },
+  "required": [
+    "namespace",
+    "parent",
+    "conformance",
+    "build"
+  ]
+}

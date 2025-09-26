@@ -4,6 +4,10 @@
   "title": "Hologram Component Model",
   "description": "Defines what constitutes a complete Hologram component",
   "type": "object",
+  "namespace": "hologram.component.spec",
+  "parent": "hologram",
+  "conformance": false,
+  "version": "0.2.0",
   "conformance_requirements": {
     "interface": {
       "required": true,
@@ -24,6 +28,21 @@
       "required": true,
       "description": "Every component must define lifecycle management",
       "schema": "hologram.manager.spec"
+    },
+    "dependency": {
+      "required": true,
+      "description": "Every component must declare its dependencies",
+      "schema": "hologram.dependency.spec"
+    },
+    "build": {
+      "required": true,
+      "description": "Every component must define build instructions",
+      "schema": "hologram.build.spec"
+    },
+    "log": {
+      "required": true,
+      "description": "Every component must define its logging interface",
+      "schema": "hologram.log.spec"
     }
   },
   "properties": {
@@ -52,5 +71,10 @@
       "type": "string"
     }
   },
-  "required": ["namespace", "conformance", "version", "description"]
+  "required": [
+    "namespace",
+    "conformance",
+    "version",
+    "description"
+  ]
 }

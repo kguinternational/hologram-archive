@@ -1,0 +1,60 @@
+{
+  "namespace": "hologram.build.manager",
+  "parent": "hologram.build",
+  "conformance": true,
+  "version": "0.1.0",
+  "description": "Lifecycle management for build conformance",
+  "manages": "hologram.build",
+  "operations": {
+    "create": {
+      "description": "Create build configuration",
+      "artifact_submission": {
+        "description": "Submit build artifacts"
+      },
+      "manifest_submission": {
+        "description": "Submit build manifest"
+      }
+    },
+    "read": {
+      "description": "Read build configuration"
+    },
+    "update": {
+      "description": "Update build configuration"
+    },
+    "delete": {
+      "description": "Delete build configuration"
+    },
+    "validate": {
+      "description": "Validate build configuration"
+    }
+  },
+  "storage": {
+    "type": "filesystem"
+  },
+  "atlas": {
+    "canonical": true,
+    "deterministic": true,
+    "verifiable": true
+  },
+  "manager": {
+    "version": "0.1.0",
+    "description": "Manager operations for build component",
+    "operations": {
+      "create": {
+        "description": "Initialize build configuration"
+      },
+      "read": {
+        "description": "Read build instructions"
+      },
+      "update": {
+        "description": "Update build steps or artifacts"
+      },
+      "delete": {
+        "description": "Remove build configuration"
+      },
+      "validate": {
+        "description": "Validate build configuration is complete"
+      }
+    }
+  }
+}

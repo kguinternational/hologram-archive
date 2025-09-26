@@ -1,0 +1,34 @@
+{
+  "namespace": "hologram.build.build",
+  "parent": "hologram.build",
+  "conformance": true,
+  "version": "0.1.0",
+  "description": "Build conformance for hologram.build",
+  "build": {
+    "type": "script",
+    "steps": [
+      {
+        "name": "validate",
+        "command": "ajv-cli validate -s spec/hologram.build.*.json -d spec/hologram.build.*.json"
+      }
+    ],
+    "artifacts": {
+      "schemas": [
+        "hologram.build.schema"
+      ],
+      "binaries": [],
+      "libraries": [],
+      "documentation": [
+        "hologram.build.docs"
+      ]
+    },
+    "requirements": {
+      "tools": [
+        {
+          "name": "ajv-cli",
+          "version": ">=5.0.0"
+        }
+      ]
+    }
+  }
+}

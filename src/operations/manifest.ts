@@ -29,7 +29,24 @@ export async function submitManifestOperation(
       };
     }
 
-    // Phase 1.5: Check if component already exists via index
+    // Phase 1.5: Validate namespace and check if component already exists
+    // Check for conformance-like patterns in namespace
+    const conformanceTypes = ['interface', 'docs', 'test', 'manager', 'dependency', 'build', 'log'];
+    const namespaceParts = namespace.split('.');
+    if (namespaceParts.length > 2) {
+      const lastPart = namespaceParts[namespaceParts.length - 1];
+      if (conformanceTypes.includes(lastPart)) {
+        return {
+          content: [
+            {
+              type: 'text',
+              text: `❌ Invalid component namespace "${namespace}". The namespace appears to be a conformance file pattern (ends with .${lastPart}). Components should not have conformance type suffixes.`,
+            },
+          ],
+        };
+      }
+    }
+
     const indexPath = path.join(specDir, `${namespace}.index.json`);
     if (fs.existsSync(indexPath)) {
       return {
@@ -43,7 +60,7 @@ export async function submitManifestOperation(
     }
 
     // Phase 2: Verify ALL required artifacts present
-    const conformanceReqs = componentModel.component?.conformance_requirements || {};
+    const conformanceReqs = componentModel.conformance_requirements || {};
     const requiredConformance = Object.keys(conformanceReqs)
       .filter(key => conformanceReqs[key].required);
 
@@ -140,7 +157,7 @@ export async function submitManifestOperation(
     // Phase 5: No implementation validation needed anymore
 
     // Each conformance validates against its conformance spec
-    const allConformanceTypes = Object.keys(componentModel.component?.conformance_requirements || {});
+    const allConformanceTypes = Object.keys(componentModel.conformance_requirements || {});
     for (const conformanceType of allConformanceTypes) {
       const conformance = loadedArtifacts.get(conformanceType);
       if (conformance) {
@@ -222,7 +239,7 @@ export async function submitManifestOperation(
 
       // Write all provided conformance files
       // First get all possible conformance types from the model
-      const modelConformanceTypes = Object.keys(componentModel.component?.conformance_requirements || {});
+      const modelConformanceTypes = Object.keys(componentModel.conformance_requirements || {});
       // Then add any conformance types that are actually provided in the artifacts
       const providedConformanceTypes = new Set([...modelConformanceTypes]);
       for (const [type] of loadedArtifacts) {

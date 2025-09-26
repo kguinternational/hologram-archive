@@ -1,0 +1,43 @@
+{
+  "namespace": "hologram.build.test",
+  "parent": "hologram.build",
+  "conformance": true,
+  "version": "0.1.0",
+  "description": "Test specifications for build conformance",
+  "test": {
+    "version": "0.1.0",
+    "description": "Test cases for build system",
+    "tests": [
+      {
+        "name": "Build steps execute in order",
+        "type": "unit",
+        "description": "Verify build steps are executed sequentially"
+      },
+      {
+        "name": "Build artifacts are produced",
+        "type": "integration",
+        "description": "Verify expected artifacts are created after build"
+      },
+      {
+        "name": "Clean removes all artifacts",
+        "type": "unit",
+        "description": "Verify clean operation removes all build outputs"
+      },
+      {
+        "name": "Build cache improves performance",
+        "type": "performance",
+        "description": "Verify cached builds are faster than clean builds"
+      },
+      {
+        "name": "Environment variables are set",
+        "type": "unit",
+        "description": "Verify required environment variables are available during build"
+      },
+      {
+        "name": "Build fails on missing tools",
+        "type": "integration",
+        "description": "Verify build fails gracefully when required tools are missing"
+      }
+    ]
+  }
+}

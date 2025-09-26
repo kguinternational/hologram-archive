@@ -1,0 +1,52 @@
+{
+  "namespace": "hologram.log",
+  "parent": "hologram.log",
+  "conformance": false,
+  "version": "0.1.0",
+  "description": "Log conformance for hologram root component",
+  "log": {
+    "version": "0.1.0",
+    "description": "Logging configuration for hologram root component",
+    "levels": [
+      "debug",
+      "info",
+      "warn",
+      "error"
+    ],
+    "default_level": "info",
+    "format": {
+      "type": "json",
+      "timestamp": "iso8601",
+      "fields": {
+        "required": [
+          "timestamp",
+          "level",
+          "message"
+        ],
+        "optional": [
+          "component",
+          "operation",
+          "error"
+        ],
+        "metadata": {
+          "service": "hologram",
+          "version": "0.1.0"
+        }
+      }
+    },
+    "output": [
+      {
+        "type": "stdout",
+        "config": {
+          "level": "info"
+        }
+      },
+      {
+        "type": "stderr",
+        "config": {
+          "level": "error"
+        }
+      }
+    ]
+  }
+}
