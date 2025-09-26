@@ -28,7 +28,7 @@ interface GCResult {
 }
 
 export function analyzeSpec(options: GCOptions = {}): GCResult {
-  const specDir = options.specDir || path.join(__dirname, '..', '..', 'spec');
+  const specDir = options.specDir || path.join(__dirname, '..', '..', '..', 'spec');
   const verbose = options.verbose ?? false;
 
   // Get all files in spec directory
@@ -117,7 +117,7 @@ export function analyzeSpec(options: GCOptions = {}): GCResult {
 }
 
 export function cleanOrphans(options: GCOptions = {}): { deleted: string[]; failed: string[] } {
-  const specDir = options.specDir || path.join(__dirname, '..', '..', 'spec');
+  const specDir = options.specDir || path.join(__dirname, '..', '..', '..', 'spec');
   const result = analyzeSpec(options);
   const deleted: string[] = [];
   const failed: string[] = [];
