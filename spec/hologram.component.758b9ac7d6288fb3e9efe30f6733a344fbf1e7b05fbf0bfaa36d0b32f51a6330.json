@@ -7,7 +7,7 @@
   "namespace": "hologram.component.spec",
   "parent": "hologram",
   "conformance": false,
-  "version": "0.2.0",
+  "version": "0.3.0",
   "conformance_requirements": {
     "interface": {
       "required": true,
@@ -43,6 +43,11 @@
       "required": true,
       "description": "Every component must define its logging interface",
       "schema": "hologram.log.spec"
+    },
+    "view": {
+      "required": true,
+      "description": "Every component must define how it is visually presented",
+      "schema": "hologram.view.spec"
     }
   },
   "properties": {

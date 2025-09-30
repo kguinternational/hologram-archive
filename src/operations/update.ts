@@ -51,16 +51,30 @@ export async function updateOperation(
     for (const [key, content] of Object.entries(files)) {
       if (!content) continue;
 
+      // Check if content is a string and needs parsing
+      let parsedContent = content;
+      if (typeof content === 'string') {
+        try {
+          parsedContent = JSON.parse(content);
+        } catch (e) {
+          errors.push({
+            file: `${namespace}.${key}.json`,
+            message: `Invalid JSON: ${e instanceof Error ? e.message : 'Unknown error'}`,
+          });
+          continue;
+        }
+      }
+
       // Determine expected namespace for this file type
       const expectedNamespace = key === 'implementation'
         ? namespace
         : `${namespace}.${key}`;
 
       // Add/update required fields
-      content.namespace = expectedNamespace;
+      parsedContent.namespace = expectedNamespace;
 
       // Set conformance flag
-      const isConformance = ['interface', 'docs', 'test', 'manager', 'dependency', 'build', 'log'].includes(key);
+      const isConformance = ['interface', 'docs', 'test', 'manager', 'dependency', 'build', 'log', 'view'].includes(key);
       content.conformance = isConformance;
 
       // Set parent for conformance files

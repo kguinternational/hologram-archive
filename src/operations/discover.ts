@@ -45,7 +45,7 @@ export async function getComponentModelOperation(): Promise<{ content: Array<{ t
       manager: 'Every component must define lifecycle management'
     };
 
-    for (const [key, req] of Object.entries(componentModel.component.conformance_requirements)) {
+    for (const [key, req] of Object.entries(componentModel.conformance_requirements || {})) {
       const requirement = req as any;
       if (requirement.required) {
         guide += `\n   ${key.toUpperCase()} ({namespace}.${key}.json):\n`;
