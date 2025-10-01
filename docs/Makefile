@@ -63,6 +63,27 @@ clean-all:
 	done
 	@echo -e "$(GREEN)✓ All books cleaned$(NC)"
 
+## pdf-all: Build PDFs for all books
+pdf-all:
+	@echo -e "$(BLUE)Building PDFs for all books...$(NC)"
+	@for book in $(BOOKS); do \
+		echo -e "$(BLUE)Building PDF for $$book...$(NC)"; \
+		$(MAKE) -C $$book build-pdf; \
+	done
+	@echo -e "$(GREEN)✓ All PDFs built successfully$(NC)"
+
+## deploy-prep: Prepare combined build for deployment
+deploy-prep: build-all
+	@echo -e "$(BLUE)Preparing deployment directory...$(NC)"
+	@rm -rf _site
+	@mkdir -p _site
+	@for book in $(BOOKS); do \
+		echo -e "$(BLUE)Copying $$book to _site/$$book$(NC)"; \
+		mkdir -p _site/$$book; \
+		cp -r $$book/build/* _site/$$book/; \
+	done
+	@echo -e "$(GREEN)✓ Deployment directory ready at _site/$(NC)"
+
 ## serve: Serve a specific book (usage: make serve BOOK=book-name)
 serve:
 	@if [ -z "$(BOOK)" ]; then \

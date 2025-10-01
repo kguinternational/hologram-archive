@@ -78,3 +78,4 @@ Thumbs.db
 # Debug files
 *.stackdump
 core.*
+docs/_site/

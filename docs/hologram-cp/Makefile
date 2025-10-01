@@ -1,4 +1,4 @@
-# {{BOOK_NAME}} Book Build System
+# Hologram Container Engine and Platform Book Build System
 SHELL := /bin/bash
 .PHONY: all build serve clean lint format check install deps help
 
@@ -20,7 +20,7 @@ NPM := npm
 PYTHON := python3
 
 # Book specific variables
-BOOK_NAME := {{BOOK_NAME}}
+BOOK_NAME := hologram-container-engine-platform
 BOOK_PDF := $(BUILD_DIR)/$(BOOK_NAME).pdf
 
 # Default target
@@ -28,8 +28,8 @@ all: check build
 
 ## help: Show this help message
 help:
-	@echo "$(BOOK_NAME) Book Build System"
-	@echo "=========================="
+	@echo "Hologram Container Engine and Platform Book Build System"
+	@echo "========================================================="
 	@echo ""
 	@echo "Available targets:"
 	@grep -E '^##' Makefile | sed 's/## /  /'
