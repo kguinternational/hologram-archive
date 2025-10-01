@@ -1,0 +1,522 @@
+<!DOCTYPE HTML>
+<html lang="en" class="light sidebar-visible" dir="ltr">
+    <head>
+        <!-- Book generated using mdBook -->
+        <meta charset="UTF-8">
+        <title>Bootstrap Architecture - The Hologram Container Engine and Platform</title>
+
+
+        <!-- Custom HTML head -->
+
+        <meta name="description" content="Comprehensive documentation of the Hologram Container Engine and Platform conceptual model">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#ffffff">
+
+        <link rel="icon" href="favicon.svg">
+        <link rel="shortcut icon" href="favicon.png">
+        <link rel="stylesheet" href="css/variables.css">
+        <link rel="stylesheet" href="css/general.css">
+        <link rel="stylesheet" href="css/chrome.css">
+        <link rel="stylesheet" href="css/print.css" media="print">
+
+        <!-- Fonts -->
+        <link rel="stylesheet" href="FontAwesome/css/font-awesome.css">
+        <link rel="stylesheet" href="fonts/fonts.css">
+
+        <!-- Highlight.js Stylesheets -->
+        <link rel="stylesheet" id="highlight-css" href="highlight.css">
+        <link rel="stylesheet" id="tomorrow-night-css" href="tomorrow-night.css">
+        <link rel="stylesheet" id="ayu-highlight-css" href="ayu-highlight.css">
+
+        <!-- Custom theme stylesheets -->
+        <link rel="stylesheet" href="theme/custom.css">
+
+        <!-- MathJax -->
+        <script async src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+        <!-- Provide site root and default themes to javascript -->
+        <script>
+            const path_to_root = "";
+            const default_light_theme = "light";
+            const default_dark_theme = "navy";
+            window.path_to_searchindex_js = "searchindex.js";
+        </script>
+        <!-- Start loading toc.js asap -->
+        <script src="toc.js"></script>
+    </head>
+    <body>
+    <div id="mdbook-help-container">
+        <div id="mdbook-help-popup">
+            <h2 class="mdbook-help-title">Keyboard shortcuts</h2>
+            <div>
+                <p>Press <kbd>←</kbd> or <kbd>→</kbd> to navigate between chapters</p>
+                <p>Press <kbd>S</kbd> or <kbd>/</kbd> to search in the book</p>
+                <p>Press <kbd>?</kbd> to show this help</p>
+                <p>Press <kbd>Esc</kbd> to hide this help</p>
+            </div>
+        </div>
+    </div>
+    <div id="body-container">
+        <!-- Work around some values being stored in localStorage wrapped in quotes -->
+        <script>
+            try {
+                let theme = localStorage.getItem('mdbook-theme');
+                let sidebar = localStorage.getItem('mdbook-sidebar');
+
+                if (theme.startsWith('"') && theme.endsWith('"')) {
+                    localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
+                }
+
+                if (sidebar.startsWith('"') && sidebar.endsWith('"')) {
+                    localStorage.setItem('mdbook-sidebar', sidebar.slice(1, sidebar.length - 1));
+                }
+            } catch (e) { }
+        </script>
+
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script>
+            const default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? default_dark_theme : default_light_theme;
+            let theme;
+            try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
+            if (theme === null || theme === undefined) { theme = default_theme; }
+            const html = document.documentElement;
+            html.classList.remove('light')
+            html.classList.add(theme);
+            html.classList.add("js");
+        </script>
+
+        <input type="checkbox" id="sidebar-toggle-anchor" class="hidden">
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script>
+            let sidebar = null;
+            const sidebar_toggle = document.getElementById("sidebar-toggle-anchor");
+            if (document.body.clientWidth >= 1080) {
+                try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
+                sidebar = sidebar || 'visible';
+            } else {
+                sidebar = 'hidden';
+                sidebar_toggle.checked = false;
+            }
+            if (sidebar === 'visible') {
+                sidebar_toggle.checked = true;
+            } else {
+                html.classList.remove('sidebar-visible');
+            }
+        </script>
+
+        <nav id="sidebar" class="sidebar" aria-label="Table of contents">
+            <!-- populated by js -->
+            <mdbook-sidebar-scrollbox class="sidebar-scrollbox"></mdbook-sidebar-scrollbox>
+            <noscript>
+                <iframe class="sidebar-iframe-outer" src="toc.html"></iframe>
+            </noscript>
+            <div id="sidebar-resize-handle" class="sidebar-resize-handle">
+                <div class="sidebar-resize-indicator"></div>
+            </div>
+        </nav>
+
+        <div id="page-wrapper" class="page-wrapper">
+
+            <div class="page">
+                <div id="menu-bar-hover-placeholder"></div>
+                <div id="menu-bar" class="menu-bar sticky">
+                    <div class="left-buttons">
+                        <label id="sidebar-toggle" class="icon-button" for="sidebar-toggle-anchor" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="sidebar">
+                            <i class="fa fa-bars"></i>
+                        </label>
+                        <button id="theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="theme-list">
+                            <i class="fa fa-paint-brush"></i>
+                        </button>
+                        <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="default_theme">Auto</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="light">Light</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="navy">Navy</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="ayu">Ayu</button></li>
+                        </ul>
+                        <button id="search-toggle" class="icon-button" type="button" title="Search (`/`)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="/ s" aria-controls="searchbar">
+                            <i class="fa fa-search"></i>
+                        </button>
+                    </div>
+
+                    <h1 class="menu-title">The Hologram Container Engine and Platform</h1>
+
+                    <div class="right-buttons">
+                        <a href="print.html" title="Print this book" aria-label="Print this book">
+                            <i id="print-button" class="fa fa-print"></i>
+                        </a>
+                        <a href="https://github.com/yourusername/Hologram" title="Git repository" aria-label="Git repository">
+                            <i id="git-repository-button" class="fa fa-github"></i>
+                        </a>
+
+                    </div>
+                </div>
+
+                <div id="search-wrapper" class="hidden">
+                    <form id="searchbar-outer" class="searchbar-outer">
+                        <div class="search-wrapper">
+                            <input type="search" id="searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="searchresults-outer" aria-describedby="searchresults-header">
+                            <div class="spinner-wrapper">
+                                <i class="fa fa-spinner fa-spin"></i>
+                            </div>
+                        </div>
+                    </form>
+                    <div id="searchresults-outer" class="searchresults-outer hidden">
+                        <div id="searchresults-header" class="searchresults-header"></div>
+                        <ul id="searchresults">
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
+                <script>
+                    document.getElementById('sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
+                    document.getElementById('sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
+                    Array.from(document.querySelectorAll('#sidebar a')).forEach(function(link) {
+                        link.setAttribute('tabIndex', sidebar === 'visible' ? 0 : -1);
+                    });
+                </script>
+
+                <div id="content" class="content">
+                    <main>
+                        <h1 id="bootstrap-architecture"><a class="header" href="#bootstrap-architecture">Bootstrap Architecture</a></h1>
+<h2 id="from-minimal-store-to-self-describing-platform"><a class="header" href="#from-minimal-store-to-self-describing-platform">From Minimal Store to Self-Describing Platform</a></h2>
+<p>The Hologram platform is <strong>self-describing</strong>—it contains its own definition as projections in the store. But this creates a bootstrapping challenge: how does the platform initialize when it needs projections to understand projections?</p>
+<p>This document describes the bootstrap sequence—how the platform cold-starts from minimal primitives and builds up to full self-describing operation.</p>
+<h2 id="the-bootstrap-problem"><a class="header" href="#the-bootstrap-problem">The Bootstrap Problem</a></h2>
+<p>The platform requires:</p>
+<ul>
+<li>Projection definitions to understand how to project</li>
+<li>Container store to hold projection definitions</li>
+<li>Projection engine to execute projection definitions</li>
+</ul>
+<p>But:</p>
+<ul>
+<li>Projection definitions are resources in the store</li>
+<li>The engine needs projection definitions to project resources</li>
+<li>Projecting projection definitions requires the engine</li>
+</ul>
+<p>This is the <strong>bootstrap paradox</strong>: the system needs itself to start itself.</p>
+<h2 id="bootstrap-solution-staged-initialization"><a class="header" href="#bootstrap-solution-staged-initialization">Bootstrap Solution: Staged Initialization</a></h2>
+<p>The solution is <strong>staged initialization</strong>—starting with minimal hard-coded capabilities and progressively replacing them with projected capabilities.</p>
+<p>Each stage builds on the previous, until the platform is fully self-describing and no hard-coded logic remains (or only fundamental primitives remain).</p>
+<h2 id="bootstrap-layers"><a class="header" href="#bootstrap-layers">Bootstrap Layers</a></h2>
+<h3 id="layer-0-minimal-content-addressed-store"><a class="header" href="#layer-0-minimal-content-addressed-store">Layer 0: Minimal Content-Addressed Store</a></h3>
+<p><strong>What Exists</strong>: A content-addressed storage implementation providing the four core capabilities:</p>
+<ul>
+<li>Store (write resource, get CID)</li>
+<li>Retrieve (read resource by CID)</li>
+<li>Reference (extract CIDs from resource)</li>
+<li>Query (identify resources by basic criteria)</li>
+</ul>
+<p><strong>What’s Hard-Coded</strong>: The store implementation itself (filesystem, database, memory).</p>
+<p><strong>What’s Not Present</strong>: Projection engine, projection definitions, container types, operations.</p>
+<p>This is the <strong>axiom layer</strong>—the minimal foundation assumed to exist.</p>
+<h3 id="layer-1-store-definition-hologramstore"><a class="header" href="#layer-1-store-definition-hologramstore">Layer 1: Store Definition (hologram.store)</a></h3>
+<p><strong>What Happens</strong>: Emit the store’s own definition as a resource.</p>
+<p><strong>Resource Content</strong>: JSON document describing:</p>
+<ul>
+<li>Store capabilities (store, retrieve, reference, query)</li>
+<li>Store properties (immutability, content addressing, deduplication)</li>
+<li>Store interface (how to interact with store)</li>
+</ul>
+<p><strong>Process</strong>:</p>
+<ol>
+<li>Hard-coded bootstrap code creates store definition resource</li>
+<li>Computes CID</li>
+<li>Stores resource in the store</li>
+<li>The store now contains its own definition</li>
+</ol>
+<p><strong>Result</strong>: The store is <strong>introspectable</strong>—its definition exists as a resource.</p>
+<p><strong>What’s Still Hard-Coded</strong>: Projection engine (doesn’t exist yet).</p>
+<h3 id="layer-2-projection-language-hologramprojection"><a class="header" href="#layer-2-projection-language-hologramprojection">Layer 2: Projection Language (hologram.projection)</a></h3>
+<p><strong>What Happens</strong>: Emit the projection language definition as resources.</p>
+<p><strong>Resource Content</strong>:</p>
+<ul>
+<li>Projection definition schema (what fields projection definitions have)</li>
+<li>Conformance requirement schema (how to specify conformance)</li>
+<li>Query language schema (how to express queries)</li>
+<li>Transformation rule schema (how to define transformations)</li>
+</ul>
+<p><strong>Process</strong>:</p>
+<ol>
+<li>Hard-coded bootstrap code creates projection language definition</li>
+<li>Stores as resources in the store</li>
+<li>Hard-coded minimal projection engine loads these definitions</li>
+<li>Engine can now interpret projection definitions</li>
+</ol>
+<p><strong>Result</strong>: The projection language is <strong>self-defined</strong>—its schema exists as resources.</p>
+<p><strong>What’s Still Hard-Coded</strong>: Minimal projection engine (can interpret but is hard-coded).</p>
+<h3 id="layer-3-base-container-schemas"><a class="header" href="#layer-3-base-container-schemas">Layer 3: Base Container Schemas</a></h3>
+<p><strong>What Happens</strong>: Emit schemas for base container types.</p>
+<p><strong>Resource Content</strong>:</p>
+<ul>
+<li>hologram.component schema</li>
+<li>hologram.instance schema</li>
+<li>hologram.interface schema</li>
+<li>hologram.documentation schema</li>
+<li>hologram.test schema</li>
+<li>hologram.manager schema</li>
+<li>hologram.view schema</li>
+<li>hologram.dependency schema</li>
+<li>hologram.build schema</li>
+<li>hologram.log schema</li>
+</ul>
+<p><strong>Process</strong>:</p>
+<ol>
+<li>Bootstrap code creates JSON Schema definitions for each container type</li>
+<li>Stores schemas as resources</li>
+<li>Engine can now validate resources against these schemas</li>
+</ol>
+<p><strong>Result</strong>: Container types are <strong>schema-defined</strong> rather than hard-coded.</p>
+<p><strong>What’s Still Hard-Coded</strong>: Operation implementations (projection engine can validate but not execute operations).</p>
+<h3 id="layer-4-projection-definitions"><a class="header" href="#layer-4-projection-definitions">Layer 4: Projection Definitions</a></h3>
+<p><strong>What Happens</strong>: Emit projection definitions for each container type.</p>
+<p><strong>Resource Content</strong>: For each container type, a projection definition specifying:</p>
+<ul>
+<li>Query to identify resources</li>
+<li>Conformance requirements (what resources must be present)</li>
+<li>Aggregation rules (how to follow references)</li>
+<li>Transformation rules (how to structure container)</li>
+<li>Schema references (what schemas apply)</li>
+</ul>
+<p><strong>Process</strong>:</p>
+<ol>
+<li>Bootstrap code creates projection definitions using projection language from Layer 2</li>
+<li>Stores projection definitions as resources</li>
+<li>Engine loads projection definitions</li>
+<li>Engine can now project resources into containers per definitions</li>
+</ol>
+<p><strong>Result</strong>: Container types are <strong>projection-defined</strong> rather than hard-coded.</p>
+<p><strong>What’s Still Hard-Coded</strong>: Basic projection engine logic (query evaluation, reference traversal, transformation application).</p>
+<h3 id="layer-5-engine-definition-hologramengine"><a class="header" href="#layer-5-engine-definition-hologramengine">Layer 5: Engine Definition (hologram.engine)</a></h3>
+<p><strong>What Happens</strong>: Emit the projection engine’s own definition as resources.</p>
+<p><strong>Resource Content</strong>:</p>
+<ul>
+<li>Engine capabilities (query execution, traversal, transformation)</li>
+<li>Engine algorithm descriptions (how it processes projections)</li>
+<li>Engine extension points (how to add custom query types, validators, transformations)</li>
+</ul>
+<p><strong>Process</strong>:</p>
+<ol>
+<li>Bootstrap code creates engine definition</li>
+<li>Stores as resources in the store</li>
+<li>Advanced implementations could use this to build engines (compilation, optimization)</li>
+</ol>
+<p><strong>Result</strong>: The engine is <strong>self-described</strong>—its behavior is documented in resources.</p>
+<p><strong>What’s Still Hard-Coded</strong>: Actual engine implementation (but its behavior is defined in resources).</p>
+<h3 id="layer-6-operation-definitions"><a class="header" href="#layer-6-operation-definitions">Layer 6: Operation Definitions</a></h3>
+<p><strong>What Happens</strong>: Emit operation definitions as projection definitions.</p>
+<p><strong>Resource Content</strong>: For each operation (component.create, instance.start, etc.):</p>
+<ul>
+<li>Input schema</li>
+<li>Projection phase specification</li>
+<li>Execution logic description</li>
+<li>Emission pattern</li>
+<li>Output schema</li>
+</ul>
+<p><strong>Process</strong>:</p>
+<ol>
+<li>Bootstrap code creates operation definitions</li>
+<li>Stores as resources</li>
+<li>Platform can now execute operations per definitions</li>
+</ol>
+<p><strong>Result</strong>: Operations are <strong>definition-driven</strong> rather than hard-coded.</p>
+<p><strong>What’s Still Hard-Coded</strong>: Execution logic for operations (projections define what to do, but implementation executes it).</p>
+<h3 id="layer-7-complete-self-description"><a class="header" href="#layer-7-complete-self-description">Layer 7: Complete Self-Description</a></h3>
+<p><strong>What Happens</strong>: The platform contains complete definition of itself.</p>
+<p><strong>What’s in Store</strong>:</p>
+<ul>
+<li>Store definition</li>
+<li>Projection language definition</li>
+<li>All container type schemas and projection definitions</li>
+<li>Engine definition</li>
+<li>Operation definitions</li>
+<li>Platform API definition</li>
+<li>Bootstrap process definition (this document as a resource!)</li>
+</ul>
+<p><strong>Result</strong>: The platform is <strong>fully self-describing</strong>—everything about its behavior exists as resources.</p>
+<p><strong>What’s Still Hard-Coded</strong>: Only Layer 0 (minimal CAS store) and basic projection engine execution. Everything else is defined in resources.</p>
+<h2 id="bootstrap-sequence"><a class="header" href="#bootstrap-sequence">Bootstrap Sequence</a></h2>
+<p>The actual initialization sequence when starting a Hologram platform:</p>
+<h3 id="step-1-initialize-store"><a class="header" href="#step-1-initialize-store">Step 1: Initialize Store</a></h3>
+<p>Start with empty or existing content-addressed store.</p>
+<p>If empty: create minimal store implementation.</p>
+<p>If existing: load store and check for bootstrap resources.</p>
+<h3 id="step-2-check-bootstrap-state"><a class="header" href="#step-2-check-bootstrap-state">Step 2: Check Bootstrap State</a></h3>
+<p>Query store for bootstrap marker resource.</p>
+<p>If not present: platform is uninitialized, proceed with bootstrap.</p>
+<p>If present: platform is already bootstrapped, load existing definitions.</p>
+<h3 id="step-3-emit-foundation-resources-if-bootstrapping"><a class="header" href="#step-3-emit-foundation-resources-if-bootstrapping">Step 3: Emit Foundation Resources (if bootstrapping)</a></h3>
+<p>Execute Layer 0-2 bootstrap:</p>
+<ol>
+<li>Emit hologram.store definition</li>
+<li>Emit hologram.projection definition</li>
+<li>Emit projection language schemas</li>
+</ol>
+<h3 id="step-4-initialize-minimal-engine"><a class="header" href="#step-4-initialize-minimal-engine">Step 4: Initialize Minimal Engine</a></h3>
+<p>Create minimal projection engine with hard-coded logic:</p>
+<ul>
+<li>Basic query evaluation</li>
+<li>Reference traversal</li>
+<li>Schema validation</li>
+<li>Simple transformations</li>
+</ul>
+<p>Engine loads projection language definitions from store.</p>
+<h3 id="step-5-emit-container-definitions"><a class="header" href="#step-5-emit-container-definitions">Step 5: Emit Container Definitions</a></h3>
+<p>Execute Layer 3-4 bootstrap:</p>
+<ol>
+<li>Emit base container type schemas</li>
+<li>Emit projection definitions for each container type</li>
+</ol>
+<p>Engine can now project these container types.</p>
+<h3 id="step-6-emit-operation-definitions"><a class="header" href="#step-6-emit-operation-definitions">Step 6: Emit Operation Definitions</a></h3>
+<p>Execute Layer 6 bootstrap:</p>
+<ol>
+<li>Emit operation definitions for all platform operations</li>
+</ol>
+<p>Platform can now execute operations per definitions.</p>
+<h3 id="step-7-emit-bootstrap-marker"><a class="header" href="#step-7-emit-bootstrap-marker">Step 7: Emit Bootstrap Marker</a></h3>
+<p>Create bootstrap marker resource indicating:</p>
+<ul>
+<li>Bootstrap completion timestamp</li>
+<li>Platform version</li>
+<li>Definitions emitted</li>
+</ul>
+<p>Emit marker to store.</p>
+<h3 id="step-8-verify-bootstrap"><a class="header" href="#step-8-verify-bootstrap">Step 8: Verify Bootstrap</a></h3>
+<p>Execute validation projection:</p>
+<ol>
+<li>Project all bootstrap resources</li>
+<li>Verify schemas valid</li>
+<li>Verify projection definitions valid</li>
+<li>Verify operations defined</li>
+</ol>
+<p>If validation passes: bootstrap complete.</p>
+<p>If validation fails: abort, report errors.</p>
+<h3 id="step-9-enter-normal-operation"><a class="header" href="#step-9-enter-normal-operation">Step 9: Enter Normal Operation</a></h3>
+<p>Platform is now fully bootstrapped and operational.</p>
+<p>All operations use projection-emission cycle.</p>
+<p>Platform is self-describing and can introspect its own definitions.</p>
+<h2 id="bootstrap-resources"><a class="header" href="#bootstrap-resources">Bootstrap Resources</a></h2>
+<p>The bootstrap resources are the <strong>platform kernel</strong>—minimal set of resources required for self-describing operation.</p>
+<p>These resources form the <strong>base projection set</strong> that all other projections build upon.</p>
+<p>Bootstrap resources should be:</p>
+<ul>
+<li>Minimal (only essential definitions)</li>
+<li>Stable (rarely change, only for platform evolution)</li>
+<li>Well-documented (critical to platform understanding)</li>
+<li>Versioned (enable platform upgrades)</li>
+</ul>
+<h2 id="incremental-bootstrap"><a class="header" href="#incremental-bootstrap">Incremental Bootstrap</a></h2>
+<p>For large platforms, bootstrap can be incremental:</p>
+<p><strong>Phase 1</strong>: Core projection system (Layers 0-4).</p>
+<p><strong>Phase 2</strong>: Base operations (component CRUD, instance lifecycle).</p>
+<p><strong>Phase 3</strong>: Extended container types (dependency, build, log).</p>
+<p><strong>Phase 4</strong>: Views and optimization (catalog, materialized views).</p>
+<p><strong>Phase 5</strong>: Advanced features (distributed execution, federation).</p>
+<p>Each phase emits resources, expands platform capabilities, enables next phase.</p>
+<h2 id="bootstrap-from-import"><a class="header" href="#bootstrap-from-import">Bootstrap from Import</a></h2>
+<p>Instead of hard-coded bootstrap, platform can bootstrap from resource import:</p>
+<p><strong>Step 1</strong>: Start with minimal store + engine.</p>
+<p><strong>Step 2</strong>: Import bootstrap resources from external source:</p>
+<ul>
+<li>File bundle</li>
+<li>Remote repository</li>
+<li>Another Hologram instance</li>
+</ul>
+<p><strong>Step 3</strong>: Engine loads imported definitions.</p>
+<p><strong>Step 4</strong>: Platform operational.</p>
+<p>This enables platform distribution as resource bundles.</p>
+<h2 id="bootstrap-verification"><a class="header" href="#bootstrap-verification">Bootstrap Verification</a></h2>
+<p>After bootstrap, verify platform consistency:</p>
+<p><strong>Definition Consistency</strong>: All projection definitions reference valid schemas.</p>
+<p><strong>Schema Validity</strong>: All schemas are well-formed JSON Schema.</p>
+<p><strong>Reference Integrity</strong>: All CID references in bootstrap resources exist.</p>
+<p><strong>Operation Completeness</strong>: All required operations are defined.</p>
+<p><strong>Engine Capability</strong>: Engine can execute all projection types defined.</p>
+<p>Verification ensures bootstrap produced valid platform state.</p>
+<h2 id="evolution-after-bootstrap"><a class="header" href="#evolution-after-bootstrap">Evolution After Bootstrap</a></h2>
+<p>Once bootstrapped, the platform evolves through normal projection-emission:</p>
+<p><strong>New Container Types</strong>: Emit new projection definitions → new container types available.</p>
+<p><strong>New Operations</strong>: Emit new operation definitions → new operations executable.</p>
+<p><strong>Improved Schemas</strong>: Emit updated schemas → refined validation.</p>
+<p><strong>Platform Updates</strong>: Emit updated bootstrap resources → platform evolves.</p>
+<p>Evolution uses the same mechanisms as application development.</p>
+<h2 id="the-minimal-kernel"><a class="header" href="#the-minimal-kernel">The Minimal Kernel</a></h2>
+<p>What must remain hard-coded (cannot be bootstrapped away)?</p>
+<p><strong>Content-Addressed Storage</strong>: The fundamental primitive (store, retrieve, reference, query).</p>
+<p><strong>Projection Execution</strong>: The ability to evaluate projections (though projection definitions can describe how).</p>
+<p><strong>Resource Serialization</strong>: Converting between in-memory and byte representations.</p>
+<p>These form the <strong>irreducible kernel</strong>—the minimal hard-coded logic required.</p>
+<p>Everything else can be defined as resources through projections.</p>
+<h2 id="bootstrap-reproducibility"><a class="header" href="#bootstrap-reproducibility">Bootstrap Reproducibility</a></h2>
+<p>Bootstrap should be reproducible:</p>
+<ul>
+<li>Same bootstrap code produces same resources</li>
+<li>Same resources produce same CIDs</li>
+<li>Same CIDs produce identical platform state</li>
+</ul>
+<p>Reproducibility enables:</p>
+<ul>
+<li>Deterministic platform creation</li>
+<li>Verification of platform integrity</li>
+<li>Consistency across distributed instances</li>
+</ul>
+<h2 id="next-steps"><a class="header" href="#next-steps">Next Steps</a></h2>
+<p>With bootstrap complete, the platform exhibits key properties that make it robust and evolvable. The next document, <strong>Platform Properties</strong>, describes the guarantees, characteristics, and emergent properties that result from the projection-emission model.</p>
+
+                    </main>
+
+                    <nav class="nav-wrapper" aria-label="Page navigation">
+                        <!-- Mobile navigation buttons -->
+                            <a rel="prev" href="11-platform-api.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                                <i class="fa fa-angle-left"></i>
+                            </a>
+
+                            <a rel="next prefetch" href="13-properties.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                                <i class="fa fa-angle-right"></i>
+                            </a>
+
+                        <div style="clear: both"></div>
+                    </nav>
+                </div>
+            </div>
+
+            <nav class="nav-wide-wrapper" aria-label="Page navigation">
+                    <a rel="prev" href="11-platform-api.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                        <i class="fa fa-angle-left"></i>
+                    </a>
+
+                    <a rel="next prefetch" href="13-properties.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                        <i class="fa fa-angle-right"></i>
+                    </a>
+            </nav>
+
+        </div>
+
+
+
+
+        <script>
+            window.playground_copyable = true;
+        </script>
+
+
+        <script src="elasticlunr.min.js"></script>
+        <script src="mark.min.js"></script>
+        <script src="searcher.js"></script>
+
+        <script src="clipboard.min.js"></script>
+        <script src="highlight.js"></script>
+        <script src="book.js"></script>
+
+        <!-- Custom JS scripts -->
+
+
+
+    </div>
+    </body>
+</html>

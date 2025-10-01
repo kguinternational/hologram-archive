@@ -24,11 +24,37 @@ export class ArtifactStore {
    * Generate CID for content using SHA256
    */
   public generateCID(content: any): string {
-    // Canonical JSON encoding (sorted keys)
-    const canonical = JSON.stringify(content, Object.keys(content).sort());
+    // Canonical JSON encoding with recursively sorted keys
+    const canonical = this.canonicalizeJSON(content);
     const hash = crypto.createHash('sha256');
     hash.update(canonical);
     return `cid:${hash.digest('hex')}`;
+  }
+
+  /**
+   * Recursively sort object keys for canonical JSON
+   */
+  private canonicalizeJSON(obj: any): string {
+    if (obj === null || obj === undefined) {
+      return JSON.stringify(obj);
+    }
+
+    if (typeof obj !== 'object') {
+      return JSON.stringify(obj);
+    }
+
+    if (Array.isArray(obj)) {
+      return '[' + obj.map(item => this.canonicalizeJSON(item)).join(',') + ']';
+    }
+
+    // Object: sort keys recursively
+    const sortedKeys = Object.keys(obj).sort();
+    const pairs = sortedKeys.map(key => {
+      const value = this.canonicalizeJSON(obj[key]);
+      return `${JSON.stringify(key)}:${value}`;
+    });
+
+    return '{' + pairs.join(',') + '}';
   }
 
   /**
@@ -67,74 +93,4 @@ export class ArtifactStore {
     return null;
   }
 
-  /**
-   * Check if artifact exists
-   */
-  public hasArtifact(cid: string): boolean {
-    if (this.artifacts.has(cid)) {
-      return true;
-    }
-
-    const artifactPath = path.join(this.artifactDir, cid);
-    return fs.existsSync(artifactPath);
-  }
-
-  /**
-   * Remove artifact
-   */
-  public removeArtifact(cid: string): boolean {
-    // Remove from memory
-    this.artifacts.delete(cid);
-
-    // Remove from disk
-    const artifactPath = path.join(this.artifactDir, cid);
-    if (fs.existsSync(artifactPath)) {
-      fs.unlinkSync(artifactPath);
-      return true;
-    }
-
-    return false;
-  }
-
-  /**
-   * Clear all artifacts (garbage collection)
-   */
-  public clearArtifacts(): void {
-    // Clear memory
-    this.artifacts.clear();
-
-    // Clear disk
-    if (fs.existsSync(this.artifactDir)) {
-      const files = fs.readdirSync(this.artifactDir);
-      for (const file of files) {
-        if (file.startsWith('cid:')) {
-          fs.unlinkSync(path.join(this.artifactDir, file));
-        }
-      }
-    }
-  }
-
-  /**
-   * List all artifact CIDs
-   */
-  public listArtifacts(): string[] {
-    const cids = new Set<string>();
-
-    // From memory
-    for (const cid of this.artifacts.keys()) {
-      cids.add(cid);
-    }
-
-    // From disk
-    if (fs.existsSync(this.artifactDir)) {
-      const files = fs.readdirSync(this.artifactDir);
-      for (const file of files) {
-        if (file.startsWith('cid:')) {
-          cids.add(file);
-        }
-      }
-    }
-
-    return Array.from(cids);
-  }
 }

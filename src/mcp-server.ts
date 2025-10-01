@@ -7,7 +7,6 @@ import {
 } from "@modelcontextprotocol/sdk/types.js";
 import { validateOperation } from "./operations/validate.js";
 import { readOperation } from "./operations/read.js";
-import { createOperation } from "./operations/create.js";
 import { updateOperation } from "./operations/update.js";
 import { deleteOperation } from "./operations/delete.js";
 import { submitArtifactOperation } from "./operations/artifact.js";
@@ -16,8 +15,13 @@ import {
   getComponentModelOperation,
   getSchemaOperation,
   listComponentsOperation,
-  getComponentExampleOperation
+  getComponentExampleOperation,
+  listSchemasOperation
 } from "./operations/discover.js";
+import {
+  validateArtifactOperation,
+  explainValidationOperation
+} from "./operations/preview.js";
 
 const server = new Server(
   {
@@ -37,7 +41,7 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
     tools: [
       {
         name: "submitArtifact",
-        description: "Submit and validate an individual artifact (spec, implementation, or conformance)",
+        description: "Submit and validate an individual artifact (spec or conformance)",
         inputSchema: {
           type: "object",
           properties: {
@@ -47,7 +51,7 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
             },
             type: {
               type: "string",
-              enum: ["spec", "implementation", "conformance"],
+              enum: ["spec", "conformance"],
               description: "Type of artifact",
             },
           },
@@ -69,13 +73,16 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
               description: "Map of artifact type to CID",
               properties: {
                 spec: { type: "string" },
-                implementation: { type: "string" },
                 interface: { type: "string" },
                 docs: { type: "string" },
                 test: { type: "string" },
                 manager: { type: "string" },
+                dependency: { type: "string" },
+                build: { type: "string" },
+                log: { type: "string" },
+                view: { type: "string" },
               },
-              required: ["spec", "implementation"],
+              required: ["spec"],
             },
           },
           required: ["namespace", "artifacts"],
@@ -83,7 +90,7 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
       },
       {
         name: "validate",
-        description: "Validate a component or all components in spec/",
+        description: "Validate component(s). Examples: validate() for all, validate({namespace: 'hologram.test'}) for specific component. Shows missing files.",
         inputSchema: {
           type: "object",
           properties: {
@@ -113,33 +120,6 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
         },
       },
       {
-        name: "create",
-        description: "Create a new component with all 6 required files",
-        inputSchema: {
-          type: "object",
-          properties: {
-            namespace: {
-              type: "string",
-              description: "Component namespace",
-            },
-            files: {
-              type: "object",
-              description: "Component files content",
-              properties: {
-                spec: { type: "object" },
-                implementation: { type: "object" },
-                interface: { type: "object" },
-                docs: { type: "object" },
-                test: { type: "object" },
-                manager: { type: "object" },
-              },
-              required: ["spec", "implementation", "interface", "docs", "test", "manager"],
-            },
-          },
-          required: ["namespace", "files"],
-        },
-      },
-      {
         name: "update",
         description: "Update component files",
         inputSchema: {
@@ -154,11 +134,14 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
               description: "Files to update",
               properties: {
                 spec: { type: "object" },
-                implementation: { type: "object" },
                 interface: { type: "object" },
                 docs: { type: "object" },
                 test: { type: "object" },
                 manager: { type: "object" },
+                dependency: { type: "object" },
+                build: { type: "object" },
+                log: { type: "object" },
+                view: { type: "object" },
               },
             },
           },
@@ -210,6 +193,14 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
         },
       },
       {
+        name: "listSchemas",
+        description: "List all available schemas for component validation",
+        inputSchema: {
+          type: "object",
+          properties: {},
+        },
+      },
+      {
         name: "getComponentExample",
         description: "Get example component structures as templates",
         inputSchema: {
@@ -221,6 +212,43 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
               description: "Type of example to show",
             },
           },
+        },
+      },
+      {
+        name: "validateArtifact",
+        description: "Preview validation of an artifact without saving. Test before committing. Example: validateArtifact({content: {...}, type: 'conformance'})",
+        inputSchema: {
+          type: "object",
+          properties: {
+            content: {
+              type: "object",
+              description: "The artifact content to validate",
+            },
+            type: {
+              type: "string",
+              enum: ["spec", "conformance"],
+              description: "Type of artifact",
+            },
+            namespace: {
+              type: "string",
+              description: "Optional namespace for context",
+            },
+          },
+          required: ["content", "type"],
+        },
+      },
+      {
+        name: "explainValidation",
+        description: "Explain what validations are performed on a component. Shows all checks that would be run.",
+        inputSchema: {
+          type: "object",
+          properties: {
+            namespace: {
+              type: "string",
+              description: "Component namespace to explain",
+            },
+          },
+          required: ["namespace"],
         },
       },
     ],
@@ -236,7 +264,7 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
       case "submitArtifact":
         return await submitArtifactOperation(
           args?.content as any,
-          args?.type as 'spec' | 'implementation' | 'conformance'
+          args?.type as 'spec' | 'conformance'
         );
 
       case "submitManifest":
@@ -252,12 +280,6 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
         return await readOperation(
           args?.namespace as string,
           args?.file as string | undefined
-        );
-
-      case "create":
-        return await createOperation(
-          args?.namespace as string,
-          args?.files as any
         );
 
       case "update":
@@ -278,9 +300,24 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
       case "listComponents":
         return await listComponentsOperation();
 
+      case "listSchemas":
+        return await listSchemasOperation();
+
       case "getComponentExample":
         return await getComponentExampleOperation(
           args?.componentType as 'simple' | 'conformance' | 'operation' | undefined
+        );
+
+      case "validateArtifact":
+        return await validateArtifactOperation(
+          args?.content as any,
+          args?.type as 'spec' | 'conformance',
+          args?.namespace as string | undefined
+        );
+
+      case "explainValidation":
+        return await explainValidationOperation(
+          args?.namespace as string
         );
 
       default:

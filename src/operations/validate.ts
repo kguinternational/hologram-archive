@@ -99,7 +99,7 @@ export async function validateOperation(
       const componentModel = await validator2.getComponentRequirements();
       if (componentModel) {
         errorText += '\n\nRequired conformance (from hologram.component.json):\n';
-        for (const [key, req] of Object.entries(componentModel.component.conformance_requirements)) {
+        for (const [key, req] of Object.entries(componentModel.conformance_requirements || {})) {
           const requirement = req as any;
           if (requirement.required) {
             errorText += `- ${key}: ${requirement.description}\n`;

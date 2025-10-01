@@ -1,0 +1,437 @@
+<!DOCTYPE HTML>
+<html lang="en" class="light sidebar-visible" dir="ltr">
+    <head>
+        <!-- Book generated using mdBook -->
+        <meta charset="UTF-8">
+        <title>Platform Properties - The Hologram Container Engine and Platform</title>
+
+
+        <!-- Custom HTML head -->
+
+        <meta name="description" content="Comprehensive documentation of the Hologram Container Engine and Platform conceptual model">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#ffffff">
+
+        <link rel="icon" href="favicon.svg">
+        <link rel="shortcut icon" href="favicon.png">
+        <link rel="stylesheet" href="css/variables.css">
+        <link rel="stylesheet" href="css/general.css">
+        <link rel="stylesheet" href="css/chrome.css">
+        <link rel="stylesheet" href="css/print.css" media="print">
+
+        <!-- Fonts -->
+        <link rel="stylesheet" href="FontAwesome/css/font-awesome.css">
+        <link rel="stylesheet" href="fonts/fonts.css">
+
+        <!-- Highlight.js Stylesheets -->
+        <link rel="stylesheet" id="highlight-css" href="highlight.css">
+        <link rel="stylesheet" id="tomorrow-night-css" href="tomorrow-night.css">
+        <link rel="stylesheet" id="ayu-highlight-css" href="ayu-highlight.css">
+
+        <!-- Custom theme stylesheets -->
+        <link rel="stylesheet" href="theme/custom.css">
+
+        <!-- MathJax -->
+        <script async src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+        <!-- Provide site root and default themes to javascript -->
+        <script>
+            const path_to_root = "";
+            const default_light_theme = "light";
+            const default_dark_theme = "navy";
+            window.path_to_searchindex_js = "searchindex.js";
+        </script>
+        <!-- Start loading toc.js asap -->
+        <script src="toc.js"></script>
+    </head>
+    <body>
+    <div id="mdbook-help-container">
+        <div id="mdbook-help-popup">
+            <h2 class="mdbook-help-title">Keyboard shortcuts</h2>
+            <div>
+                <p>Press <kbd>←</kbd> or <kbd>→</kbd> to navigate between chapters</p>
+                <p>Press <kbd>S</kbd> or <kbd>/</kbd> to search in the book</p>
+                <p>Press <kbd>?</kbd> to show this help</p>
+                <p>Press <kbd>Esc</kbd> to hide this help</p>
+            </div>
+        </div>
+    </div>
+    <div id="body-container">
+        <!-- Work around some values being stored in localStorage wrapped in quotes -->
+        <script>
+            try {
+                let theme = localStorage.getItem('mdbook-theme');
+                let sidebar = localStorage.getItem('mdbook-sidebar');
+
+                if (theme.startsWith('"') && theme.endsWith('"')) {
+                    localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
+                }
+
+                if (sidebar.startsWith('"') && sidebar.endsWith('"')) {
+                    localStorage.setItem('mdbook-sidebar', sidebar.slice(1, sidebar.length - 1));
+                }
+            } catch (e) { }
+        </script>
+
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script>
+            const default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? default_dark_theme : default_light_theme;
+            let theme;
+            try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
+            if (theme === null || theme === undefined) { theme = default_theme; }
+            const html = document.documentElement;
+            html.classList.remove('light')
+            html.classList.add(theme);
+            html.classList.add("js");
+        </script>
+
+        <input type="checkbox" id="sidebar-toggle-anchor" class="hidden">
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script>
+            let sidebar = null;
+            const sidebar_toggle = document.getElementById("sidebar-toggle-anchor");
+            if (document.body.clientWidth >= 1080) {
+                try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
+                sidebar = sidebar || 'visible';
+            } else {
+                sidebar = 'hidden';
+                sidebar_toggle.checked = false;
+            }
+            if (sidebar === 'visible') {
+                sidebar_toggle.checked = true;
+            } else {
+                html.classList.remove('sidebar-visible');
+            }
+        </script>
+
+        <nav id="sidebar" class="sidebar" aria-label="Table of contents">
+            <!-- populated by js -->
+            <mdbook-sidebar-scrollbox class="sidebar-scrollbox"></mdbook-sidebar-scrollbox>
+            <noscript>
+                <iframe class="sidebar-iframe-outer" src="toc.html"></iframe>
+            </noscript>
+            <div id="sidebar-resize-handle" class="sidebar-resize-handle">
+                <div class="sidebar-resize-indicator"></div>
+            </div>
+        </nav>
+
+        <div id="page-wrapper" class="page-wrapper">
+
+            <div class="page">
+                <div id="menu-bar-hover-placeholder"></div>
+                <div id="menu-bar" class="menu-bar sticky">
+                    <div class="left-buttons">
+                        <label id="sidebar-toggle" class="icon-button" for="sidebar-toggle-anchor" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="sidebar">
+                            <i class="fa fa-bars"></i>
+                        </label>
+                        <button id="theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="theme-list">
+                            <i class="fa fa-paint-brush"></i>
+                        </button>
+                        <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="default_theme">Auto</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="light">Light</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="navy">Navy</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="ayu">Ayu</button></li>
+                        </ul>
+                        <button id="search-toggle" class="icon-button" type="button" title="Search (`/`)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="/ s" aria-controls="searchbar">
+                            <i class="fa fa-search"></i>
+                        </button>
+                    </div>
+
+                    <h1 class="menu-title">The Hologram Container Engine and Platform</h1>
+
+                    <div class="right-buttons">
+                        <a href="print.html" title="Print this book" aria-label="Print this book">
+                            <i id="print-button" class="fa fa-print"></i>
+                        </a>
+                        <a href="https://github.com/yourusername/Hologram" title="Git repository" aria-label="Git repository">
+                            <i id="git-repository-button" class="fa fa-github"></i>
+                        </a>
+
+                    </div>
+                </div>
+
+                <div id="search-wrapper" class="hidden">
+                    <form id="searchbar-outer" class="searchbar-outer">
+                        <div class="search-wrapper">
+                            <input type="search" id="searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="searchresults-outer" aria-describedby="searchresults-header">
+                            <div class="spinner-wrapper">
+                                <i class="fa fa-spinner fa-spin"></i>
+                            </div>
+                        </div>
+                    </form>
+                    <div id="searchresults-outer" class="searchresults-outer hidden">
+                        <div id="searchresults-header" class="searchresults-header"></div>
+                        <ul id="searchresults">
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
+                <script>
+                    document.getElementById('sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
+                    document.getElementById('sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
+                    Array.from(document.querySelectorAll('#sidebar a')).forEach(function(link) {
+                        link.setAttribute('tabIndex', sidebar === 'visible' ? 0 : -1);
+                    });
+                </script>
+
+                <div id="content" class="content">
+                    <main>
+                        <h1 id="platform-properties"><a class="header" href="#platform-properties">Platform Properties</a></h1>
+<h2 id="guarantees-and-emergent-characteristics"><a class="header" href="#guarantees-and-emergent-characteristics">Guarantees and Emergent Characteristics</a></h2>
+<p>The Hologram platform exhibits fundamental properties that emerge from its projection-emission architecture. These properties provide guarantees about platform behavior and enable powerful capabilities.</p>
+<p>This document catalogs the platform’s key properties—both guaranteed invariants and emergent characteristics.</p>
+<h2 id="immutability"><a class="header" href="#immutability">Immutability</a></h2>
+<h3 id="property"><a class="header" href="#property">Property</a></h3>
+<p>Resources in the container store <strong>never change</strong> after emission. Once a resource is stored with a CID, that CID always refers to the same content.</p>
+<h3 id="guarantees"><a class="header" href="#guarantees">Guarantees</a></h3>
+<p><strong>Stable References</strong>: A CID reference is永permanent and reliable—it will always retrieve the same content.</p>
+<p><strong>Historical Completeness</strong>: All versions of evolving data persist as distinct resources. No information is lost through updates.</p>
+<p><strong>Concurrent Safety</strong>: Multiple readers can access the same resource without coordination—it will never change under them.</p>
+<p><strong>Verifiable Integrity</strong>: Retrieved content can be hashed and verified against the CID cryptographically.</p>
+<h3 id="implications"><a class="header" href="#implications">Implications</a></h3>
+<p><strong>Versioning is Natural</strong>: Updates create new resources with new CIDs, automatically creating version history.</p>
+<p><strong>Caching is Simple</strong>: Immutable resources can be cached indefinitely without invalidation concerns.</p>
+<p><strong>Distribution is Safe</strong>: Resources can be copied between stores without synchronization—content identity is preserved.</p>
+<p><strong>Audit Trails are Built-In</strong>: Complete operation history exists as immutable resources.</p>
+<h2 id="content-addressing"><a class="header" href="#content-addressing">Content Addressing</a></h2>
+<h3 id="property-1"><a class="header" href="#property-1">Property</a></h3>
+<p>Resources are identified by <strong>cryptographic hash of their content</strong>, not by location or assigned identifiers.</p>
+<h3 id="guarantees-1"><a class="header" href="#guarantees-1">Guarantees</a></h3>
+<p><strong>Identity from Content</strong>: Identical content produces identical CID regardless of when, where, or by whom it was created.</p>
+<p><strong>Collision Resistance</strong>: Different content produces different CIDs with cryptographic probability.</p>
+<p><strong>Deduplication</strong>: Identical content stored multiple times occupies space once.</p>
+<p><strong>Location Independence</strong>: CID is valid across stores, networks, time—content can move freely.</p>
+<h3 id="implications-1"><a class="header" href="#implications-1">Implications</a></h3>
+<p><strong>Global Namespace</strong>: CIDs are globally unique without coordination or central registry.</p>
+<p><strong>Trustless Verification</strong>: Content authenticity verifiable without trusting the source.</p>
+<p><strong>Efficient Storage</strong>: No redundant copies of shared resources (common dependencies, standard libraries).</p>
+<p><strong>Portable References</strong>: CID references work across platform instances and implementations.</p>
+<h2 id="projection-purity"><a class="header" href="#projection-purity">Projection Purity</a></h2>
+<h3 id="property-2"><a class="header" href="#property-2">Property</a></h3>
+<p>Projections are <strong>pure queries</strong> that do not modify the store or produce side effects.</p>
+<h3 id="guarantees-2"><a class="header" href="#guarantees-2">Guarantees</a></h3>
+<p><strong>Determinism</strong>: Same store state and parameters always produce same projection result.</p>
+<p><strong>Repeatability</strong>: Projections can be executed multiple times without affecting results.</p>
+<p><strong>Concurrency</strong>: Multiple projections execute safely in parallel without interference.</p>
+<p><strong>Reproducibility</strong>: Historical projections can be re-executed against historical store state.</p>
+<h3 id="implications-2"><a class="header" href="#implications-2">Implications</a></h3>
+<p><strong>Testing is Straightforward</strong>: Projections testable with known resource sets and expected results.</p>
+<p><strong>Debugging is Possible</strong>: Projection failures reproducible with same inputs.</p>
+<p><strong>Optimization is Safe</strong>: Caching, parallelization, reordering don’t affect semantics.</p>
+<p><strong>Temporal Queries Work</strong>: Projecting historical state produces accurate historical views.</p>
+<h2 id="emission-atomicity"><a class="header" href="#emission-atomicity">Emission Atomicity</a></h2>
+<h3 id="property-3"><a class="header" href="#property-3">Property</a></h3>
+<p>Emissions are <strong>atomic operations</strong>—resources are either fully stored and indexed, or not stored at all.</p>
+<h3 id="guarantees-3"><a class="header" href="#guarantees-3">Guarantees</a></h3>
+<p><strong>No Partial Writes</strong>: Resources are complete and valid or don’t exist.</p>
+<p><strong>Consistent State</strong>: Store remains consistent regardless of emission success or failure.</p>
+<p><strong>Transaction Support</strong>: Multiple related emissions succeed or fail together.</p>
+<p><strong>Recovery from Failure</strong>: Failed emissions leave no partial state requiring cleanup.</p>
+<h3 id="implications-3"><a class="header" href="#implications-3">Implications</a></h3>
+<p><strong>Operations are Reliable</strong>: Operations either complete successfully or fail cleanly.</p>
+<p><strong>Concurrent Emissions Safe</strong>: Multiple clients emitting concurrently maintain consistency.</p>
+<p><strong>Error Recovery Simple</strong>: Failed operations can be retried without cleanup.</p>
+<p><strong>Multi-Resource Consistency</strong>: Component definitions with multiple resources appear atomically.</p>
+<h2 id="extensibility"><a class="header" href="#extensibility">Extensibility</a></h2>
+<h3 id="property-4"><a class="header" href="#property-4">Property</a></h3>
+<p>New container types, operations, and capabilities can be added by <strong>emitting new projection definitions</strong>.</p>
+<h3 id="guarantees-4"><a class="header" href="#guarantees-4">Guarantees</a></h3>
+<p><strong>No Platform Modification Required</strong>: Extension through resource emission, not code changes.</p>
+<p><strong>Backward Compatibility</strong>: Existing projections continue working when new projections added.</p>
+<p><strong>Composition Supported</strong>: New projections can compose existing projections.</p>
+<p><strong>Version Coexistence</strong>: Multiple versions of projections can exist simultaneously.</p>
+<h3 id="implications-4"><a class="header" href="#implications-4">Implications</a></h3>
+<p><strong>Platform Evolves Continuously</strong>: New capabilities added without platform downtime.</p>
+<p><strong>Domain-Specific Extensions</strong>: Applications can define custom container types for their needs.</p>
+<p><strong>Experimentation is Safe</strong>: New projections can be tested without affecting existing system.</p>
+<p><strong>Migration is Gradual</strong>: Old and new projection versions coexist during transitions.</p>
+<h2 id="self-description"><a class="header" href="#self-description">Self-Description</a></h2>
+<h3 id="property-5"><a class="header" href="#property-5">Property</a></h3>
+<p>The platform <strong>contains its own definition</strong> as resources in the store.</p>
+<h3 id="guarantees-5"><a class="header" href="#guarantees-5">Guarantees</a></h3>
+<p><strong>Introspectable</strong>: Platform behavior is documented in resources, accessible via projections.</p>
+<p><strong>Evolvable</strong>: Platform definition can be updated by emitting new definition resources.</p>
+<p><strong>Bootstrappable</strong>: New platform instances can initialize from definition resources.</p>
+<p><strong>Documentable</strong>: Platform documentation exists as resources, version-controlled with platform.</p>
+<h3 id="implications-5"><a class="header" href="#implications-5">Implications</a></h3>
+<p><strong>Understanding is Accessible</strong>: Projecting platform definitions reveals how platform works.</p>
+<p><strong>Meta-Operations Possible</strong>: Operations that analyze or transform platform definitions.</p>
+<p><strong>Migration is Defined</strong>: Platform upgrades are resource updates, trackable and reversible.</p>
+<p><strong>Consistency Verifiable</strong>: Platform definition consistency checkable via projections.</p>
+<h2 id="auditability"><a class="header" href="#auditability">Auditability</a></h2>
+<h3 id="property-6"><a class="header" href="#property-6">Property</a></h3>
+<p>All operations leave <strong>immutable audit trails</strong> as emitted resources.</p>
+<h3 id="guarantees-6"><a class="header" href="#guarantees-6">Guarantees</a></h3>
+<p><strong>Complete History</strong>: Every operation, emission, and state change recorded.</p>
+<p><strong>Tamper-Evident</strong>: Immutable resources and content addressing prevent undetectable modification.</p>
+<p><strong>Traceable</strong>: Resource reference graph shows relationships and provenance.</p>
+<p><strong>Queryable</strong>: Audit data is projectable like any resources.</p>
+<h3 id="implications-6"><a class="header" href="#implications-6">Implications</a></h3>
+<p><strong>Compliance Enabled</strong>: Regulatory audit requirements satisfiable from store content.</p>
+<p><strong>Debugging Informed</strong>: Complete history available for investigating issues.</p>
+<p><strong>Attribution Clear</strong>: Who emitted what resources when is recorded.</p>
+<p><strong>Reproducibility Supported</strong>: Historical operations reproducible from audit data.</p>
+<h2 id="composability"><a class="header" href="#composability">Composability</a></h2>
+<h3 id="property-7"><a class="header" href="#property-7">Property</a></h3>
+<p>Projections, operations, and containers <strong>compose cleanly</strong> without tight coupling.</p>
+<h3 id="guarantees-7"><a class="header" href="#guarantees-7">Guarantees</a></h3>
+<p><strong>Hierarchical Composition</strong>: Projections can project other projections.</p>
+<p><strong>Operation Chaining</strong>: Operations compose into workflows.</p>
+<p><strong>Container Reuse</strong>: Containers participate in multiple projections.</p>
+<p><strong>Independent Evolution</strong>: Composed elements evolve independently.</p>
+<h3 id="implications-7"><a class="header" href="#implications-7">Implications</a></h3>
+<p><strong>Complex from Simple</strong>: Sophisticated capabilities built from basic projections.</p>
+<p><strong>Reusability High</strong>: Components, projections, operations reused across contexts.</p>
+<p><strong>Coupling Low</strong>: Changes to one projection don’t require changes to others.</p>
+<p><strong>Modularity Maintained</strong>: System organized as composable modules, not monolith.</p>
+<h2 id="consistency-models"><a class="header" href="#consistency-models">Consistency Models</a></h2>
+<h3 id="property-8"><a class="header" href="#property-8">Property</a></h3>
+<p>The platform supports <strong>multiple consistency models</strong> appropriate to different use cases.</p>
+<h3 id="guarantees-8"><a class="header" href="#guarantees-8">Guarantees</a></h3>
+<p><strong>Strong Consistency Available</strong>: Operations can require immediate consistency when critical.</p>
+<p><strong>Eventual Consistency Supported</strong>: Operations can accept eventual consistency for performance.</p>
+<p><strong>Snapshot Consistency Provided</strong>: Projections can use consistent historical snapshots.</p>
+<p><strong>Client Choice</strong>: Consistency level selected per operation.</p>
+<h3 id="implications-8"><a class="header" href="#implications-8">Implications</a></h3>
+<p><strong>Flexibility</strong>: Applications choose appropriate tradeoffs between consistency and performance.</p>
+<p><strong>Scalability</strong>: Eventual consistency enables distributed, high-throughput scenarios.</p>
+<p><strong>Correctness</strong>: Strong consistency ensures critical operations maintain invariants.</p>
+<p><strong>Optimization</strong>: Views and caches use eventual consistency without compromising safety.</p>
+<h2 id="distribution"><a class="header" href="#distribution">Distribution</a></h2>
+<h3 id="property-9"><a class="header" href="#property-9">Property</a></h3>
+<p>Resources and projections are <strong>location-independent</strong> and distributable.</p>
+<h3 id="guarantees-9"><a class="header" href="#guarantees-9">Guarantees</a></h3>
+<p><strong>CID Portability</strong>: CIDs valid across distributed stores.</p>
+<p><strong>Content Synchronization</strong>: Resources copyable between stores with identity preserved.</p>
+<p><strong>Projection Mobility</strong>: Projections executable on any store containing required resources.</p>
+<p><strong>Decentralization Possible</strong>: No required central coordinator or master.</p>
+<h3 id="implications-9"><a class="header" href="#implications-9">Implications</a></h3>
+<p><strong>Federation Enabled</strong>: Multiple Hologram instances can federate, sharing resources.</p>
+<p><strong>Edge Computing Supported</strong>: Projections executable at edge with local resource subset.</p>
+<p><strong>Disaster Recovery Simple</strong>: Stores replicable for redundancy and recovery.</p>
+<p><strong>Geographic Distribution</strong>: Resources locatable near users for performance.</p>
+<h2 id="performance-characteristics"><a class="header" href="#performance-characteristics">Performance Characteristics</a></h2>
+<h3 id="property-10"><a class="header" href="#property-10">Property</a></h3>
+<p>The platform exhibits predictable <strong>performance characteristics</strong> based on resource access patterns.</p>
+<h3 id="guarantees-10"><a class="header" href="#guarantees-10">Guarantees</a></h3>
+<p><strong>Content Retrieval O(1)</strong>: Direct CID retrieval is constant time (hash table lookup).</p>
+<p><strong>Deduplication Automatic</strong>: Storage scales with unique content, not total references.</p>
+<p><strong>Projection Cost Proportional</strong>: Projection cost scales with resources accessed, not store size.</p>
+<p><strong>Caching Effective</strong>: Immutability enables aggressive caching without invalidation complexity.</p>
+<h3 id="implications-10"><a class="header" href="#implications-10">Implications</a></h3>
+<p><strong>Scalability Predictable</strong>: Performance behavior understood and plannable.</p>
+<p><strong>Optimization Opportunities</strong>: Materialized views, indexes, caching optimize common patterns.</p>
+<p><strong>Resource Planning</strong>: Storage and compute requirements estimable from usage patterns.</p>
+<p><strong>Bottleneck Identification</strong>: Performance issues traceable to specific projection or emission patterns.</p>
+<h2 id="backward-compatibility"><a class="header" href="#backward-compatibility">Backward Compatibility</a></h2>
+<h3 id="property-11"><a class="header" href="#property-11">Property</a></h3>
+<p>Platform evolution maintains <strong>backward compatibility</strong> through projection versioning.</p>
+<h3 id="guarantees-11"><a class="header" href="#guarantees-11">Guarantees</a></h3>
+<p><strong>Old Projections Work</strong>: Existing projection definitions continue functioning after platform updates.</p>
+<p><strong>Old Resources Accessible</strong>: Historical resources remain retrievable and projectable.</p>
+<p><strong>Version Coexistence</strong>: Multiple projection versions available simultaneously.</p>
+<p><strong>Gradual Migration</strong>: Systems transition from old to new projections at their own pace.</p>
+<h3 id="implications-11"><a class="header" href="#implications-11">Implications</a></h3>
+<p><strong>Breaking Changes Avoidable</strong>: New projection versions published alongside old versions.</p>
+<p><strong>Deprecation Gradual</strong>: Old projections marked deprecated but remain functional.</p>
+<p><strong>Migration Risk Low</strong>: New versions testable before switching production systems.</p>
+<p><strong>Long-Term Stability</strong>: Systems built on Hologram remain functional through platform evolution.</p>
+<h2 id="resource-efficiency"><a class="header" href="#resource-efficiency">Resource Efficiency</a></h2>
+<h3 id="property-12"><a class="header" href="#property-12">Property</a></h3>
+<p>The platform minimizes <strong>resource consumption</strong> through deduplication and structural sharing.</p>
+<h3 id="guarantees-12"><a class="header" href="#guarantees-12">Guarantees</a></h3>
+<p><strong>No Redundant Storage</strong>: Identical content stored once regardless of reference count.</p>
+<p><strong>Efficient Updates</strong>: Updates share unchanged resources, storing only differences.</p>
+<p><strong>Lazy Loading</strong>: Resources retrieved only when projected, not preemptively.</p>
+<p><strong>Garbage Collection</strong>: Unreferenced resources reclaimable to free storage.</p>
+<h3 id="implications-12"><a class="header" href="#implications-12">Implications</a></h3>
+<p><strong>Storage Costs Bounded</strong>: Storage grows with unique content, deduplicating redundancy.</p>
+<p><strong>Network Efficiency</strong>: Only missing resources transferred between stores.</p>
+<p><strong>Memory Efficiency</strong>: Projection engine loads only required resources.</p>
+<p><strong>Cost Optimization</strong>: Storage and transfer costs minimized through structural sharing.</p>
+<h2 id="temporal-capabilities"><a class="header" href="#temporal-capabilities">Temporal Capabilities</a></h2>
+<h3 id="property-13"><a class="header" href="#property-13">Property</a></h3>
+<p>Immutability enables <strong>time-travel queries</strong> and historical projections.</p>
+<h3 id="guarantees-13"><a class="header" href="#guarantees-13">Guarantees</a></h3>
+<p><strong>Historical State Preserved</strong>: All resource versions remain in store.</p>
+<p><strong>Temporal Projections Valid</strong>: Projections can target specific points in time.</p>
+<p><strong>Consistency Across Time</strong>: Historical projections produce consistent views of past state.</p>
+<p><strong>Provenance Trackable</strong>: Resource creation and modification timeline reconstructable.</p>
+<h3 id="implications-13"><a class="header" href="#implications-13">Implications</a></h3>
+<p><strong>Debugging Simplified</strong>: Issues reproducible by projecting historical state.</p>
+<p><strong>Compliance Supported</strong>: Historical compliance queries answerable.</p>
+<p><strong>Analytics Enabled</strong>: Time-series analysis of platform state and resources.</p>
+<p><strong>Undo Possible</strong>: Reverting to previous state means projecting historical resources.</p>
+<h2 id="security-properties"><a class="header" href="#security-properties">Security Properties</a></h2>
+<h3 id="property-14"><a class="header" href="#property-14">Property</a></h3>
+<p>Content addressing and immutability provide <strong>security foundations</strong>.</p>
+<h3 id="guarantees-14"><a class="header" href="#guarantees-14">Guarantees</a></h3>
+<p><strong>Integrity Verification</strong>: Content authenticity cryptographically verifiable.</p>
+<p><strong>Tamper Detection</strong>: Any modification changes CID, making tampering evident.</p>
+<p><strong>Access Control Enforcement</strong>: Store can enforce read/write permissions per resource or namespace.</p>
+<p><strong>Audit Trail Immutable</strong>: Audit resources cannot be altered retroactively.</p>
+<h3 id="implications-14"><a class="header" href="#implications-14">Implications</a></h3>
+<p><strong>Trust Minimized</strong>: Verify content cryptographically rather than trusting source.</p>
+<p><strong>Compliance Enhanced</strong>: Immutable audit trails satisfy regulatory requirements.</p>
+<p><strong>Attack Surface Reduced</strong>: Immutability eliminates modification attacks.</p>
+<p><strong>Provenance Verifiable</strong>: Resource origin and modification history checkable.</p>
+<h2 id="next-steps"><a class="header" href="#next-steps">Next Steps</a></h2>
+<p>These properties emerge from the platform’s architecture, but realizing them requires implementation decisions. The next document, <strong>Implementation Considerations</strong>, discusses how to implement the platform—architectural patterns, technology choices, performance optimization, and practical tradeoffs.</p>
+
+                    </main>
+
+                    <nav class="nav-wrapper" aria-label="Page navigation">
+                        <!-- Mobile navigation buttons -->
+                            <a rel="prev" href="12-bootstrap.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                                <i class="fa fa-angle-left"></i>
+                            </a>
+
+                            <a rel="next prefetch" href="14-implementation.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                                <i class="fa fa-angle-right"></i>
+                            </a>
+
+                        <div style="clear: both"></div>
+                    </nav>
+                </div>
+            </div>
+
+            <nav class="nav-wide-wrapper" aria-label="Page navigation">
+                    <a rel="prev" href="12-bootstrap.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                        <i class="fa fa-angle-left"></i>
+                    </a>
+
+                    <a rel="next prefetch" href="14-implementation.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                        <i class="fa fa-angle-right"></i>
+                    </a>
+            </nav>
+
+        </div>
+
+
+
+
+        <script>
+            window.playground_copyable = true;
+        </script>
+
+
+        <script src="elasticlunr.min.js"></script>
+        <script src="mark.min.js"></script>
+        <script src="searcher.js"></script>
+
+        <script src="clipboard.min.js"></script>
+        <script src="highlight.js"></script>
+        <script src="book.js"></script>
+
+        <!-- Custom JS scripts -->
+
+
+
+    </div>
+    </body>
+</html>

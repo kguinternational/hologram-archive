@@ -31,7 +31,7 @@ export async function submitManifestOperation(
 
     // Phase 1.5: Validate namespace and check if component already exists
     // Check for conformance-like patterns in namespace
-    const conformanceTypes = ['interface', 'docs', 'test', 'manager', 'dependency', 'build', 'log'];
+    const conformanceTypes = Object.keys(componentModel.conformance_requirements || {});
     const namespaceParts = namespace.split('.');
     if (namespaceParts.length > 2) {
       const lastPart = namespaceParts[namespaceParts.length - 1];
@@ -274,10 +274,8 @@ export async function submitManifestOperation(
         return formatErrors(namespace, finalValidation.errors);
       }
 
-      // Success - clear artifacts from store (they're now in spec/)
-      for (const cid of Object.values(artifacts)) {
-        artifactStore.removeArtifact(cid);
-      }
+      // Success - artifacts are now persisted in spec/
+      // The artifact store will be cleaned by the Makefile when needed
 
       return {
         content: [

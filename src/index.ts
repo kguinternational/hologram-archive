@@ -10,7 +10,6 @@ export { ArtifactStore } from './core/artifact-store.js';
 // Operation exports
 export { validateOperation } from './operations/validate.js';
 export { readOperation } from './operations/read.js';
-export { createOperation } from './operations/create.js';
 export { updateOperation } from './operations/update.js';
 export { deleteOperation } from './operations/delete.js';
 export { submitArtifactOperation } from './operations/artifact.js';
@@ -29,7 +28,6 @@ export type {
   ComponentFiles,
   ValidationResult,
   ValidationError,
-  CreateResult,
   UpdateResult,
   DeleteResult,
   ReadResult,

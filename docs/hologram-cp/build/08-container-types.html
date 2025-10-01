@@ -1,0 +1,554 @@
+<!DOCTYPE HTML>
+<html lang="en" class="light sidebar-visible" dir="ltr">
+    <head>
+        <!-- Book generated using mdBook -->
+        <meta charset="UTF-8">
+        <title>Container Types - The Hologram Container Engine and Platform</title>
+
+
+        <!-- Custom HTML head -->
+
+        <meta name="description" content="Comprehensive documentation of the Hologram Container Engine and Platform conceptual model">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#ffffff">
+
+        <link rel="icon" href="favicon.svg">
+        <link rel="shortcut icon" href="favicon.png">
+        <link rel="stylesheet" href="css/variables.css">
+        <link rel="stylesheet" href="css/general.css">
+        <link rel="stylesheet" href="css/chrome.css">
+        <link rel="stylesheet" href="css/print.css" media="print">
+
+        <!-- Fonts -->
+        <link rel="stylesheet" href="FontAwesome/css/font-awesome.css">
+        <link rel="stylesheet" href="fonts/fonts.css">
+
+        <!-- Highlight.js Stylesheets -->
+        <link rel="stylesheet" id="highlight-css" href="highlight.css">
+        <link rel="stylesheet" id="tomorrow-night-css" href="tomorrow-night.css">
+        <link rel="stylesheet" id="ayu-highlight-css" href="ayu-highlight.css">
+
+        <!-- Custom theme stylesheets -->
+        <link rel="stylesheet" href="theme/custom.css">
+
+        <!-- MathJax -->
+        <script async src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+        <!-- Provide site root and default themes to javascript -->
+        <script>
+            const path_to_root = "";
+            const default_light_theme = "light";
+            const default_dark_theme = "navy";
+            window.path_to_searchindex_js = "searchindex.js";
+        </script>
+        <!-- Start loading toc.js asap -->
+        <script src="toc.js"></script>
+    </head>
+    <body>
+    <div id="mdbook-help-container">
+        <div id="mdbook-help-popup">
+            <h2 class="mdbook-help-title">Keyboard shortcuts</h2>
+            <div>
+                <p>Press <kbd>←</kbd> or <kbd>→</kbd> to navigate between chapters</p>
+                <p>Press <kbd>S</kbd> or <kbd>/</kbd> to search in the book</p>
+                <p>Press <kbd>?</kbd> to show this help</p>
+                <p>Press <kbd>Esc</kbd> to hide this help</p>
+            </div>
+        </div>
+    </div>
+    <div id="body-container">
+        <!-- Work around some values being stored in localStorage wrapped in quotes -->
+        <script>
+            try {
+                let theme = localStorage.getItem('mdbook-theme');
+                let sidebar = localStorage.getItem('mdbook-sidebar');
+
+                if (theme.startsWith('"') && theme.endsWith('"')) {
+                    localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
+                }
+
+                if (sidebar.startsWith('"') && sidebar.endsWith('"')) {
+                    localStorage.setItem('mdbook-sidebar', sidebar.slice(1, sidebar.length - 1));
+                }
+            } catch (e) { }
+        </script>
+
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script>
+            const default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? default_dark_theme : default_light_theme;
+            let theme;
+            try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
+            if (theme === null || theme === undefined) { theme = default_theme; }
+            const html = document.documentElement;
+            html.classList.remove('light')
+            html.classList.add(theme);
+            html.classList.add("js");
+        </script>
+
+        <input type="checkbox" id="sidebar-toggle-anchor" class="hidden">
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script>
+            let sidebar = null;
+            const sidebar_toggle = document.getElementById("sidebar-toggle-anchor");
+            if (document.body.clientWidth >= 1080) {
+                try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
+                sidebar = sidebar || 'visible';
+            } else {
+                sidebar = 'hidden';
+                sidebar_toggle.checked = false;
+            }
+            if (sidebar === 'visible') {
+                sidebar_toggle.checked = true;
+            } else {
+                html.classList.remove('sidebar-visible');
+            }
+        </script>
+
+        <nav id="sidebar" class="sidebar" aria-label="Table of contents">
+            <!-- populated by js -->
+            <mdbook-sidebar-scrollbox class="sidebar-scrollbox"></mdbook-sidebar-scrollbox>
+            <noscript>
+                <iframe class="sidebar-iframe-outer" src="toc.html"></iframe>
+            </noscript>
+            <div id="sidebar-resize-handle" class="sidebar-resize-handle">
+                <div class="sidebar-resize-indicator"></div>
+            </div>
+        </nav>
+
+        <div id="page-wrapper" class="page-wrapper">
+
+            <div class="page">
+                <div id="menu-bar-hover-placeholder"></div>
+                <div id="menu-bar" class="menu-bar sticky">
+                    <div class="left-buttons">
+                        <label id="sidebar-toggle" class="icon-button" for="sidebar-toggle-anchor" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="sidebar">
+                            <i class="fa fa-bars"></i>
+                        </label>
+                        <button id="theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="theme-list">
+                            <i class="fa fa-paint-brush"></i>
+                        </button>
+                        <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="default_theme">Auto</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="light">Light</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="navy">Navy</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="ayu">Ayu</button></li>
+                        </ul>
+                        <button id="search-toggle" class="icon-button" type="button" title="Search (`/`)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="/ s" aria-controls="searchbar">
+                            <i class="fa fa-search"></i>
+                        </button>
+                    </div>
+
+                    <h1 class="menu-title">The Hologram Container Engine and Platform</h1>
+
+                    <div class="right-buttons">
+                        <a href="print.html" title="Print this book" aria-label="Print this book">
+                            <i id="print-button" class="fa fa-print"></i>
+                        </a>
+                        <a href="https://github.com/yourusername/Hologram" title="Git repository" aria-label="Git repository">
+                            <i id="git-repository-button" class="fa fa-github"></i>
+                        </a>
+
+                    </div>
+                </div>
+
+                <div id="search-wrapper" class="hidden">
+                    <form id="searchbar-outer" class="searchbar-outer">
+                        <div class="search-wrapper">
+                            <input type="search" id="searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="searchresults-outer" aria-describedby="searchresults-header">
+                            <div class="spinner-wrapper">
+                                <i class="fa fa-spinner fa-spin"></i>
+                            </div>
+                        </div>
+                    </form>
+                    <div id="searchresults-outer" class="searchresults-outer hidden">
+                        <div id="searchresults-header" class="searchresults-header"></div>
+                        <ul id="searchresults">
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
+                <script>
+                    document.getElementById('sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
+                    document.getElementById('sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
+                    Array.from(document.querySelectorAll('#sidebar a')).forEach(function(link) {
+                        link.setAttribute('tabIndex', sidebar === 'visible' ? 0 : -1);
+                    });
+                </script>
+
+                <div id="content" class="content">
+                    <main>
+                        <h1 id="container-types"><a class="header" href="#container-types">Container Types</a></h1>
+<h2 id="platform-container-types-and-emissions"><a class="header" href="#platform-container-types-and-emissions">Platform Container Types and Emissions</a></h2>
+<p>The Hologram platform provides <strong>base container types</strong>—projection definitions and associated operations for common containment patterns. Container types define how resources are projected into containers and what emissions those containers produce.</p>
+<p>This document describes the platform’s base container types, their projection patterns, and emission characteristics.</p>
+<h2 id="container-type-fundamentals"><a class="header" href="#container-type-fundamentals">Container Type Fundamentals</a></h2>
+<p>A <strong>container type</strong> is defined by:</p>
+<p><strong>Projection Definition</strong>: The conformance requirements and transformation rules for projecting resources into this container type.</p>
+<p><strong>Required Resources</strong>: What resources must be present for valid containers of this type.</p>
+<p><strong>Optional Resources</strong>: What resources may be included but aren’t mandatory.</p>
+<p><strong>Emission Pattern</strong>: What resources containers of this type emit during their lifecycle.</p>
+<p><strong>Operations</strong>: What operations can be performed with containers of this type.</p>
+<p>Container types are defined as resources in the store (projection definitions), making them extensible—new container types are added by emitting new projection definitions.</p>
+<h2 id="component-containers"><a class="header" href="#component-containers">Component Containers</a></h2>
+<p><strong>Purpose</strong>: Define reusable capabilities as specifications.</p>
+<h3 id="projection-pattern"><a class="header" href="#projection-pattern">Projection Pattern</a></h3>
+<p><strong>Query</strong>: Identify resources with component namespace (e.g., “hologram.component”, “application.service”).</p>
+<p><strong>Required Resources</strong>:</p>
+<ul>
+<li><strong>Spec</strong>: Component specification (namespace, version, description, metadata)</li>
+</ul>
+<p><strong>Optional Resources</strong>:</p>
+<ul>
+<li><strong>Interface</strong>: Interface definition resources</li>
+<li><strong>Documentation</strong>: Human-readable documentation resources</li>
+<li><strong>Tests</strong>: Test suite resources</li>
+<li><strong>Dependencies</strong>: References to other components required</li>
+<li><strong>Build</strong>: Build process definition</li>
+<li><strong>Manager</strong>: Lifecycle management definition</li>
+</ul>
+<p><strong>Aggregation</strong>: Follow references from spec to collect all related resources.</p>
+<p><strong>Transformation</strong>: Structure into hierarchical component definition with spec as root, related resources as branches.</p>
+<h3 id="emission-pattern"><a class="header" href="#emission-pattern">Emission Pattern</a></h3>
+<p><strong>Creation</strong>: Emit component definition resource containing spec and references to all conformance resources.</p>
+<p><strong>Update</strong>: Emit new component definition resource with updated content (new CID, immutable versioning).</p>
+<p><strong>Deletion Marker</strong>: Emit resource marking component as deprecated or deleted (original definition remains for history).</p>
+<h3 id="characteristics"><a class="header" href="#characteristics">Characteristics</a></h3>
+<ul>
+<li><strong>Immutable</strong>: Once created, component definitions don’t change (updates create new versions)</li>
+<li><strong>Versioned</strong>: Each update produces new CID, creating version chain</li>
+<li><strong>Reusable</strong>: Can be referenced by multiple instances or other components</li>
+<li><strong>Self-Describing</strong>: Contains all information needed to understand and use the component</li>
+</ul>
+<h2 id="instance-containers"><a class="header" href="#instance-containers">Instance Containers</a></h2>
+<p><strong>Purpose</strong>: Execute component definitions with runtime state.</p>
+<h3 id="projection-pattern-1"><a class="header" href="#projection-pattern-1">Projection Pattern</a></h3>
+<p><strong>Query</strong>: Identify resources with instance identifier (references specific component definition and instance ID).</p>
+<p><strong>Required Resources</strong>:</p>
+<ul>
+<li><strong>Component Reference</strong>: CID of component definition to instantiate</li>
+<li><strong>Instance Identity</strong>: Unique identifier for this instance</li>
+</ul>
+<p><strong>Optional Resources</strong>:</p>
+<ul>
+<li><strong>Initial State</strong>: Starting state for the instance</li>
+<li><strong>Configuration</strong>: Instance-specific configuration overriding defaults</li>
+<li><strong>Context</strong>: Runtime environment information</li>
+</ul>
+<p><strong>Aggregation</strong>: Project component definition, then collect instance-specific resources.</p>
+<p><strong>Transformation</strong>: Combine component definition with instance state/config into executable instance container.</p>
+<h3 id="emission-pattern-1"><a class="header" href="#emission-pattern-1">Emission Pattern</a></h3>
+<p><strong>Initialization</strong>: Emit initial instance state resource.</p>
+<p><strong>Runtime</strong>: Continuous emission stream while running:</p>
+<ul>
+<li><strong>State Snapshots</strong>: Periodic or event-triggered state captures</li>
+<li><strong>Log Entries</strong>: Events, errors, info messages</li>
+<li><strong>Application Data</strong>: Output produced by instance execution</li>
+<li><strong>Metrics</strong>: Performance and resource utilization data</li>
+</ul>
+<p><strong>Termination</strong>: Emit final state and shutdown logs when instance stops.</p>
+<h3 id="characteristics-1"><a class="header" href="#characteristics-1">Characteristics</a></h3>
+<ul>
+<li><strong>Stateful</strong>: Maintains evolving state over time through emissions</li>
+<li><strong>Ephemeral</strong>: Can be started, stopped, removed (though emissions persist)</li>
+<li><strong>Observable</strong>: Continuous emission stream provides visibility</li>
+<li><strong>Recoverable</strong>: State snapshots enable restart from last known state</li>
+</ul>
+<h2 id="interface-containers"><a class="header" href="#interface-containers">Interface Containers</a></h2>
+<p><strong>Purpose</strong>: Define contracts between components.</p>
+<h3 id="projection-pattern-2"><a class="header" href="#projection-pattern-2">Projection Pattern</a></h3>
+<p><strong>Query</strong>: Identify interface definition resources (often by namespace or referenced by component).</p>
+<p><strong>Required Resources</strong>:</p>
+<ul>
+<li><strong>Interface Specification</strong>: Methods, parameters, return types, error conditions</li>
+</ul>
+<p><strong>Optional Resources</strong>:</p>
+<ul>
+<li><strong>Schema Definitions</strong>: Type definitions for parameters/returns</li>
+<li><strong>Documentation</strong>: Description of interface semantics</li>
+<li><strong>Examples</strong>: Usage examples</li>
+</ul>
+<p><strong>Aggregation</strong>: Collect interface spec and related type/schema resources.</p>
+<p><strong>Transformation</strong>: Structure into interface definition with methods and types clearly defined.</p>
+<h3 id="emission-pattern-2"><a class="header" href="#emission-pattern-2">Emission Pattern</a></h3>
+<p><strong>Definition</strong>: Emit interface definition resource.</p>
+<p><strong>Versioning</strong>: Emit new interface versions (semantic versioning for compatibility tracking).</p>
+<p><strong>Conformance Validation</strong>: Implementations emit validation resources demonstrating conformance to interface.</p>
+<h3 id="characteristics-2"><a class="header" href="#characteristics-2">Characteristics</a></h3>
+<ul>
+<li><strong>Contract-Defining</strong>: Specifies expectations between components</li>
+<li><strong>Versioned</strong>: Interface evolution tracked through versions</li>
+<li><strong>Reusable</strong>: Multiple components can implement same interface</li>
+<li><strong>Validation-Enabling</strong>: Enables checking component compatibility</li>
+</ul>
+<h2 id="documentation-containers"><a class="header" href="#documentation-containers">Documentation Containers</a></h2>
+<p><strong>Purpose</strong>: Provide human-readable explanations and guides.</p>
+<h3 id="projection-pattern-3"><a class="header" href="#projection-pattern-3">Projection Pattern</a></h3>
+<p><strong>Query</strong>: Identify documentation resources (by namespace, by reference from components).</p>
+<p><strong>Required Resources</strong>:</p>
+<ul>
+<li><strong>Documentation Content</strong>: Markdown, HTML, or other human-readable format</li>
+</ul>
+<p><strong>Optional Resources</strong>:</p>
+<ul>
+<li><strong>Examples</strong>: Code examples, usage demonstrations</li>
+<li><strong>Diagrams</strong>: Visual representations</li>
+<li><strong>Cross-References</strong>: Links to related documentation</li>
+</ul>
+<p><strong>Aggregation</strong>: Collect documentation resources and related examples/diagrams.</p>
+<p><strong>Transformation</strong>: Structure into navigable documentation with sections, cross-references resolved.</p>
+<h3 id="emission-pattern-3"><a class="header" href="#emission-pattern-3">Emission Pattern</a></h3>
+<p><strong>Creation</strong>: Emit documentation resource.</p>
+<p><strong>Updates</strong>: Emit updated documentation (versioned with component versions).</p>
+<p><strong>Rendered Views</strong>: Emit transformed formats (HTML from Markdown, PDF from LaTeX).</p>
+<h3 id="characteristics-3"><a class="header" href="#characteristics-3">Characteristics</a></h3>
+<ul>
+<li><strong>Human-Oriented</strong>: Designed for human consumption, not machine execution</li>
+<li><strong>Cross-Linked</strong>: References other documentation, components, interfaces</li>
+<li><strong>Multi-Format</strong>: Can be projected into different representations</li>
+<li><strong>Versioned</strong>: Evolves with component versions</li>
+</ul>
+<h2 id="test-containers"><a class="header" href="#test-containers">Test Containers</a></h2>
+<p><strong>Purpose</strong>: Validate component behavior and correctness.</p>
+<h3 id="projection-pattern-4"><a class="header" href="#projection-pattern-4">Projection Pattern</a></h3>
+<p><strong>Query</strong>: Identify test resources (by namespace, by component reference).</p>
+<p><strong>Required Resources</strong>:</p>
+<ul>
+<li><strong>Test Cases</strong>: Individual test definitions (inputs, expected outputs, assertions)</li>
+</ul>
+<p><strong>Optional Resources</strong>:</p>
+<ul>
+<li><strong>Test Fixtures</strong>: Shared setup/teardown logic</li>
+<li><strong>Test Data</strong>: Input datasets for tests</li>
+<li><strong>Validation Rules</strong>: Expected behavior specifications</li>
+</ul>
+<p><strong>Aggregation</strong>: Collect test cases, fixtures, and data into test suite.</p>
+<p><strong>Transformation</strong>: Structure into executable test suite.</p>
+<h3 id="emission-pattern-4"><a class="header" href="#emission-pattern-4">Emission Pattern</a></h3>
+<p><strong>Suite Execution</strong>: Emit test results:</p>
+<ul>
+<li><strong>Pass/Fail Status</strong>: Per-test and overall results</li>
+<li><strong>Execution Logs</strong>: Details of test execution</li>
+<li><strong>Coverage Data</strong>: What code/behavior was tested</li>
+<li><strong>Performance Metrics</strong>: Test execution time</li>
+</ul>
+<p><strong>Continuous Testing</strong>: Emit updated test results as tests re-run.</p>
+<h3 id="characteristics-4"><a class="header" href="#characteristics-4">Characteristics</a></h3>
+<ul>
+<li><strong>Executable</strong>: Test containers run to produce results</li>
+<li><strong>Validation-Focused</strong>: Purpose is to verify correctness</li>
+<li><strong>Evolving</strong>: New tests added as components evolve</li>
+<li><strong>Result-Producing</strong>: Emissions are test outcomes</li>
+</ul>
+<h2 id="manager-containers"><a class="header" href="#manager-containers">Manager Containers</a></h2>
+<p><strong>Purpose</strong>: Control lifecycle of instances and components.</p>
+<h3 id="projection-pattern-5"><a class="header" href="#projection-pattern-5">Projection Pattern</a></h3>
+<p><strong>Query</strong>: Identify manager definition resources (lifecycle management logic).</p>
+<p><strong>Required Resources</strong>:</p>
+<ul>
+<li><strong>Lifecycle Operations</strong>: Definitions for start, stop, restart, update operations</li>
+</ul>
+<p><strong>Optional Resources</strong>:</p>
+<ul>
+<li><strong>Health Checks</strong>: Logic for determining instance health</li>
+<li><strong>Scaling Rules</strong>: Criteria for starting/stopping multiple instances</li>
+<li><strong>Recovery Policies</strong>: How to handle failures</li>
+</ul>
+<p><strong>Aggregation</strong>: Collect manager operations and policies.</p>
+<p><strong>Transformation</strong>: Structure into manager definition with operation handlers.</p>
+<h3 id="emission-pattern-5"><a class="header" href="#emission-pattern-5">Emission Pattern</a></h3>
+<p><strong>Operation Execution</strong>: Emit operation results:</p>
+<ul>
+<li><strong>State Transitions</strong>: Instance moved from stopped to running</li>
+<li><strong>Operation Logs</strong>: What actions were taken</li>
+<li><strong>Status Updates</strong>: Current manager state</li>
+</ul>
+<p><strong>Health Monitoring</strong>: Emit health check results periodically.</p>
+<h3 id="characteristics-5"><a class="header" href="#characteristics-5">Characteristics</a></h3>
+<ul>
+<li><strong>Control-Oriented</strong>: Manages other containers’ lifecycles</li>
+<li><strong>Policy-Driven</strong>: Behavior defined by policies in projection</li>
+<li><strong>Reactive</strong>: Responds to state changes and external requests</li>
+<li><strong>Status-Emitting</strong>: Continuously updates status</li>
+</ul>
+<h2 id="view-containers"><a class="header" href="#view-containers">View Containers</a></h2>
+<p><strong>Purpose</strong>: Materialized projections for efficient access.</p>
+<h3 id="projection-pattern-6"><a class="header" href="#projection-pattern-6">Projection Pattern</a></h3>
+<p><strong>Query</strong>: Identify resources matching view criteria (flexible, view-specific).</p>
+<p><strong>Required Resources</strong>: Varies by view type (any resources the view aggregates).</p>
+<p><strong>Optional Resources</strong>: Varies by view type.</p>
+<p><strong>Aggregation</strong>: Follows view-specific aggregation rules (might be complex multi-step).</p>
+<p><strong>Transformation</strong>: Transform to view format (often denormalized, indexed).</p>
+<h3 id="emission-pattern-6"><a class="header" href="#emission-pattern-6">Emission Pattern</a></h3>
+<p><strong>Materialization</strong>: Emit view resource (pre-computed projection result).</p>
+<p><strong>Refresh</strong>: Emit updated view resource as underlying resources change.</p>
+<p><strong>Index Emissions</strong>: Emit index structures for efficient view queries.</p>
+<h3 id="characteristics-6"><a class="header" href="#characteristics-6">Characteristics</a></h3>
+<ul>
+<li><strong>Denormalized</strong>: Often aggregate and flatten for query performance</li>
+<li><strong>Refreshable</strong>: Can be updated incrementally or fully rebuilt</li>
+<li><strong>Query-Optimized</strong>: Structured for fast access patterns</li>
+<li><strong>Derived</strong>: Always derivable from underlying resources (can be rebuilt)</li>
+</ul>
+<h2 id="dependency-containers"><a class="header" href="#dependency-containers">Dependency Containers</a></h2>
+<p><strong>Purpose</strong>: Express relationships between components.</p>
+<h3 id="projection-pattern-7"><a class="header" href="#projection-pattern-7">Projection Pattern</a></h3>
+<p><strong>Query</strong>: Identify dependency resources (references between components).</p>
+<p><strong>Required Resources</strong>:</p>
+<ul>
+<li><strong>Dependent Component</strong>: Component requiring dependencies</li>
+<li><strong>Required Component</strong>: Component being depended upon</li>
+<li><strong>Dependency Type</strong>: Nature of dependency (interface, data, service)</li>
+</ul>
+<p><strong>Optional Resources</strong>:</p>
+<ul>
+<li><strong>Version Constraints</strong>: Compatible version ranges</li>
+<li><strong>Optional Flags</strong>: Whether dependency is required or optional</li>
+</ul>
+<p><strong>Aggregation</strong>: Build dependency graph by following dependency references.</p>
+<p><strong>Transformation</strong>: Structure into graph or list of dependencies.</p>
+<h3 id="emission-pattern-7"><a class="header" href="#emission-pattern-7">Emission Pattern</a></h3>
+<p><strong>Dependency Declaration</strong>: Emit dependency resource linking components.</p>
+<p><strong>Resolution Results</strong>: Emit resolved dependency sets (satisfying version constraints).</p>
+<p><strong>Conflict Warnings</strong>: Emit warnings if dependency conflicts detected.</p>
+<h3 id="characteristics-7"><a class="header" href="#characteristics-7">Characteristics</a></h3>
+<ul>
+<li><strong>Graph-Forming</strong>: Dependencies create directed graph over components</li>
+<li><strong>Constraint-Carrying</strong>: Express version and compatibility requirements</li>
+<li><strong>Resolvable</strong>: Dependency resolution algorithms operate on these containers</li>
+<li><strong>Validation-Enabling</strong>: Enable checking for circular dependencies, conflicts</li>
+</ul>
+<h2 id="build-containers"><a class="header" href="#build-containers">Build Containers</a></h2>
+<p><strong>Purpose</strong>: Define transformation from source to executable artifacts.</p>
+<h3 id="projection-pattern-8"><a class="header" href="#projection-pattern-8">Projection Pattern</a></h3>
+<p><strong>Query</strong>: Identify build definition resources.</p>
+<p><strong>Required Resources</strong>:</p>
+<ul>
+<li><strong>Build Steps</strong>: Sequence of transformation operations</li>
+<li><strong>Source References</strong>: Input resources to build process</li>
+</ul>
+<p><strong>Optional Resources</strong>:</p>
+<ul>
+<li><strong>Build Environment</strong>: Required tools, dependencies</li>
+<li><strong>Build Configuration</strong>: Parameters, flags, options</li>
+</ul>
+<p><strong>Aggregation</strong>: Collect build definition and referenced sources.</p>
+<p><strong>Transformation</strong>: Structure into executable build plan.</p>
+<h3 id="emission-pattern-8"><a class="header" href="#emission-pattern-8">Emission Pattern</a></h3>
+<p><strong>Build Execution</strong>: Emit build results:</p>
+<ul>
+<li><strong>Built Artifacts</strong>: Output resources from build</li>
+<li><strong>Build Logs</strong>: Details of build process</li>
+<li><strong>Build Status</strong>: Success/failure</li>
+<li><strong>Build Metadata</strong>: Build timestamp, environment, inputs</li>
+</ul>
+<h3 id="characteristics-8"><a class="header" href="#characteristics-8">Characteristics</a></h3>
+<ul>
+<li><strong>Transformation-Focused</strong>: Converts inputs to outputs</li>
+<li><strong>Repeatable</strong>: Same inputs and build definition produce same outputs</li>
+<li><strong>Artifact-Producing</strong>: Primary emission is built artifacts</li>
+<li><strong>Traceable</strong>: Build logs provide full traceability</li>
+</ul>
+<h2 id="log-containers"><a class="header" href="#log-containers">Log Containers</a></h2>
+<p><strong>Purpose</strong>: Structured logging and event records.</p>
+<h3 id="projection-pattern-9"><a class="header" href="#projection-pattern-9">Projection Pattern</a></h3>
+<p><strong>Query</strong>: Identify log entry resources (by source, by time range, by level).</p>
+<p><strong>Required Resources</strong>:</p>
+<ul>
+<li><strong>Log Entries</strong>: Individual log records</li>
+</ul>
+<p><strong>Optional Resources</strong>:</p>
+<ul>
+<li><strong>Context Information</strong>: Associated resource references, user identity</li>
+</ul>
+<p><strong>Aggregation</strong>: Collect logs by query criteria (temporal, source-based).</p>
+<p><strong>Transformation</strong>: Structure into queryable log collection (often chronological).</p>
+<h3 id="emission-pattern-9"><a class="header" href="#emission-pattern-9">Emission Pattern</a></h3>
+<p><strong>Log Creation</strong>: Emit individual log entry resources continuously.</p>
+<p><strong>Log Aggregation</strong>: Emit aggregated log views (hourly, daily summaries).</p>
+<p><strong>Alert Emissions</strong>: Emit alert resources when logs match alert criteria.</p>
+<h3 id="characteristics-9"><a class="header" href="#characteristics-9">Characteristics</a></h3>
+<ul>
+<li><strong>Time-Ordered</strong>: Logs have timestamps, often queried chronologically</li>
+<li><strong>High-Volume</strong>: Can produce many emissions rapidly</li>
+<li><strong>Queryable</strong>: Often projected into views for searching</li>
+<li><strong>Retention-Sensitive</strong>: May be garbage collected after retention period</li>
+</ul>
+<h2 id="extending-container-types"><a class="header" href="#extending-container-types">Extending Container Types</a></h2>
+<p>New container types are created by emitting new projection definitions.</p>
+<p><strong>Process</strong>:</p>
+<ol>
+<li>Define conformance requirements (what resources, what structure)</li>
+<li>Define transformation rules (how to structure container)</li>
+<li>Define emission patterns (what the container emits)</li>
+<li>Emit projection definition resource to store</li>
+<li>Platform recognizes new container type, enables projecting it</li>
+</ol>
+<p>This extensibility means the platform is <strong>open</strong>—applications can define domain-specific container types without modifying platform code.</p>
+<h2 id="container-type-composition"><a class="header" href="#container-type-composition">Container Type Composition</a></h2>
+<p>Container types compose naturally:</p>
+<ul>
+<li>Components reference interfaces and documentation</li>
+<li>Instances reference components</li>
+<li>Views aggregate any container type</li>
+<li>Managers control instances</li>
+</ul>
+<p>Composition creates rich ecosystems where container types work together.</p>
+<h2 id="next-steps"><a class="header" href="#next-steps">Next Steps</a></h2>
+<p>View containers deserve detailed treatment due to their role as optimized, persistent projections. The next document, <strong>Platform Views</strong>, explores views in depth—how they’re materialized, refreshed, and used for efficient access to projected data.</p>
+
+                    </main>
+
+                    <nav class="nav-wrapper" aria-label="Page navigation">
+                        <!-- Mobile navigation buttons -->
+                            <a rel="prev" href="07-emission-model.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                                <i class="fa fa-angle-left"></i>
+                            </a>
+
+                            <a rel="next prefetch" href="09-platform-views.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                                <i class="fa fa-angle-right"></i>
+                            </a>
+
+                        <div style="clear: both"></div>
+                    </nav>
+                </div>
+            </div>
+
+            <nav class="nav-wide-wrapper" aria-label="Page navigation">
+                    <a rel="prev" href="07-emission-model.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                        <i class="fa fa-angle-left"></i>
+                    </a>
+
+                    <a rel="next prefetch" href="09-platform-views.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                        <i class="fa fa-angle-right"></i>
+                    </a>
+            </nav>
+
+        </div>
+
+
+
+
+        <script>
+            window.playground_copyable = true;
+        </script>
+
+
+        <script src="elasticlunr.min.js"></script>
+        <script src="mark.min.js"></script>
+        <script src="searcher.js"></script>
+
+        <script src="clipboard.min.js"></script>
+        <script src="highlight.js"></script>
+        <script src="book.js"></script>
+
+        <!-- Custom JS scripts -->
+
+
+
+    </div>
+    </body>
+</html>

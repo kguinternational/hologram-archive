@@ -1,0 +1,409 @@
+<!DOCTYPE HTML>
+<html lang="en" class="light sidebar-visible" dir="ltr">
+    <head>
+        <!-- Book generated using mdBook -->
+        <meta charset="UTF-8">
+        <title>The Container Store - The Hologram Container Engine and Platform</title>
+
+
+        <!-- Custom HTML head -->
+
+        <meta name="description" content="Comprehensive documentation of the Hologram Container Engine and Platform conceptual model">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#ffffff">
+
+        <link rel="icon" href="favicon.svg">
+        <link rel="shortcut icon" href="favicon.png">
+        <link rel="stylesheet" href="css/variables.css">
+        <link rel="stylesheet" href="css/general.css">
+        <link rel="stylesheet" href="css/chrome.css">
+        <link rel="stylesheet" href="css/print.css" media="print">
+
+        <!-- Fonts -->
+        <link rel="stylesheet" href="FontAwesome/css/font-awesome.css">
+        <link rel="stylesheet" href="fonts/fonts.css">
+
+        <!-- Highlight.js Stylesheets -->
+        <link rel="stylesheet" id="highlight-css" href="highlight.css">
+        <link rel="stylesheet" id="tomorrow-night-css" href="tomorrow-night.css">
+        <link rel="stylesheet" id="ayu-highlight-css" href="ayu-highlight.css">
+
+        <!-- Custom theme stylesheets -->
+        <link rel="stylesheet" href="theme/custom.css">
+
+        <!-- MathJax -->
+        <script async src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+        <!-- Provide site root and default themes to javascript -->
+        <script>
+            const path_to_root = "";
+            const default_light_theme = "light";
+            const default_dark_theme = "navy";
+            window.path_to_searchindex_js = "searchindex.js";
+        </script>
+        <!-- Start loading toc.js asap -->
+        <script src="toc.js"></script>
+    </head>
+    <body>
+    <div id="mdbook-help-container">
+        <div id="mdbook-help-popup">
+            <h2 class="mdbook-help-title">Keyboard shortcuts</h2>
+            <div>
+                <p>Press <kbd>←</kbd> or <kbd>→</kbd> to navigate between chapters</p>
+                <p>Press <kbd>S</kbd> or <kbd>/</kbd> to search in the book</p>
+                <p>Press <kbd>?</kbd> to show this help</p>
+                <p>Press <kbd>Esc</kbd> to hide this help</p>
+            </div>
+        </div>
+    </div>
+    <div id="body-container">
+        <!-- Work around some values being stored in localStorage wrapped in quotes -->
+        <script>
+            try {
+                let theme = localStorage.getItem('mdbook-theme');
+                let sidebar = localStorage.getItem('mdbook-sidebar');
+
+                if (theme.startsWith('"') && theme.endsWith('"')) {
+                    localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
+                }
+
+                if (sidebar.startsWith('"') && sidebar.endsWith('"')) {
+                    localStorage.setItem('mdbook-sidebar', sidebar.slice(1, sidebar.length - 1));
+                }
+            } catch (e) { }
+        </script>
+
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script>
+            const default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? default_dark_theme : default_light_theme;
+            let theme;
+            try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
+            if (theme === null || theme === undefined) { theme = default_theme; }
+            const html = document.documentElement;
+            html.classList.remove('light')
+            html.classList.add(theme);
+            html.classList.add("js");
+        </script>
+
+        <input type="checkbox" id="sidebar-toggle-anchor" class="hidden">
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script>
+            let sidebar = null;
+            const sidebar_toggle = document.getElementById("sidebar-toggle-anchor");
+            if (document.body.clientWidth >= 1080) {
+                try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
+                sidebar = sidebar || 'visible';
+            } else {
+                sidebar = 'hidden';
+                sidebar_toggle.checked = false;
+            }
+            if (sidebar === 'visible') {
+                sidebar_toggle.checked = true;
+            } else {
+                html.classList.remove('sidebar-visible');
+            }
+        </script>
+
+        <nav id="sidebar" class="sidebar" aria-label="Table of contents">
+            <!-- populated by js -->
+            <mdbook-sidebar-scrollbox class="sidebar-scrollbox"></mdbook-sidebar-scrollbox>
+            <noscript>
+                <iframe class="sidebar-iframe-outer" src="toc.html"></iframe>
+            </noscript>
+            <div id="sidebar-resize-handle" class="sidebar-resize-handle">
+                <div class="sidebar-resize-indicator"></div>
+            </div>
+        </nav>
+
+        <div id="page-wrapper" class="page-wrapper">
+
+            <div class="page">
+                <div id="menu-bar-hover-placeholder"></div>
+                <div id="menu-bar" class="menu-bar sticky">
+                    <div class="left-buttons">
+                        <label id="sidebar-toggle" class="icon-button" for="sidebar-toggle-anchor" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="sidebar">
+                            <i class="fa fa-bars"></i>
+                        </label>
+                        <button id="theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="theme-list">
+                            <i class="fa fa-paint-brush"></i>
+                        </button>
+                        <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="default_theme">Auto</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="light">Light</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="navy">Navy</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="ayu">Ayu</button></li>
+                        </ul>
+                        <button id="search-toggle" class="icon-button" type="button" title="Search (`/`)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="/ s" aria-controls="searchbar">
+                            <i class="fa fa-search"></i>
+                        </button>
+                    </div>
+
+                    <h1 class="menu-title">The Hologram Container Engine and Platform</h1>
+
+                    <div class="right-buttons">
+                        <a href="print.html" title="Print this book" aria-label="Print this book">
+                            <i id="print-button" class="fa fa-print"></i>
+                        </a>
+                        <a href="https://github.com/yourusername/Hologram" title="Git repository" aria-label="Git repository">
+                            <i id="git-repository-button" class="fa fa-github"></i>
+                        </a>
+
+                    </div>
+                </div>
+
+                <div id="search-wrapper" class="hidden">
+                    <form id="searchbar-outer" class="searchbar-outer">
+                        <div class="search-wrapper">
+                            <input type="search" id="searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="searchresults-outer" aria-describedby="searchresults-header">
+                            <div class="spinner-wrapper">
+                                <i class="fa fa-spinner fa-spin"></i>
+                            </div>
+                        </div>
+                    </form>
+                    <div id="searchresults-outer" class="searchresults-outer hidden">
+                        <div id="searchresults-header" class="searchresults-header"></div>
+                        <ul id="searchresults">
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
+                <script>
+                    document.getElementById('sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
+                    document.getElementById('sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
+                    Array.from(document.querySelectorAll('#sidebar a')).forEach(function(link) {
+                        link.setAttribute('tabIndex', sidebar === 'visible' ? 0 : -1);
+                    });
+                </script>
+
+                <div id="content" class="content">
+                    <main>
+                        <h1 id="the-container-store"><a class="header" href="#the-container-store">The Container Store</a></h1>
+<h2 id="universal-resource-storage"><a class="header" href="#universal-resource-storage">Universal Resource Storage</a></h2>
+<p>The container store is the foundation of the Hologram platform. It is a universal storage system where all resources exist as immutable, content-addressed data without inherent type or structure.</p>
+<p>This document establishes the principles, capabilities, and properties of the container store from first principles.</p>
+<h2 id="first-principles"><a class="header" href="#first-principles">First Principles</a></h2>
+<h3 id="resources-as-undifferentiated-data"><a class="header" href="#resources-as-undifferentiated-data">Resources as Undifferentiated Data</a></h3>
+<p>A <strong>resource</strong> is any sequence of bytes stored in the container store. Resources have no inherent type, schema, or semantic meaning. A JSON document, a binary executable, an image file, a text log—all exist as resources without distinction.</p>
+<p>The store does not interpret, validate, or classify resources at write time. It stores bytes and provides mechanisms for retrieval and reference. Meaning emerges later through projection, not at storage time.</p>
+<p>This principle enables universal applicability—any data can be stored, and any interpretation can be applied through projections.</p>
+<h3 id="content-addressed-identity"><a class="header" href="#content-addressed-identity">Content-Addressed Identity</a></h3>
+<p>Every resource is identified by a <strong>Content Identifier (CID)</strong>, a cryptographic hash computed from the resource’s complete content.</p>
+<p>The CID function has these properties:</p>
+<ul>
+<li><strong>Deterministic</strong>: The same content always produces the same CID</li>
+<li><strong>Unique</strong>: Different content produces different CIDs (with cryptographic collision resistance)</li>
+<li><strong>Opaque</strong>: The CID reveals nothing about content structure or meaning</li>
+<li><strong>Immutable</strong>: Content cannot change without changing the CID</li>
+</ul>
+<p>CIDs provide <strong>intrinsic identity</strong>—identity derived from content itself rather than assigned externally. This makes resources self-verifying: retrieving a resource by CID guarantees you receive exactly the content that produced that CID.</p>
+<h3 id="immutability"><a class="header" href="#immutability">Immutability</a></h3>
+<p>Resources are <strong>write-once</strong>. Once stored, a resource’s content never changes. The CID permanently identifies that specific content.</p>
+<p>If content needs to change, a new resource with new content is written, producing a new CID. The original resource remains unchanged and available.</p>
+<p>Immutability provides:</p>
+<ul>
+<li><strong>Reliable references</strong>: A CID always refers to the same content</li>
+<li><strong>Historical record</strong>: All versions persist as distinct resources</li>
+<li><strong>Concurrent access</strong>: No coordination needed for reads (content never changes)</li>
+<li><strong>Distribution</strong>: Resources can move between stores with identity intact</li>
+</ul>
+<h3 id="references-as-cids"><a class="header" href="#references-as-cids">References as CIDs</a></h3>
+<p>Resources can reference other resources by including CIDs in their content. A JSON resource might contain:</p>
+<pre><code>{
+  "spec": "cid:abc123...",
+  "interface": "cid:def456...",
+  "documentation": "cid:789ghi..."
+}
+</code></pre>
+<p>These references form a <strong>directed graph</strong> where nodes are resources and edges are CID references. The graph is immutable—references never change—but new resources can reference existing resources, extending the graph.</p>
+<p>The reference graph enables:</p>
+<ul>
+<li><strong>Aggregation</strong>: Collecting related resources by following references</li>
+<li><strong>Composition</strong>: Building complex structures from simple resources</li>
+<li><strong>Deduplication</strong>: Multiple resources can reference the same resource</li>
+<li><strong>Versioning</strong>: New versions reference previous versions</li>
+</ul>
+<h2 id="store-capabilities"><a class="header" href="#store-capabilities">Store Capabilities</a></h2>
+<p>The container store provides four fundamental capabilities.</p>
+<h3 id="1-store"><a class="header" href="#1-store">1. Store</a></h3>
+<p><strong>Operation</strong>: Given content (bytes), compute the CID and store the content indexed by CID.</p>
+<p><strong>Properties</strong>:</p>
+<ul>
+<li>Idempotent: Storing identical content multiple times produces the same CID and stores content once</li>
+<li>Atomic: Content is either fully stored or not stored (no partial writes)</li>
+<li>Durable: Once stored, content persists until explicitly deleted</li>
+</ul>
+<p><strong>Result</strong>: The CID identifying the stored resource.</p>
+<p>This operation makes resources available for retrieval and projection.</p>
+<h3 id="2-retrieve"><a class="header" href="#2-retrieve">2. Retrieve</a></h3>
+<p><strong>Operation</strong>: Given a CID, retrieve the corresponding resource content.</p>
+<p><strong>Properties</strong>:</p>
+<ul>
+<li>Deterministic: The same CID always retrieves the same content</li>
+<li>Verified: Retrieved content can be hashed to verify it matches the CID</li>
+<li>Complete: Resources are retrieved entirely (no partial retrieval in base operation)</li>
+</ul>
+<p><strong>Result</strong>: The complete content of the resource, or an indication that the CID is not present in the store.</p>
+<p>This operation makes stored resources accessible.</p>
+<h3 id="3-reference"><a class="header" href="#3-reference">3. Reference</a></h3>
+<p><strong>Operation</strong>: Parse a resource’s content to extract CIDs that reference other resources.</p>
+<p><strong>Properties</strong>:</p>
+<ul>
+<li>Format-dependent: Different content types encode references differently (JSON uses strings, binary formats use specific fields)</li>
+<li>Transitive: Following references from referenced resources builds the reference graph</li>
+<li>Graph-forming: References create a directed graph structure over resources</li>
+</ul>
+<p><strong>Result</strong>: A set of CIDs referenced by the resource.</p>
+<p>This operation enables graph traversal and aggregation.</p>
+<h3 id="4-query"><a class="header" href="#4-query">4. Query</a></h3>
+<p><strong>Operation</strong>: Identify resources matching specified criteria (content patterns, reference relationships, metadata constraints).</p>
+<p><strong>Properties</strong>:</p>
+<ul>
+<li>Set-valued: Queries return zero or more matching resources</li>
+<li>Composable: Query results can be inputs to other queries</li>
+<li>Projection-enabling: Queries identify resources to aggregate into containers</li>
+</ul>
+<p><strong>Result</strong>: A set of CIDs for resources matching the query criteria.</p>
+<p>This operation enables projections to identify relevant resources.</p>
+<h2 id="store-properties"><a class="header" href="#store-properties">Store Properties</a></h2>
+<p>These capabilities provide foundational properties that the projection engine and platform rely upon.</p>
+<h3 id="deduplication"><a class="header" href="#deduplication">Deduplication</a></h3>
+<p>Identical content produces the same CID. If the same content is stored multiple times, it occupies storage space once but can be referenced by multiple CID references.</p>
+<p>This eliminates redundancy—shared resources (common dependencies, standard interfaces, repeated data) exist once in the store regardless of how many containers reference them.</p>
+<h3 id="integrity"><a class="header" href="#integrity">Integrity</a></h3>
+<p>Retrieved content can be verified by computing its hash and comparing to the CID. Any corruption, tampering, or transmission error is detectable.</p>
+<p>This makes the store <strong>trustless</strong>—you can retrieve resources from untrusted sources and verify integrity cryptographically.</p>
+<h3 id="immutability-1"><a class="header" href="#immutability-1">Immutability</a></h3>
+<p>Resources never change after being written. This provides:</p>
+<ul>
+<li><strong>Stable references</strong>: CIDs are reliable permanent identifiers</li>
+<li><strong>Historical completeness</strong>: All versions of evolving data persist as separate resources</li>
+<li><strong>Conflict-free replication</strong>: Immutable resources can be copied between stores without coordination</li>
+</ul>
+<h3 id="content-equivalence"><a class="header" href="#content-equivalence">Content Equivalence</a></h3>
+<p>If two stores contain resources with the same CID, the content is identical. This enables:</p>
+<ul>
+<li><strong>Store synchronization</strong>: Comparing CID sets identifies missing resources</li>
+<li><strong>Distributed storage</strong>: Resources can live in different stores while maintaining identity</li>
+<li><strong>Caching</strong>: Resources can be cached anywhere without invalidation concerns</li>
+</ul>
+<h3 id="addressability"><a class="header" href="#addressability">Addressability</a></h3>
+<p>Every resource has a globally unique identifier (its CID) that remains valid across stores, networks, and time. Resources can be:</p>
+<ul>
+<li>Moved between storage backends without changing identity</li>
+<li>Cached locally while referencing remote stores</li>
+<li>Shared through CIDs without transferring content</li>
+<li>Archived and restored while maintaining references</li>
+</ul>
+<h2 id="graph-structure"><a class="header" href="#graph-structure">Graph Structure</a></h2>
+<p>The reference capability creates an immutable directed graph:</p>
+<ul>
+<li><strong>Nodes</strong> are resources identified by CID</li>
+<li><strong>Edges</strong> are references (CID values in resource content)</li>
+<li><strong>Properties</strong>:
+<ul>
+<li>Acyclic or cyclic (nothing prevents cycles)</li>
+<li>Immutable (edges never change, but new nodes can be added)</li>
+<li>Traversable (following edges from any node explores connected resources)</li>
+</ul>
+</li>
+</ul>
+<p>The graph structure enables:</p>
+<p><strong>Aggregation</strong>: Starting from a root resource, follow references to collect all related resources (a component and its documentation, tests, dependencies).</p>
+<p><strong>Reachability</strong>: Determine what resources are transitively referenced from a starting point, enabling garbage collection of unreferenced resources.</p>
+<p><strong>Versioning</strong>: New versions of resources can reference previous versions, creating version chains in the graph.</p>
+<p><strong>Composition</strong>: Complex containers are projections over subgraphs—collecting specific resources based on reference patterns.</p>
+<h2 id="implementation-independence"><a class="header" href="#implementation-independence">Implementation Independence</a></h2>
+<p>The container store is defined by its capabilities and properties, not by a specific implementation.</p>
+<p>Valid store implementations include:</p>
+<p><strong>Filesystem</strong>: Resources as files in content-addressed directories, references parsed from file contents.</p>
+<p><strong>Relational Database</strong>: Resources as BLOBs in tables, CIDs as primary keys, references extracted and indexed for query performance.</p>
+<p><strong>Object Storage</strong>: Resources as objects in cloud storage (S3, Azure Blob), CIDs as object keys.</p>
+<p><strong>Distributed Hash Table</strong>: Resources distributed across nodes in a DHT, CID-based retrieval and replication.</p>
+<p><strong>Hybrid</strong>: Filesystem for local working set, database for indexing and queries, object storage for archival.</p>
+<p>The platform operates identically regardless of backend. This allows:</p>
+<ul>
+<li>Choosing storage appropriate to scale and access patterns</li>
+<li>Migrating between backends without changing platform semantics</li>
+<li>Using multiple backends simultaneously (local cache + remote archive)</li>
+</ul>
+<h2 id="store-metadata"><a class="header" href="#store-metadata">Store Metadata</a></h2>
+<p>The store may maintain metadata about resources beyond their content:</p>
+<ul>
+<li><strong>Storage timestamp</strong>: When the resource was written to this store</li>
+<li><strong>Access patterns</strong>: How frequently the resource is retrieved</li>
+<li><strong>Reference count</strong>: How many other resources reference this CID</li>
+<li><strong>Size</strong>: Byte count of resource content</li>
+</ul>
+<p>This metadata is <strong>not part of the resource</strong> and does not affect the CID. It assists with store management (garbage collection, caching, performance optimization) but is not visible to projections.</p>
+<p>Metadata is store-specific and not preserved when resources move between stores.</p>
+<h2 id="garbage-collection"><a class="header" href="#garbage-collection">Garbage Collection</a></h2>
+<p>Since resources are immutable and referenced by CID, unused resources can accumulate. <strong>Garbage collection</strong> identifies and removes resources that are no longer reachable from any root.</p>
+<p><strong>Roots</strong> are resources designated as starting points (active component definitions, running instances, materialized views). Resources reachable by following references from roots are retained. Unreachable resources can be deleted.</p>
+<p>Garbage collection is a store management operation, not a platform operation. It operates on the store’s reference graph without affecting the projection engine or platform semantics.</p>
+<h2 id="the-store-as-foundation"><a class="header" href="#the-store-as-foundation">The Store as Foundation</a></h2>
+<p>The container store provides the invariant foundation for the platform:</p>
+<ul>
+<li>All resources exist in the store</li>
+<li>All resources are content-addressed and immutable</li>
+<li>All resources are referenceable by CID</li>
+<li>All resources are queryable for projection</li>
+</ul>
+<p>From this foundation, we build the projection-emission cycle: projections identify and aggregate resources from the store, execution produces results, and emissions write new resources back to the store.</p>
+<p>The next document, <strong>The Projection-Emission Cycle</strong>, describes how the platform operates on the container store through continuous cycles of projection and emission.</p>
+
+                    </main>
+
+                    <nav class="nav-wrapper" aria-label="Page navigation">
+                        <!-- Mobile navigation buttons -->
+                            <a rel="prev" href="01-introduction.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                                <i class="fa fa-angle-left"></i>
+                            </a>
+
+                            <a rel="next prefetch" href="03-projection-emission-cycle.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                                <i class="fa fa-angle-right"></i>
+                            </a>
+
+                        <div style="clear: both"></div>
+                    </nav>
+                </div>
+            </div>
+
+            <nav class="nav-wide-wrapper" aria-label="Page navigation">
+                    <a rel="prev" href="01-introduction.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                        <i class="fa fa-angle-left"></i>
+                    </a>
+
+                    <a rel="next prefetch" href="03-projection-emission-cycle.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                        <i class="fa fa-angle-right"></i>
+                    </a>
+            </nav>
+
+        </div>
+
+
+
+
+        <script>
+            window.playground_copyable = true;
+        </script>
+
+
+        <script src="elasticlunr.min.js"></script>
+        <script src="mark.min.js"></script>
+        <script src="searcher.js"></script>
+
+        <script src="clipboard.min.js"></script>
+        <script src="highlight.js"></script>
+        <script src="book.js"></script>
+
+        <!-- Custom JS scripts -->
+
+
+
+    </div>
+    </body>
+</html>

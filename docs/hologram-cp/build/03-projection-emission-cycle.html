@@ -1,0 +1,491 @@
+<!DOCTYPE HTML>
+<html lang="en" class="light sidebar-visible" dir="ltr">
+    <head>
+        <!-- Book generated using mdBook -->
+        <meta charset="UTF-8">
+        <title>The Projection-Emission Cycle - The Hologram Container Engine and Platform</title>
+
+
+        <!-- Custom HTML head -->
+
+        <meta name="description" content="Comprehensive documentation of the Hologram Container Engine and Platform conceptual model">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#ffffff">
+
+        <link rel="icon" href="favicon.svg">
+        <link rel="shortcut icon" href="favicon.png">
+        <link rel="stylesheet" href="css/variables.css">
+        <link rel="stylesheet" href="css/general.css">
+        <link rel="stylesheet" href="css/chrome.css">
+        <link rel="stylesheet" href="css/print.css" media="print">
+
+        <!-- Fonts -->
+        <link rel="stylesheet" href="FontAwesome/css/font-awesome.css">
+        <link rel="stylesheet" href="fonts/fonts.css">
+
+        <!-- Highlight.js Stylesheets -->
+        <link rel="stylesheet" id="highlight-css" href="highlight.css">
+        <link rel="stylesheet" id="tomorrow-night-css" href="tomorrow-night.css">
+        <link rel="stylesheet" id="ayu-highlight-css" href="ayu-highlight.css">
+
+        <!-- Custom theme stylesheets -->
+        <link rel="stylesheet" href="theme/custom.css">
+
+        <!-- MathJax -->
+        <script async src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+        <!-- Provide site root and default themes to javascript -->
+        <script>
+            const path_to_root = "";
+            const default_light_theme = "light";
+            const default_dark_theme = "navy";
+            window.path_to_searchindex_js = "searchindex.js";
+        </script>
+        <!-- Start loading toc.js asap -->
+        <script src="toc.js"></script>
+    </head>
+    <body>
+    <div id="mdbook-help-container">
+        <div id="mdbook-help-popup">
+            <h2 class="mdbook-help-title">Keyboard shortcuts</h2>
+            <div>
+                <p>Press <kbd>←</kbd> or <kbd>→</kbd> to navigate between chapters</p>
+                <p>Press <kbd>S</kbd> or <kbd>/</kbd> to search in the book</p>
+                <p>Press <kbd>?</kbd> to show this help</p>
+                <p>Press <kbd>Esc</kbd> to hide this help</p>
+            </div>
+        </div>
+    </div>
+    <div id="body-container">
+        <!-- Work around some values being stored in localStorage wrapped in quotes -->
+        <script>
+            try {
+                let theme = localStorage.getItem('mdbook-theme');
+                let sidebar = localStorage.getItem('mdbook-sidebar');
+
+                if (theme.startsWith('"') && theme.endsWith('"')) {
+                    localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
+                }
+
+                if (sidebar.startsWith('"') && sidebar.endsWith('"')) {
+                    localStorage.setItem('mdbook-sidebar', sidebar.slice(1, sidebar.length - 1));
+                }
+            } catch (e) { }
+        </script>
+
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script>
+            const default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? default_dark_theme : default_light_theme;
+            let theme;
+            try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
+            if (theme === null || theme === undefined) { theme = default_theme; }
+            const html = document.documentElement;
+            html.classList.remove('light')
+            html.classList.add(theme);
+            html.classList.add("js");
+        </script>
+
+        <input type="checkbox" id="sidebar-toggle-anchor" class="hidden">
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script>
+            let sidebar = null;
+            const sidebar_toggle = document.getElementById("sidebar-toggle-anchor");
+            if (document.body.clientWidth >= 1080) {
+                try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
+                sidebar = sidebar || 'visible';
+            } else {
+                sidebar = 'hidden';
+                sidebar_toggle.checked = false;
+            }
+            if (sidebar === 'visible') {
+                sidebar_toggle.checked = true;
+            } else {
+                html.classList.remove('sidebar-visible');
+            }
+        </script>
+
+        <nav id="sidebar" class="sidebar" aria-label="Table of contents">
+            <!-- populated by js -->
+            <mdbook-sidebar-scrollbox class="sidebar-scrollbox"></mdbook-sidebar-scrollbox>
+            <noscript>
+                <iframe class="sidebar-iframe-outer" src="toc.html"></iframe>
+            </noscript>
+            <div id="sidebar-resize-handle" class="sidebar-resize-handle">
+                <div class="sidebar-resize-indicator"></div>
+            </div>
+        </nav>
+
+        <div id="page-wrapper" class="page-wrapper">
+
+            <div class="page">
+                <div id="menu-bar-hover-placeholder"></div>
+                <div id="menu-bar" class="menu-bar sticky">
+                    <div class="left-buttons">
+                        <label id="sidebar-toggle" class="icon-button" for="sidebar-toggle-anchor" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="sidebar">
+                            <i class="fa fa-bars"></i>
+                        </label>
+                        <button id="theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="theme-list">
+                            <i class="fa fa-paint-brush"></i>
+                        </button>
+                        <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="default_theme">Auto</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="light">Light</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="navy">Navy</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="ayu">Ayu</button></li>
+                        </ul>
+                        <button id="search-toggle" class="icon-button" type="button" title="Search (`/`)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="/ s" aria-controls="searchbar">
+                            <i class="fa fa-search"></i>
+                        </button>
+                    </div>
+
+                    <h1 class="menu-title">The Hologram Container Engine and Platform</h1>
+
+                    <div class="right-buttons">
+                        <a href="print.html" title="Print this book" aria-label="Print this book">
+                            <i id="print-button" class="fa fa-print"></i>
+                        </a>
+                        <a href="https://github.com/yourusername/Hologram" title="Git repository" aria-label="Git repository">
+                            <i id="git-repository-button" class="fa fa-github"></i>
+                        </a>
+
+                    </div>
+                </div>
+
+                <div id="search-wrapper" class="hidden">
+                    <form id="searchbar-outer" class="searchbar-outer">
+                        <div class="search-wrapper">
+                            <input type="search" id="searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="searchresults-outer" aria-describedby="searchresults-header">
+                            <div class="spinner-wrapper">
+                                <i class="fa fa-spinner fa-spin"></i>
+                            </div>
+                        </div>
+                    </form>
+                    <div id="searchresults-outer" class="searchresults-outer hidden">
+                        <div id="searchresults-header" class="searchresults-header"></div>
+                        <ul id="searchresults">
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
+                <script>
+                    document.getElementById('sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
+                    document.getElementById('sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
+                    Array.from(document.querySelectorAll('#sidebar a')).forEach(function(link) {
+                        link.setAttribute('tabIndex', sidebar === 'visible' ? 0 : -1);
+                    });
+                </script>
+
+                <div id="content" class="content">
+                    <main>
+                        <h1 id="the-projection-emission-cycle"><a class="header" href="#the-projection-emission-cycle">The Projection-Emission Cycle</a></h1>
+<h2 id="the-fundamental-operating-principle"><a class="header" href="#the-fundamental-operating-principle">The Fundamental Operating Principle</a></h2>
+<p>The Hologram platform operates through a continuous cycle of <strong>projection</strong> and <strong>emission</strong>:</p>
+<p><strong>Project → Execute → Emit → Store → Project…</strong></p>
+<p>This cycle is the fundamental mechanism by which the platform creates containers, executes operations, and evolves over time. Every interaction with Hologram—creating components, running instances, materializing views, executing operations—follows this cycle.</p>
+<p>This document establishes how the projection-emission cycle works and why it provides a universal operating model for the platform.</p>
+<h2 id="the-four-phases"><a class="header" href="#the-four-phases">The Four Phases</a></h2>
+<h3 id="phase-1-project"><a class="header" href="#phase-1-project">Phase 1: Project</a></h3>
+<p><strong>Projection</strong> identifies and aggregates resources from the container store to form a container.</p>
+<p>A projection definition specifies:</p>
+<ul>
+<li><strong>Query criteria</strong>: Which resources to identify (by content patterns, reference relationships, metadata)</li>
+<li><strong>Aggregation rules</strong>: How to collect related resources (following references, grouping by properties)</li>
+<li><strong>Transformation</strong>: How to structure aggregated resources into a container</li>
+</ul>
+<p>The projection engine evaluates the definition against the store, producing a <strong>container</strong>—a structured collection of resources with defined relationships and purpose.</p>
+<p>Projection is <strong>read-only</strong>. It examines the store but does not modify it. The same projection evaluated multiple times against an unchanged store produces the same container.</p>
+<h3 id="phase-2-execute"><a class="header" href="#phase-2-execute">Phase 2: Execute</a></h3>
+<p><strong>Execution</strong> operates on the projected container to produce results.</p>
+<p>Execution might:</p>
+<ul>
+<li>Validate that resources satisfy constraints</li>
+<li>Transform resources into different formats</li>
+<li>Run computation using resources as inputs</li>
+<li>Coordinate between multiple containers</li>
+<li>Generate new content from container resources</li>
+</ul>
+<p>Execution consumes projected resources and produces results. Results might be:</p>
+<ul>
+<li>Status information (success, failure, validation results)</li>
+<li>Transformed content (compiled artifacts, rendered documentation)</li>
+<li>Generated data (logs, metrics, computed results)</li>
+<li>New resource definitions (component updates, instance state)</li>
+</ul>
+<p>Execution is <strong>isolated</strong>. It operates on projected resources without directly accessing the store. This isolation enables:</p>
+<ul>
+<li>Reproducibility: Same inputs produce same results</li>
+<li>Testability: Execution can be tested with mock containers</li>
+<li>Distribution: Execution can occur anywhere with the projected resources</li>
+</ul>
+<h3 id="phase-3-emit"><a class="header" href="#phase-3-emit">Phase 3: Emit</a></h3>
+<p><strong>Emission</strong> writes execution results back to the container store as new resources.</p>
+<p>Each result is:</p>
+<ol>
+<li>Serialized to bytes</li>
+<li>Hashed to produce a CID</li>
+<li>Stored in the container store indexed by CID</li>
+</ol>
+<p>Emitted resources become immediately available for future projections. They exist in the store alongside resources from previous operations, forming an accumulated knowledge base.</p>
+<p>Emission is <strong>additive</strong>. New resources are added; existing resources are never modified. This preserves complete history—every emission creates a new snapshot while previous snapshots remain accessible.</p>
+<h3 id="phase-4-store"><a class="header" href="#phase-4-store">Phase 4: Store</a></h3>
+<p><strong>Storage</strong> persists emitted resources durably in the container store.</p>
+<p>The store:</p>
+<ul>
+<li>Indexes resources by CID for retrieval</li>
+<li>Updates queryable metadata for projection</li>
+<li>Extends the reference graph with new resources</li>
+<li>Maintains integrity guarantees (immutability, deduplication)</li>
+</ul>
+<p>Once stored, resources are available for projection. The cycle completes and can begin again—new projections can include newly emitted resources.</p>
+<h2 id="the-complete-cycle"><a class="header" href="#the-complete-cycle">The Complete Cycle</a></h2>
+<p>Chaining these phases creates a continuous cycle:</p>
+<ol>
+<li>A client requests an operation (create component, run instance, materialize view)</li>
+<li><strong>Project</strong>: The engine projects resources needed for the operation</li>
+<li><strong>Execute</strong>: The operation runs using projected resources</li>
+<li><strong>Emit</strong>: Results are emitted as new resources</li>
+<li><strong>Store</strong>: Emitted resources are persisted</li>
+<li>The client can request further operations, which project the newly stored resources</li>
+</ol>
+<p>Each cycle adds to the store. Over time, the store accumulates:</p>
+<ul>
+<li>Component definitions</li>
+<li>Instance states</li>
+<li>Operation logs</li>
+<li>Materialized views</li>
+<li>Application data</li>
+<li>User content</li>
+</ul>
+<p>All emitted as immutable, content-addressed resources available for projection.</p>
+<h2 id="why-this-cycle-works"><a class="header" href="#why-this-cycle-works">Why This Cycle Works</a></h2>
+<h3 id="universal-applicability"><a class="header" href="#universal-applicability">Universal Applicability</a></h3>
+<p>The same cycle applies to every platform operation:</p>
+<p><strong>Creating a component definition</strong>:</p>
+<ul>
+<li>Project: Identify artifact resources (spec, interface, docs, tests)</li>
+<li>Execute: Validate artifacts against schemas, compute component structure</li>
+<li>Emit: Write component definition resource</li>
+<li>Store: Persist component definition</li>
+</ul>
+<p><strong>Running an instance</strong>:</p>
+<ul>
+<li>Project: Identify component definition and dependencies</li>
+<li>Execute: Run the component’s defined computation</li>
+<li>Emit: Write logs, state snapshots, application outputs</li>
+<li>Store: Persist instance emissions continuously</li>
+</ul>
+<p><strong>Materializing a view</strong>:</p>
+<ul>
+<li>Project: Identify resources matching view criteria</li>
+<li>Execute: Transform resources into view format</li>
+<li>Emit: Write materialized view resource</li>
+<li>Store: Persist view for efficient access</li>
+</ul>
+<p>Every operation is a projection-emission cycle with operation-specific execution logic.</p>
+<h3 id="composability"><a class="header" href="#composability">Composability</a></h3>
+<p>Cycles can chain. One operation’s emissions become another operation’s projection inputs:</p>
+<ul>
+<li>Create component definition → emit component resource</li>
+<li>Create instance from component → project component, emit instance resource</li>
+<li>Instance runs → emit logs and state</li>
+<li>Materialize log view → project logs, emit view</li>
+<li>Query log view → project view, return results</li>
+</ul>
+<p>Each operation builds on previous emissions. Complex workflows emerge from composing simple projection-emission cycles.</p>
+<h3 id="self-evolution"><a class="header" href="#self-evolution">Self-Evolution</a></h3>
+<p>The platform itself is defined through projections. Improving the platform means:</p>
+<ul>
+<li>Defining new projection definitions (new container types, new operations)</li>
+<li>Emitting those definitions as resources</li>
+<li>The engine projects the new definitions and incorporates them</li>
+</ul>
+<p>The platform evolves through the same projection-emission cycle used for applications. There is no separate “platform update” mechanism—platform and application use the same primitives.</p>
+<h3 id="auditability"><a class="header" href="#auditability">Auditability</a></h3>
+<p>Every emission is immutable and content-addressed. The store contains complete history:</p>
+<ul>
+<li>What resources were projected (recorded in operation logs)</li>
+<li>What execution occurred (recorded in execution logs)</li>
+<li>What results were emitted (the emitted resources themselves)</li>
+<li>When operations occurred (store metadata)</li>
+</ul>
+<p>This provides full audit trails without additional logging infrastructure. The projection-emission cycle inherently records its own history.</p>
+<h3 id="reproducibility"><a class="header" href="#reproducibility">Reproducibility</a></h3>
+<p>Given the same projected resources and execution logic, the same results are emitted. This enables:</p>
+<ul>
+<li><strong>Deterministic operations</strong>: Re-running projections produces consistent results</li>
+<li><strong>Testing</strong>: Mock stores with known resources enable testing projection-emission cycles</li>
+<li><strong>Debugging</strong>: Reproducing issues by projecting the same historical resources</li>
+</ul>
+<p>Immutability of resources guarantees that historical projections remain reproducible—the resources never change.</p>
+<h2 id="examples-across-the-platform"><a class="header" href="#examples-across-the-platform">Examples Across the Platform</a></h2>
+<h3 id="component-crud-operations"><a class="header" href="#component-crud-operations">Component CRUD Operations</a></h3>
+<p><strong>Create</strong>:</p>
+<ul>
+<li>Project: Artifact resources submitted by client</li>
+<li>Execute: Validate artifacts, build component structure</li>
+<li>Emit: Component definition resource</li>
+<li>Store: Component available for projection</li>
+</ul>
+<p><strong>Read</strong>:</p>
+<ul>
+<li>Project: Component definition and referenced resources</li>
+<li>Execute: Assemble complete component container</li>
+<li>Emit: None (read-only operation, but query results could be cached as emissions)</li>
+<li>Store: No new resources (unless caching results)</li>
+</ul>
+<p><strong>Update</strong>:</p>
+<ul>
+<li>Project: Existing component definition, new artifact resources</li>
+<li>Execute: Validate changes, build updated component</li>
+<li>Emit: New component definition resource (original unchanged)</li>
+<li>Store: Updated component available, original remains for versioning</li>
+</ul>
+<p><strong>Delete</strong>:</p>
+<ul>
+<li>Project: Component definition, dependency references</li>
+<li>Execute: Verify no dependencies, mark component as deleted</li>
+<li>Emit: Deletion marker or updated catalog</li>
+<li>Store: Component no longer appears in catalogs (but resources remain for history)</li>
+</ul>
+<h3 id="instance-lifecycle"><a class="header" href="#instance-lifecycle">Instance Lifecycle</a></h3>
+<p><strong>Start</strong>:</p>
+<ul>
+<li>Project: Component definition</li>
+<li>Execute: Initialize instance state, begin execution</li>
+<li>Emit: Instance resource with initial state</li>
+<li>Store: Instance available for monitoring</li>
+</ul>
+<p><strong>Run</strong>:</p>
+<ul>
+<li>Project: Instance state, component definition</li>
+<li>Execute: Continue instance execution</li>
+<li>Emit: Logs, metrics, application data, state updates</li>
+<li>Store: Continuous stream of emitted resources</li>
+</ul>
+<p><strong>Stop</strong>:</p>
+<ul>
+<li>Project: Running instance resource</li>
+<li>Execute: Graceful shutdown</li>
+<li>Emit: Final state, shutdown logs</li>
+<li>Store: Instance state preserved</li>
+</ul>
+<p><strong>Restart</strong>:</p>
+<ul>
+<li>Project: Stopped instance resource</li>
+<li>Execute: Reinitialize from last state</li>
+<li>Emit: New instance resource (new start)</li>
+<li>Store: New instance lifecycle begins</li>
+</ul>
+<h3 id="view-materialization"><a class="header" href="#view-materialization">View Materialization</a></h3>
+<p><strong>Materialize</strong>:</p>
+<ul>
+<li>Project: Resources matching view criteria</li>
+<li>Execute: Transform to view format, aggregate</li>
+<li>Emit: Materialized view resource</li>
+<li>Store: View available for efficient queries</li>
+</ul>
+<p><strong>Refresh</strong>:</p>
+<ul>
+<li>Project: Current view, new resources since last materialization</li>
+<li>Execute: Update view with new data</li>
+<li>Emit: Updated view resource</li>
+<li>Store: Fresh view available</li>
+</ul>
+<p><strong>Query</strong>:</p>
+<ul>
+<li>Project: Materialized view resource</li>
+<li>Execute: Filter/search within view</li>
+<li>Emit: Query results (potentially cached)</li>
+<li>Store: Results available for reuse</li>
+</ul>
+<h2 id="the-generative-property"><a class="header" href="#the-generative-property">The Generative Property</a></h2>
+<p>Each emission adds to the store. Over time, the store grows richer:</p>
+<ul>
+<li>More components → more capabilities</li>
+<li>More instances → more application data</li>
+<li>More logs → better observability</li>
+<li>More views → more ways to understand the system</li>
+</ul>
+<p>This is <strong>generative</strong>—the system becomes more capable through use. Every operation contributes to the knowledge base available for future projections.</p>
+<p>The projection-emission cycle creates a <strong>flywheel effect</strong>: more emissions enable richer projections, which enable more sophisticated operations, which produce richer emissions.</p>
+<h2 id="invariants"><a class="header" href="#invariants">Invariants</a></h2>
+<p>The cycle maintains critical invariants:</p>
+<p><strong>Store Immutability</strong>: Resources never change after emission. History is preserved.</p>
+<p><strong>Projection Purity</strong>: Projections don’t modify the store. They’re reproducible queries.</p>
+<p><strong>Emission Atomicity</strong>: Resources are either fully emitted or not emitted (no partial writes).</p>
+<p><strong>CID Integrity</strong>: Emitted resources are correctly identified by content hash.</p>
+<p><strong>Reference Validity</strong>: CID references in emitted resources refer to actual stored resources.</p>
+<p>These invariants enable reasoning about the system—projections are safe queries, emissions are durable writes, the store is a reliable foundation.</p>
+<h2 id="contrast-with-traditional-systems"><a class="header" href="#contrast-with-traditional-systems">Contrast with Traditional Systems</a></h2>
+<p>Traditional systems often separate:</p>
+<ul>
+<li><strong>Data storage</strong> (databases, filesystems)</li>
+<li><strong>Computation</strong> (application logic)</li>
+<li><strong>Output</strong> (write operations, side effects)</li>
+</ul>
+<p>Hologram unifies these through the projection-emission cycle:</p>
+<ul>
+<li>Storage, computation, and output are phases of a single cycle</li>
+<li>All operations follow the same pattern</li>
+<li>The boundary between platform and application blurs (both use projection-emission)</li>
+</ul>
+<p>This unification provides consistency—learning one operation teaches the pattern for all operations.</p>
+<h2 id="next-steps"><a class="header" href="#next-steps">Next Steps</a></h2>
+<p>The projection-emission cycle operates on containers. The next document, <strong>Container Projections</strong>, describes how projections transform undifferentiated resources into containers with structure, meaning, and purpose.</p>
+
+                    </main>
+
+                    <nav class="nav-wrapper" aria-label="Page navigation">
+                        <!-- Mobile navigation buttons -->
+                            <a rel="prev" href="02-container-store.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                                <i class="fa fa-angle-left"></i>
+                            </a>
+
+                            <a rel="next prefetch" href="04-container-projections.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                                <i class="fa fa-angle-right"></i>
+                            </a>
+
+                        <div style="clear: both"></div>
+                    </nav>
+                </div>
+            </div>
+
+            <nav class="nav-wide-wrapper" aria-label="Page navigation">
+                    <a rel="prev" href="02-container-store.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                        <i class="fa fa-angle-left"></i>
+                    </a>
+
+                    <a rel="next prefetch" href="04-container-projections.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                        <i class="fa fa-angle-right"></i>
+                    </a>
+            </nav>
+
+        </div>
+
+
+
+
+        <script>
+            window.playground_copyable = true;
+        </script>
+
+
+        <script src="elasticlunr.min.js"></script>
+        <script src="mark.min.js"></script>
+        <script src="searcher.js"></script>
+
+        <script src="clipboard.min.js"></script>
+        <script src="highlight.js"></script>
+        <script src="book.js"></script>
+
+        <!-- Custom JS scripts -->
+
+
+
+    </div>
+    </body>
+</html>

@@ -123,8 +123,8 @@ describe('MCP Server - Conformance Enforcement', () => {
       expect(isConformanceFile && !invalidInterface.conformance).toBe(true);
     });
 
-    it('should enforce conformance=false for implementation files', async () => {
-      // Since we removed implementation artifacts, this test now validates spec files
+    it('should enforce conformance=false for spec files', async () => {
+      // Spec files with conformance=false ARE the component definition
       const spec = {
         namespace: 'hologram.test',
         parent: 'hologram',

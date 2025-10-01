@@ -13,6 +13,21 @@ export async function updateOperation(
   const errors: ValidationError[] = [];
 
   try {
+    // Load component model to get conformance requirements
+    const componentModel = await validator.getComponentRequirements();
+    if (!componentModel?.conformance_requirements) {
+      return {
+        content: [
+          {
+            type: 'text',
+            text: '❌ Component model (hologram.component) not found or invalid'
+          }
+        ]
+      };
+    }
+    const conformanceTypes = Object.keys(componentModel.conformance_requirements);
+
+    // Now proceed with the rest
     // Check that component exists via index
     const indexPath = path.join(specDir, `${namespace}.index.json`);
     if (!fs.existsSync(indexPath)) {
@@ -20,7 +35,7 @@ export async function updateOperation(
         content: [
           {
             type: 'text',
-            text: `Component ${namespace} does not exist. Use create operation to add new components.`,
+            text: `❌ Component ${namespace} not found`,
           },
         ],
       };
@@ -57,44 +72,71 @@ export async function updateOperation(
         try {
           parsedContent = JSON.parse(content);
         } catch (e) {
+          const errorDetail = e instanceof Error ? e.message : 'Unknown error';
           errors.push({
             file: `${namespace}.${key}.json`,
-            message: `Invalid JSON: ${e instanceof Error ? e.message : 'Unknown error'}`,
+            message: `Content for '${key}' appears to be an invalid JSON string. ${errorDetail}. Expected a JSON object.`,
           });
           continue;
         }
       }
 
-      // Determine expected namespace for this file type
-      const expectedNamespace = key === 'implementation'
-        ? namespace
-        : `${namespace}.${key}`;
+      // Validate content is an object
+      if (typeof parsedContent !== 'object' || parsedContent === null) {
+        errors.push({
+          file: `${namespace}.${key}.json`,
+          message: `Content for '${key}' must be a JSON object. Got ${typeof parsedContent}.`,
+        });
+        continue;
+      }
 
-      // Add/update required fields
-      parsedContent.namespace = expectedNamespace;
+      // Determine expected values for validation
+      const isConformance = conformanceTypes.includes(key);
+      const expectedNamespace = isConformance ? `${namespace}.${key}` : namespace;
 
-      // Set conformance flag
-      const isConformance = ['interface', 'docs', 'test', 'manager', 'dependency', 'build', 'log', 'view'].includes(key);
-      content.conformance = isConformance;
+      // Validate namespace matches expected value
+      if (parsedContent.namespace && parsedContent.namespace !== expectedNamespace) {
+        return {
+          content: [{
+            type: 'text',
+            text: `❌ Namespace mismatch for ${key}: expected "${expectedNamespace}", got "${parsedContent.namespace}"`
+          }]
+        };
+      }
 
-      // Set parent for conformance files
-      if (isConformance) {
-        content.parent = namespace;
+      // Validate conformance flag matches expected value
+      if (parsedContent.conformance !== undefined && parsedContent.conformance !== isConformance) {
+        return {
+          content: [{
+            type: 'text',
+            text: `❌ Conformance flag mismatch for ${key}: expected ${isConformance}, got ${parsedContent.conformance}`
+          }]
+        };
+      }
+
+      // Validate parent for conformance files
+      if (isConformance && parsedContent.parent && parsedContent.parent !== namespace) {
+        return {
+          content: [{
+            type: 'text',
+            text: `❌ Parent mismatch for ${key}: expected "${namespace}", got "${parsedContent.parent}"`
+          }]
+        };
       }
 
       // Validate against base schema
-      const baseValidation = await validator.validateBaseSchema(content);
+      const baseValidation = await validator.validateBaseSchema(parsedContent);
       if (!baseValidation.valid) {
         errors.push(...baseValidation.errors.map(e => ({
           ...e,
-          file: `${namespace}.${key === 'implementation' ? '' : key + '.'}json`,
+          file: isConformance ? `${namespace}.${key}.json` : `${namespace}.json`,
         })));
       }
 
       // Validate conformance files against their specs
       if (isConformance) {
         const conformanceSpecFile = `hologram.${key}.spec`;
-        const conformanceValidation = await validator.validateAgainstSchema(content, conformanceSpecFile);
+        const conformanceValidation = await validator.validateAgainstSchema(parsedContent, conformanceSpecFile);
         if (!conformanceValidation.valid) {
           errors.push(...conformanceValidation.errors.map(e => ({
             ...e,
@@ -103,7 +145,7 @@ export async function updateOperation(
         }
       }
 
-      updates.set(key, content);
+      updates.set(key, parsedContent);
     }
 
     // If validation errors, don't proceed

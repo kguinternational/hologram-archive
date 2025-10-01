@@ -82,26 +82,29 @@ export class SchemaValidator {
 
     if (!valid && validate.errors) {
       for (const error of validate.errors) {
+        let detailedMessage = error.message || 'Validation error';
+
+        // Enhance error message with context
+        if (error.keyword === 'enum' && error.params?.allowedValues) {
+          const allowedValues = error.params.allowedValues as string[];
+          detailedMessage = `${error.message} - Expected one of: [${allowedValues.join(', ')}], Got: ${JSON.stringify(error.data)}`;
+        } else if (error.keyword === 'required' && error.params?.missingProperty) {
+          detailedMessage = `Missing required field: '${error.params.missingProperty}'`;
+        } else if (error.keyword === 'type') {
+          detailedMessage = `Type mismatch at ${error.instancePath || 'root'}: expected ${error.params?.type}, got ${typeof error.data}`;
+        } else if (error.keyword === 'additionalProperties') {
+          detailedMessage = `Unexpected property: '${error.params?.additionalProperty}'`;
+        }
+
         errors.push({
           file: schemaId,
-          message: error.message || 'Validation error',
+          message: detailedMessage,
           path: error.instancePath,
         });
       }
     }
 
     return { valid, errors };
-  }
-
-  /**
-   * Validate that a component implementation matches its spec
-   */
-  public async validateImplementationAgainstSpec(
-    implementation: any,
-    namespace: string
-  ): Promise<{ valid: boolean; errors: ValidationError[] }> {
-    const specFile = `${namespace}.spec`;
-    return this.validateAgainstSchema(implementation, specFile);
   }
 
   /**

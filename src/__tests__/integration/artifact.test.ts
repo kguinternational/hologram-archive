@@ -134,56 +134,8 @@ describe('MCP Server - Artifact Submission', () => {
     });
   });
 
-  describe('Implementation Artifact Submission', () => {
-    it('should accept valid implementation', async () => {
-      const implementation = {
-        namespace: 'hologram.test',
-        parent: 'hologram',
-        conformance: false,
-        version: '0.1.0',
-        description: 'Test implementation'
-      };
-
-      const result = await submitArtifactOperation(implementation, 'implementation', testSpecDir);
-
-      // Will fail without spec file, but should validate base schema
-      const text = result.content[0].text;
-      if (text.includes('❌')) {
-        // May fail due to missing spec file or validation
-        expect(text).toContain('validation failed');
-      } else {
-        const response = JSON.parse(text);
-        expect(response.success).toBe(true);
-      }
-    });
-
-    it('should reject implementation without namespace', async () => {
-      const implementation = {
-        parent: 'hologram',
-        conformance: false
-      };
-
-      const result = await submitArtifactOperation(implementation, 'implementation', testSpecDir);
-      const text = result.content[0].text;
-
-      expect(text).toContain('❌');
-      expect(text).toContain('namespace');
-    });
-
-    it('should reject implementation without conformance flag', async () => {
-      const implementation = {
-        namespace: 'hologram.test',
-        parent: 'hologram'
-        // Missing conformance
-      };
-
-      const result = await submitArtifactOperation(implementation, 'implementation', testSpecDir);
-      const text = result.content[0].text;
-
-      expect(text).toContain('❌');
-      expect(text.toLowerCase()).toContain('conformance');
-    });
-  });
+  // Note: There is no separate "implementation" artifact type.
+  // The spec file with conformance: false IS the component itself.
 
   describe('Conformance Artifact Submission', () => {
     it('should accept valid conformance file', async () => {

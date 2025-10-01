@@ -1,0 +1,879 @@
+<!DOCTYPE HTML>
+<html lang="en" class="light sidebar-visible" dir="ltr">
+    <head>
+        <!-- Book generated using mdBook -->
+        <meta charset="UTF-8">
+        <title>Platform Operations - The Hologram Container Engine and Platform</title>
+
+
+        <!-- Custom HTML head -->
+
+        <meta name="description" content="Comprehensive documentation of the Hologram Container Engine and Platform conceptual model">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#ffffff">
+
+        <link rel="icon" href="favicon.svg">
+        <link rel="shortcut icon" href="favicon.png">
+        <link rel="stylesheet" href="css/variables.css">
+        <link rel="stylesheet" href="css/general.css">
+        <link rel="stylesheet" href="css/chrome.css">
+        <link rel="stylesheet" href="css/print.css" media="print">
+
+        <!-- Fonts -->
+        <link rel="stylesheet" href="FontAwesome/css/font-awesome.css">
+        <link rel="stylesheet" href="fonts/fonts.css">
+
+        <!-- Highlight.js Stylesheets -->
+        <link rel="stylesheet" id="highlight-css" href="highlight.css">
+        <link rel="stylesheet" id="tomorrow-night-css" href="tomorrow-night.css">
+        <link rel="stylesheet" id="ayu-highlight-css" href="ayu-highlight.css">
+
+        <!-- Custom theme stylesheets -->
+        <link rel="stylesheet" href="theme/custom.css">
+
+        <!-- MathJax -->
+        <script async src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+        <!-- Provide site root and default themes to javascript -->
+        <script>
+            const path_to_root = "";
+            const default_light_theme = "light";
+            const default_dark_theme = "navy";
+            window.path_to_searchindex_js = "searchindex.js";
+        </script>
+        <!-- Start loading toc.js asap -->
+        <script src="toc.js"></script>
+    </head>
+    <body>
+    <div id="mdbook-help-container">
+        <div id="mdbook-help-popup">
+            <h2 class="mdbook-help-title">Keyboard shortcuts</h2>
+            <div>
+                <p>Press <kbd>←</kbd> or <kbd>→</kbd> to navigate between chapters</p>
+                <p>Press <kbd>S</kbd> or <kbd>/</kbd> to search in the book</p>
+                <p>Press <kbd>?</kbd> to show this help</p>
+                <p>Press <kbd>Esc</kbd> to hide this help</p>
+            </div>
+        </div>
+    </div>
+    <div id="body-container">
+        <!-- Work around some values being stored in localStorage wrapped in quotes -->
+        <script>
+            try {
+                let theme = localStorage.getItem('mdbook-theme');
+                let sidebar = localStorage.getItem('mdbook-sidebar');
+
+                if (theme.startsWith('"') && theme.endsWith('"')) {
+                    localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
+                }
+
+                if (sidebar.startsWith('"') && sidebar.endsWith('"')) {
+                    localStorage.setItem('mdbook-sidebar', sidebar.slice(1, sidebar.length - 1));
+                }
+            } catch (e) { }
+        </script>
+
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script>
+            const default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? default_dark_theme : default_light_theme;
+            let theme;
+            try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
+            if (theme === null || theme === undefined) { theme = default_theme; }
+            const html = document.documentElement;
+            html.classList.remove('light')
+            html.classList.add(theme);
+            html.classList.add("js");
+        </script>
+
+        <input type="checkbox" id="sidebar-toggle-anchor" class="hidden">
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script>
+            let sidebar = null;
+            const sidebar_toggle = document.getElementById("sidebar-toggle-anchor");
+            if (document.body.clientWidth >= 1080) {
+                try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
+                sidebar = sidebar || 'visible';
+            } else {
+                sidebar = 'hidden';
+                sidebar_toggle.checked = false;
+            }
+            if (sidebar === 'visible') {
+                sidebar_toggle.checked = true;
+            } else {
+                html.classList.remove('sidebar-visible');
+            }
+        </script>
+
+        <nav id="sidebar" class="sidebar" aria-label="Table of contents">
+            <!-- populated by js -->
+            <mdbook-sidebar-scrollbox class="sidebar-scrollbox"></mdbook-sidebar-scrollbox>
+            <noscript>
+                <iframe class="sidebar-iframe-outer" src="toc.html"></iframe>
+            </noscript>
+            <div id="sidebar-resize-handle" class="sidebar-resize-handle">
+                <div class="sidebar-resize-indicator"></div>
+            </div>
+        </nav>
+
+        <div id="page-wrapper" class="page-wrapper">
+
+            <div class="page">
+                <div id="menu-bar-hover-placeholder"></div>
+                <div id="menu-bar" class="menu-bar sticky">
+                    <div class="left-buttons">
+                        <label id="sidebar-toggle" class="icon-button" for="sidebar-toggle-anchor" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="sidebar">
+                            <i class="fa fa-bars"></i>
+                        </label>
+                        <button id="theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="theme-list">
+                            <i class="fa fa-paint-brush"></i>
+                        </button>
+                        <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="default_theme">Auto</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="light">Light</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="navy">Navy</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="ayu">Ayu</button></li>
+                        </ul>
+                        <button id="search-toggle" class="icon-button" type="button" title="Search (`/`)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="/ s" aria-controls="searchbar">
+                            <i class="fa fa-search"></i>
+                        </button>
+                    </div>
+
+                    <h1 class="menu-title">The Hologram Container Engine and Platform</h1>
+
+                    <div class="right-buttons">
+                        <a href="print.html" title="Print this book" aria-label="Print this book">
+                            <i id="print-button" class="fa fa-print"></i>
+                        </a>
+                        <a href="https://github.com/yourusername/Hologram" title="Git repository" aria-label="Git repository">
+                            <i id="git-repository-button" class="fa fa-github"></i>
+                        </a>
+
+                    </div>
+                </div>
+
+                <div id="search-wrapper" class="hidden">
+                    <form id="searchbar-outer" class="searchbar-outer">
+                        <div class="search-wrapper">
+                            <input type="search" id="searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="searchresults-outer" aria-describedby="searchresults-header">
+                            <div class="spinner-wrapper">
+                                <i class="fa fa-spinner fa-spin"></i>
+                            </div>
+                        </div>
+                    </form>
+                    <div id="searchresults-outer" class="searchresults-outer hidden">
+                        <div id="searchresults-header" class="searchresults-header"></div>
+                        <ul id="searchresults">
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
+                <script>
+                    document.getElementById('sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
+                    document.getElementById('sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
+                    Array.from(document.querySelectorAll('#sidebar a')).forEach(function(link) {
+                        link.setAttribute('tabIndex', sidebar === 'visible' ? 0 : -1);
+                    });
+                </script>
+
+                <div id="content" class="content">
+                    <main>
+                        <h1 id="platform-operations"><a class="header" href="#platform-operations">Platform Operations</a></h1>
+<h2 id="operations-as-projections-that-emit"><a class="header" href="#operations-as-projections-that-emit">Operations as Projections That Emit</a></h2>
+<p><strong>Operations</strong> are the platform’s mechanisms for interacting with resources through projection-emission cycles. Every operation follows the pattern: project resources, execute logic, emit results.</p>
+<p>This document describes platform operations, their structure, and how they embody the projection-emission cycle.</p>
+<h2 id="operation-fundamentals"><a class="header" href="#operation-fundamentals">Operation Fundamentals</a></h2>
+<p>An <strong>operation</strong> is a named, executable procedure that:</p>
+<p><strong>Projects</strong>: Identifies and aggregates resources from the store based on operation inputs.</p>
+<p><strong>Executes</strong>: Performs computation, validation, transformation, or coordination using projected resources.</p>
+<p><strong>Emits</strong>: Writes results back to the store as new resources.</p>
+<p><strong>Returns</strong>: Provides operation outcome to the caller (success/failure, emitted resource CIDs).</p>
+<p>Operations are the <strong>verbs</strong> of the platform—the actions that transform store state.</p>
+<h2 id="operation-structure"><a class="header" href="#operation-structure">Operation Structure</a></h2>
+<p>Every operation has:</p>
+<p><strong>Identity</strong>: Operation name and type (e.g., “component.create”, “instance.start”).</p>
+<p><strong>Inputs</strong>: Parameters provided by caller (resource CIDs, values, options).</p>
+<p><strong>Projection Phase</strong>: How the operation identifies and aggregates resources from the store.</p>
+<p><strong>Execution Phase</strong>: What computation the operation performs on projected resources.</p>
+<p><strong>Emission Phase</strong>: What resources the operation writes back to the store.</p>
+<p><strong>Outputs</strong>: What the operation returns to caller (status, emitted CIDs, error information).</p>
+<p>This structure maps directly to the projection-emission cycle.</p>
+<h2 id="component-operations"><a class="header" href="#component-operations">Component Operations</a></h2>
+<p>Operations for managing component definitions.</p>
+<h3 id="component-create"><a class="header" href="#component-create">Component Create</a></h3>
+<p><strong>Purpose</strong>: Define a new component from artifacts.</p>
+<p><strong>Inputs</strong>:</p>
+<ul>
+<li>Artifact resources (spec, interface, docs, tests, etc.)</li>
+<li>Component namespace</li>
+<li>Version information</li>
+</ul>
+<p><strong>Projection Phase</strong>:</p>
+<ul>
+<li>Project artifact resources by CID</li>
+<li>Project component model (hologram.component definition) to understand conformance requirements</li>
+</ul>
+<p><strong>Execution Phase</strong>:</p>
+<ul>
+<li>Validate artifacts against schemas</li>
+<li>Check conformance requirements satisfied</li>
+<li>Build component definition structure</li>
+<li>Assign unique component identifier</li>
+</ul>
+<p><strong>Emission Phase</strong>:</p>
+<ul>
+<li>Emit component definition resource</li>
+<li>Emit component index entry (for catalog)</li>
+</ul>
+<p><strong>Outputs</strong>:</p>
+<ul>
+<li>Component definition CID</li>
+<li>Success/failure status</li>
+<li>Validation messages</li>
+</ul>
+<h3 id="component-read"><a class="header" href="#component-read">Component Read</a></h3>
+<p><strong>Purpose</strong>: Retrieve component definition and related resources.</p>
+<p><strong>Inputs</strong>:</p>
+<ul>
+<li>Component namespace or CID</li>
+</ul>
+<p><strong>Projection Phase</strong>:</p>
+<ul>
+<li>Project component definition resource</li>
+<li>Project referenced resources (interface, docs, tests per request)</li>
+</ul>
+<p><strong>Execution Phase</strong>:</p>
+<ul>
+<li>Assemble complete component container</li>
+<li>Resolve references</li>
+<li>Apply formatting/transformation if requested</li>
+</ul>
+<p><strong>Emission Phase</strong>:</p>
+<ul>
+<li>None (read-only operation)</li>
+<li>May cache projection result for performance</li>
+</ul>
+<p><strong>Outputs</strong>:</p>
+<ul>
+<li>Component definition</li>
+<li>Referenced resources</li>
+<li>Metadata</li>
+</ul>
+<h3 id="component-update"><a class="header" href="#component-update">Component Update</a></h3>
+<p><strong>Purpose</strong>: Modify existing component definition.</p>
+<p><strong>Inputs</strong>:</p>
+<ul>
+<li>Component namespace or CID</li>
+<li>Updated artifact resources</li>
+<li>Change description</li>
+</ul>
+<p><strong>Projection Phase</strong>:</p>
+<ul>
+<li>Project existing component definition</li>
+<li>Project new artifact resources</li>
+<li>Project dependents (components depending on this one)</li>
+</ul>
+<p><strong>Execution Phase</strong>:</p>
+<ul>
+<li>Validate new artifacts</li>
+<li>Check backward compatibility if required</li>
+<li>Build updated component definition</li>
+<li>Verify dependents not broken</li>
+</ul>
+<p><strong>Emission Phase</strong>:</p>
+<ul>
+<li>Emit new component definition resource (new CID, immutable versioning)</li>
+<li>Emit change log entry</li>
+<li>Update component index</li>
+</ul>
+<p><strong>Outputs</strong>:</p>
+<ul>
+<li>New component definition CID</li>
+<li>Change summary</li>
+<li>Compatibility status</li>
+</ul>
+<h3 id="component-delete"><a class="header" href="#component-delete">Component Delete</a></h3>
+<p><strong>Purpose</strong>: Remove component from catalog.</p>
+<p><strong>Inputs</strong>:</p>
+<ul>
+<li>Component namespace or CID</li>
+<li>Force flag (delete even with dependents)</li>
+</ul>
+<p><strong>Projection Phase</strong>:</p>
+<ul>
+<li>Project component definition</li>
+<li>Project reverse dependencies (what depends on this)</li>
+</ul>
+<p><strong>Execution Phase</strong>:</p>
+<ul>
+<li>Check for dependents</li>
+<li>If dependents exist and not forced, fail</li>
+<li>Mark component as deleted</li>
+</ul>
+<p><strong>Emission Phase</strong>:</p>
+<ul>
+<li>Emit deletion marker resource</li>
+<li>Update component index (remove from catalog)</li>
+<li>Emit dependency warning if forced deletion</li>
+</ul>
+<p><strong>Outputs</strong>:</p>
+<ul>
+<li>Deletion status</li>
+<li>Affected dependents list</li>
+</ul>
+<h3 id="component-validate"><a class="header" href="#component-validate">Component Validate</a></h3>
+<p><strong>Purpose</strong>: Verify component definition correctness.</p>
+<p><strong>Inputs</strong>:</p>
+<ul>
+<li>Component namespace or CID</li>
+</ul>
+<p><strong>Projection Phase</strong>:</p>
+<ul>
+<li>Project component definition</li>
+<li>Project all referenced resources</li>
+<li>Project schemas for validation</li>
+</ul>
+<p><strong>Execution Phase</strong>:</p>
+<ul>
+<li>Validate spec against schema</li>
+<li>Validate conformance resources</li>
+<li>Check reference integrity</li>
+<li>Verify dependencies resolvable</li>
+</ul>
+<p><strong>Emission Phase</strong>:</p>
+<ul>
+<li>Emit validation report resource</li>
+</ul>
+<p><strong>Outputs</strong>:</p>
+<ul>
+<li>Validation result (pass/fail)</li>
+<li>Detailed validation messages</li>
+<li>Report CID</li>
+</ul>
+<h2 id="instance-operations"><a class="header" href="#instance-operations">Instance Operations</a></h2>
+<p>Operations for managing running instances.</p>
+<h3 id="instance-create"><a class="header" href="#instance-create">Instance Create</a></h3>
+<p><strong>Purpose</strong>: Instantiate a component definition.</p>
+<p><strong>Inputs</strong>:</p>
+<ul>
+<li>Component definition CID or namespace</li>
+<li>Instance configuration</li>
+<li>Initial state (optional)</li>
+</ul>
+<p><strong>Projection Phase</strong>:</p>
+<ul>
+<li>Project component definition</li>
+<li>Project dependency components (transitive)</li>
+<li>Project runtime context</li>
+</ul>
+<p><strong>Execution Phase</strong>:</p>
+<ul>
+<li>Resolve dependencies</li>
+<li>Initialize instance state</li>
+<li>Allocate resources</li>
+<li>Prepare execution environment</li>
+</ul>
+<p><strong>Emission Phase</strong>:</p>
+<ul>
+<li>Emit instance resource (initial state)</li>
+<li>Emit instance catalog entry</li>
+<li>Emit initialization log</li>
+</ul>
+<p><strong>Outputs</strong>:</p>
+<ul>
+<li>Instance ID and CID</li>
+<li>Initialization status</li>
+</ul>
+<h3 id="instance-start"><a class="header" href="#instance-start">Instance Start</a></h3>
+<p><strong>Purpose</strong>: Begin instance execution.</p>
+<p><strong>Inputs</strong>:</p>
+<ul>
+<li>Instance ID</li>
+</ul>
+<p><strong>Projection Phase</strong>:</p>
+<ul>
+<li>Project instance resource</li>
+<li>Project component definition</li>
+<li>Project dependencies</li>
+</ul>
+<p><strong>Execution Phase</strong>:</p>
+<ul>
+<li>Load instance state</li>
+<li>Begin execution per component definition</li>
+<li>Start emission streams (logs, state, data)</li>
+</ul>
+<p><strong>Emission Phase</strong>:</p>
+<ul>
+<li>Emit instance state update (status: running)</li>
+<li>Emit startup logs</li>
+<li>Begin continuous emission stream</li>
+</ul>
+<p><strong>Outputs</strong>:</p>
+<ul>
+<li>Start status</li>
+<li>Instance runtime information</li>
+</ul>
+<h3 id="instance-stop"><a class="header" href="#instance-stop">Instance Stop</a></h3>
+<p><strong>Purpose</strong>: Halt instance execution.</p>
+<p><strong>Inputs</strong>:</p>
+<ul>
+<li>Instance ID</li>
+<li>Graceful timeout (optional)</li>
+</ul>
+<p><strong>Projection Phase</strong>:</p>
+<ul>
+<li>Project running instance resource</li>
+</ul>
+<p><strong>Execution Phase</strong>:</p>
+<ul>
+<li>Signal instance to stop</li>
+<li>Wait for graceful shutdown (up to timeout)</li>
+<li>Force stop if timeout exceeded</li>
+<li>Finalize state</li>
+</ul>
+<p><strong>Emission Phase</strong>:</p>
+<ul>
+<li>Emit final instance state (status: stopped)</li>
+<li>Emit shutdown logs</li>
+<li>Emit execution summary</li>
+</ul>
+<p><strong>Outputs</strong>:</p>
+<ul>
+<li>Stop status</li>
+<li>Final state CID</li>
+</ul>
+<h3 id="instance-restart"><a class="header" href="#instance-restart">Instance Restart</a></h3>
+<p><strong>Purpose</strong>: Stop and start instance.</p>
+<p><strong>Inputs</strong>:</p>
+<ul>
+<li>Instance ID</li>
+<li>Restart options</li>
+</ul>
+<p><strong>Projection Phase</strong>:</p>
+<ul>
+<li>Project instance resource</li>
+</ul>
+<p><strong>Execution Phase</strong>:</p>
+<ul>
+<li>Execute stop operation</li>
+<li>Execute start operation</li>
+</ul>
+<p><strong>Emission Phase</strong>:</p>
+<ul>
+<li>Emissions from stop and start operations</li>
+<li>Emit restart log entry</li>
+</ul>
+<p><strong>Outputs</strong>:</p>
+<ul>
+<li>Restart status</li>
+<li>New instance state CID</li>
+</ul>
+<h3 id="instance-inspect"><a class="header" href="#instance-inspect">Instance Inspect</a></h3>
+<p><strong>Purpose</strong>: Retrieve instance state and status.</p>
+<p><strong>Inputs</strong>:</p>
+<ul>
+<li>Instance ID</li>
+</ul>
+<p><strong>Projection Phase</strong>:</p>
+<ul>
+<li>Project instance resource</li>
+<li>Project recent logs</li>
+<li>Project component definition</li>
+</ul>
+<p><strong>Execution Phase</strong>:</p>
+<ul>
+<li>Assemble current instance state</li>
+<li>Gather runtime information</li>
+<li>Compute uptime and metrics</li>
+</ul>
+<p><strong>Emission Phase</strong>:</p>
+<ul>
+<li>None (read-only)</li>
+<li>May cache inspection result</li>
+</ul>
+<p><strong>Outputs</strong>:</p>
+<ul>
+<li>Instance state</li>
+<li>Status information</li>
+<li>Logs and metrics</li>
+</ul>
+<h2 id="view-operations"><a class="header" href="#view-operations">View Operations</a></h2>
+<p>Operations for managing materialized views.</p>
+<h3 id="view-materialize"><a class="header" href="#view-materialize">View Materialize</a></h3>
+<p><strong>Purpose</strong>: Execute projection and emit result as view resource.</p>
+<p><strong>Inputs</strong>:</p>
+<ul>
+<li>View definition CID</li>
+<li>Projection parameters</li>
+<li>Materialization options</li>
+</ul>
+<p><strong>Projection Phase</strong>:</p>
+<ul>
+<li>Project view definition</li>
+<li>Execute view’s projection (project resources per view definition)</li>
+</ul>
+<p><strong>Execution Phase</strong>:</p>
+<ul>
+<li>Transform projection result to view format</li>
+<li>Apply indexing or optimization</li>
+<li>Validate view structure</li>
+</ul>
+<p><strong>Emission Phase</strong>:</p>
+<ul>
+<li>Emit view resource</li>
+<li>Emit view catalog entry</li>
+<li>Update view index</li>
+</ul>
+<p><strong>Outputs</strong>:</p>
+<ul>
+<li>View CID</li>
+<li>Materialization timestamp</li>
+<li>Statistics (resources processed, view size)</li>
+</ul>
+<h3 id="view-refresh"><a class="header" href="#view-refresh">View Refresh</a></h3>
+<p><strong>Purpose</strong>: Update existing view with current store state.</p>
+<p><strong>Inputs</strong>:</p>
+<ul>
+<li>View CID or identifier</li>
+<li>Refresh strategy (full, incremental)</li>
+</ul>
+<p><strong>Projection Phase</strong>:</p>
+<ul>
+<li>Project existing view</li>
+<li>Project new/changed resources since last refresh</li>
+<li>Project view definition</li>
+</ul>
+<p><strong>Execution Phase</strong>:</p>
+<ul>
+<li>Determine changes since last materialization</li>
+<li>Apply incremental updates or full rebuild</li>
+<li>Validate updated view</li>
+</ul>
+<p><strong>Emission Phase</strong>:</p>
+<ul>
+<li>Emit refreshed view resource (new CID)</li>
+<li>Update view catalog with new version</li>
+<li>Emit refresh log</li>
+</ul>
+<p><strong>Outputs</strong>:</p>
+<ul>
+<li>New view CID</li>
+<li>Changes applied</li>
+<li>Refresh statistics</li>
+</ul>
+<h3 id="view-query"><a class="header" href="#view-query">View Query</a></h3>
+<p><strong>Purpose</strong>: Execute query against materialized view.</p>
+<p><strong>Inputs</strong>:</p>
+<ul>
+<li>View CID or identifier</li>
+<li>Query parameters (filters, search terms)</li>
+</ul>
+<p><strong>Projection Phase</strong>:</p>
+<ul>
+<li>Project view resource</li>
+<li>Apply query filters</li>
+</ul>
+<p><strong>Execution Phase</strong>:</p>
+<ul>
+<li>Search or filter within view</li>
+<li>Compute results</li>
+<li>Apply pagination or limits</li>
+</ul>
+<p><strong>Emission Phase</strong>:</p>
+<ul>
+<li>None (read-only)</li>
+<li>May emit query result cache</li>
+</ul>
+<p><strong>Outputs</strong>:</p>
+<ul>
+<li>Query results</li>
+<li>Result metadata (count, timing)</li>
+</ul>
+<h2 id="artifact-operations"><a class="header" href="#artifact-operations">Artifact Operations</a></h2>
+<p>Operations for staging resources before component creation.</p>
+<h3 id="artifact-submit"><a class="header" href="#artifact-submit">Artifact Submit</a></h3>
+<p><strong>Purpose</strong>: Stage a resource for later use in component creation.</p>
+<p><strong>Inputs</strong>:</p>
+<ul>
+<li>Artifact content</li>
+<li>Artifact type (spec, interface, docs, etc.)</li>
+</ul>
+<p><strong>Projection Phase</strong>:</p>
+<ul>
+<li>None (no existing resources needed)</li>
+</ul>
+<p><strong>Execution Phase</strong>:</p>
+<ul>
+<li>Validate artifact content</li>
+<li>Check artifact type valid</li>
+</ul>
+<p><strong>Emission Phase</strong>:</p>
+<ul>
+<li>Emit artifact resource to store</li>
+<li>Record in artifact staging area</li>
+</ul>
+<p><strong>Outputs</strong>:</p>
+<ul>
+<li>Artifact CID</li>
+<li>Staging status</li>
+</ul>
+<h3 id="manifest-submit"><a class="header" href="#manifest-submit">Manifest Submit</a></h3>
+<p><strong>Purpose</strong>: Create component from staged artifacts.</p>
+<p><strong>Inputs</strong>:</p>
+<ul>
+<li>Manifest listing artifact CIDs and types</li>
+<li>Component namespace</li>
+</ul>
+<p><strong>Projection Phase</strong>:</p>
+<ul>
+<li>Project staged artifact resources</li>
+<li>Project component model</li>
+</ul>
+<p><strong>Execution Phase</strong>:</p>
+<ul>
+<li>Execute component create operation using artifacts</li>
+<li>Clear artifact staging area</li>
+</ul>
+<p><strong>Emission Phase</strong>:</p>
+<ul>
+<li>Emissions from component create</li>
+<li>Clear staging artifacts</li>
+</ul>
+<p><strong>Outputs</strong>:</p>
+<ul>
+<li>Component definition CID</li>
+<li>Component creation status</li>
+</ul>
+<h2 id="validation-operations"><a class="header" href="#validation-operations">Validation Operations</a></h2>
+<p>Operations for verifying correctness.</p>
+<h3 id="schema-validate"><a class="header" href="#schema-validate">Schema Validate</a></h3>
+<p><strong>Purpose</strong>: Validate resource against schema.</p>
+<p><strong>Inputs</strong>:</p>
+<ul>
+<li>Resource CID</li>
+<li>Schema CID or type</li>
+</ul>
+<p><strong>Projection Phase</strong>:</p>
+<ul>
+<li>Project resource to validate</li>
+<li>Project schema definition</li>
+</ul>
+<p><strong>Execution Phase</strong>:</p>
+<ul>
+<li>Apply schema validation</li>
+<li>Collect validation errors/warnings</li>
+</ul>
+<p><strong>Emission Phase</strong>:</p>
+<ul>
+<li>Emit validation report</li>
+</ul>
+<p><strong>Outputs</strong>:</p>
+<ul>
+<li>Validation result</li>
+<li>Error details</li>
+</ul>
+<h3 id="reference-validate"><a class="header" href="#reference-validate">Reference Validate</a></h3>
+<p><strong>Purpose</strong>: Verify reference integrity.</p>
+<p><strong>Inputs</strong>:</p>
+<ul>
+<li>Resource CID</li>
+<li>Traversal depth</li>
+</ul>
+<p><strong>Projection Phase</strong>:</p>
+<ul>
+<li>Project resource</li>
+<li>Project all referenced resources (recursively)</li>
+</ul>
+<p><strong>Execution Phase</strong>:</p>
+<ul>
+<li>Check all CID references exist</li>
+<li>Verify no dangling references</li>
+<li>Detect reference cycles if problematic</li>
+</ul>
+<p><strong>Emission Phase</strong>:</p>
+<ul>
+<li>Emit reference validation report</li>
+</ul>
+<p><strong>Outputs</strong>:</p>
+<ul>
+<li>Integrity status</li>
+<li>Missing references</li>
+<li>Cycle information</li>
+</ul>
+<h2 id="catalog-operations"><a class="header" href="#catalog-operations">Catalog Operations</a></h2>
+<p>Operations for discovering resources.</p>
+<h3 id="catalog-list"><a class="header" href="#catalog-list">Catalog List</a></h3>
+<p><strong>Purpose</strong>: List available resources by type.</p>
+<p><strong>Inputs</strong>:</p>
+<ul>
+<li>Resource type (components, instances, views)</li>
+<li>Filters (namespace pattern, status)</li>
+</ul>
+<p><strong>Projection Phase</strong>:</p>
+<ul>
+<li>Project catalog view for resource type</li>
+<li>Apply filters</li>
+</ul>
+<p><strong>Execution Phase</strong>:</p>
+<ul>
+<li>Extract matching entries</li>
+<li>Sort and paginate</li>
+</ul>
+<p><strong>Emission Phase</strong>:</p>
+<ul>
+<li>None (read-only)</li>
+<li>May emit query result cache</li>
+</ul>
+<p><strong>Outputs</strong>:</p>
+<ul>
+<li>Resource list</li>
+<li>Metadata</li>
+</ul>
+<h3 id="catalog-search"><a class="header" href="#catalog-search">Catalog Search</a></h3>
+<p><strong>Purpose</strong>: Search resources by content or metadata.</p>
+<p><strong>Inputs</strong>:</p>
+<ul>
+<li>Search query (text, patterns)</li>
+<li>Resource types to search</li>
+</ul>
+<p><strong>Projection Phase</strong>:</p>
+<ul>
+<li>Project search indexes or catalog views</li>
+<li>Execute search query</li>
+</ul>
+<p><strong>Execution Phase</strong>:</p>
+<ul>
+<li>Rank results by relevance</li>
+<li>Apply pagination</li>
+</ul>
+<p><strong>Emission Phase</strong>:</p>
+<ul>
+<li>None (read-only)</li>
+<li>May emit search result cache</li>
+</ul>
+<p><strong>Outputs</strong>:</p>
+<ul>
+<li>Search results</li>
+<li>Relevance scores</li>
+</ul>
+<h2 id="dependency-operations"><a class="header" href="#dependency-operations">Dependency Operations</a></h2>
+<p>Operations for managing component relationships.</p>
+<h3 id="dependency-resolve"><a class="header" href="#dependency-resolve">Dependency Resolve</a></h3>
+<p><strong>Purpose</strong>: Compute transitive dependencies for a component.</p>
+<p><strong>Inputs</strong>:</p>
+<ul>
+<li>Component CID or namespace</li>
+</ul>
+<p><strong>Projection Phase</strong>:</p>
+<ul>
+<li>Project component definition</li>
+<li>Project dependency view or build graph</li>
+</ul>
+<p><strong>Execution Phase</strong>:</p>
+<ul>
+<li>Traverse dependency references</li>
+<li>Build transitive closure</li>
+<li>Check for conflicts or cycles</li>
+</ul>
+<p><strong>Emission Phase</strong>:</p>
+<ul>
+<li>Emit dependency resolution result</li>
+<li>Emit dependency graph</li>
+</ul>
+<p><strong>Outputs</strong>:</p>
+<ul>
+<li>Resolved dependencies (all required components)</li>
+<li>Resolution status</li>
+<li>Conflict information</li>
+</ul>
+<h2 id="operation-composition"><a class="header" href="#operation-composition">Operation Composition</a></h2>
+<p>Operations can compose:</p>
+<p><strong>Sequential</strong>: Component Create → Instance Create → Instance Start (build workflow).</p>
+<p><strong>Parallel</strong>: Multiple Instance Start operations concurrently.</p>
+<p><strong>Conditional</strong>: Instance Stop → if graceful failed → Instance Force Stop.</p>
+<p><strong>Transactional</strong>: Artifact Submit (multiple) → Manifest Submit (atomic component creation).</p>
+<p>Composition enables complex workflows from simple operations.</p>
+<h2 id="operation-atomicity"><a class="header" href="#operation-atomicity">Operation Atomicity</a></h2>
+<p>Operations are atomic with respect to emissions:</p>
+<ul>
+<li>All emissions succeed or all fail</li>
+<li>Store remains consistent regardless of operation outcome</li>
+<li>Partial failures result in complete rollback</li>
+</ul>
+<p>This enables reliable operations even with concurrent access.</p>
+<h2 id="operation-idempotence"><a class="header" href="#operation-idempotence">Operation Idempotence</a></h2>
+<p>Many operations are idempotent:</p>
+<ul>
+<li>Repeating with same inputs produces same result</li>
+<li>Component Create with identical artifacts produces same CID</li>
+<li>View Materialize with same parameters produces same view</li>
+</ul>
+<p>Idempotence enables safe retries after failures.</p>
+<h2 id="operation-observability"><a class="header" href="#operation-observability">Operation Observability</a></h2>
+<p>All operations emit logs and metadata:</p>
+<ul>
+<li>Operation start/end timestamps</li>
+<li>Resources projected</li>
+<li>Execution duration</li>
+<li>Success/failure status</li>
+<li>Emitted resource CIDs</li>
+</ul>
+<p>This provides complete audit trail and debugging information.</p>
+<h2 id="next-steps"><a class="header" href="#next-steps">Next Steps</a></h2>
+<p>Operations are invoked through the <strong>Platform API</strong>—the client interface for interacting with the platform. The next document describes the API model, request/response patterns, and how clients use the API to perform operations.</p>
+
+                    </main>
+
+                    <nav class="nav-wrapper" aria-label="Page navigation">
+                        <!-- Mobile navigation buttons -->
+                            <a rel="prev" href="09-platform-views.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                                <i class="fa fa-angle-left"></i>
+                            </a>
+
+                            <a rel="next prefetch" href="11-platform-api.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                                <i class="fa fa-angle-right"></i>
+                            </a>
+
+                        <div style="clear: both"></div>
+                    </nav>
+                </div>
+            </div>
+
+            <nav class="nav-wide-wrapper" aria-label="Page navigation">
+                    <a rel="prev" href="09-platform-views.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                        <i class="fa fa-angle-left"></i>
+                    </a>
+
+                    <a rel="next prefetch" href="11-platform-api.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                        <i class="fa fa-angle-right"></i>
+                    </a>
+            </nav>
+
+        </div>
+
+
+
+
+        <script>
+            window.playground_copyable = true;
+        </script>
+
+
+        <script src="elasticlunr.min.js"></script>
+        <script src="mark.min.js"></script>
+        <script src="searcher.js"></script>
+
+        <script src="clipboard.min.js"></script>
+        <script src="highlight.js"></script>
+        <script src="book.js"></script>
+
+        <!-- Custom JS scripts -->
+
+
+
+    </div>
+    </body>
+</html>

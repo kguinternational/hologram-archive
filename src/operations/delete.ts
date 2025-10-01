@@ -15,7 +15,7 @@ export async function deleteOperation(
         content: [
           {
             type: 'text',
-            text: `Component ${namespace} does not exist`,
+            text: `❌ Component ${namespace} not found`,
           },
         ],
       };

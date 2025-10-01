@@ -120,11 +120,10 @@ describe('MCP Server - Manifest Submission', () => {
     it('should reject manifest with non-existent CIDs', async () => {
       const manifest = {
         spec: 'cid:nonexistent1',
-        implementation: 'cid:nonexistent2',
-        interface: 'cid:nonexistent3',
-        docs: 'cid:nonexistent4',
-        test: 'cid:nonexistent5',
-        manager: 'cid:nonexistent6'
+        interface: 'cid:nonexistent2',
+        docs: 'cid:nonexistent3',
+        test: 'cid:nonexistent4',
+        manager: 'cid:nonexistent5'
       };
 
       const result = await submitManifestOperation('hologram.test', manifest, testSpecDir);
@@ -138,18 +137,16 @@ describe('MCP Server - Manifest Submission', () => {
       // Store actual artifacts
       const spec = artifactStore.storeArtifact({
         $schema: 'http://json-schema.org/draft-07/schema#',
-        $id: 'hologram.test.spec.json'
-      });
-
-      const impl = artifactStore.storeArtifact({
+        $id: 'hologram.test.spec.json',
         namespace: 'hologram.test',
         parent: 'hologram',
-        conformance: false
+        conformance: false,
+        version: '0.1.0',
+        description: 'Test component'
       });
 
       const manifest = {
         spec,
-        implementation: impl,
         interface: 'cid:fake1',
         docs: 'cid:fake2',
         test: 'cid:fake3',
@@ -171,12 +168,12 @@ describe('MCP Server - Manifest Submission', () => {
         spec: artifactStore.storeArtifact({
           $schema: 'http://json-schema.org/draft-07/schema#',
           $id: 'hologram.atomic.spec.json',
-          type: 'object'
-        }),
-        implementation: artifactStore.storeArtifact({
           namespace: 'hologram.atomic',
           parent: 'hologram',
-          conformance: false
+          conformance: false,
+          version: '0.1.0',
+          description: 'Test atomic component',
+          type: 'object'
         }),
         interface: artifactStore.storeArtifact({
           namespace: 'hologram.atomic.interface',
@@ -249,12 +246,7 @@ describe('MCP Server - Manifest Submission', () => {
     it('should not create partial components on failure', async () => {
       // Create invalid manifest that will fail validation
       const artifacts = {
-        spec: artifactStore.storeArtifact({ invalid: 'spec' }),
-        implementation: artifactStore.storeArtifact({
-          namespace: 'hologram.partial',
-          parent: 'hologram',
-          conformance: false
-        }),
+        spec: artifactStore.storeArtifact({ invalid: 'spec' }), // This will fail validation
         interface: 'cid:missing',
         docs: 'cid:missing',
         test: 'cid:missing',
@@ -330,7 +322,6 @@ describe('MCP Server - Manifest Submission', () => {
 
       const manifest = {
         spec: 'cid:test',
-        implementation: 'cid:test',
         interface: 'cid:test',
         docs: 'cid:test',
         test: 'cid:test',
@@ -352,18 +343,11 @@ describe('MCP Server - Manifest Submission', () => {
     it('should validate artifact content before writing', async () => {
       // Store artifact with invalid content
       const invalidSpec = artifactStore.storeArtifact({
-        notASchema: true
-      });
-
-      const validImpl = artifactStore.storeArtifact({
-        namespace: 'hologram.contenttest',
-        parent: 'hologram',
-        conformance: false
+        notASchema: true  // Invalid - not a proper spec
       });
 
       const manifest = {
         spec: invalidSpec,
-        implementation: validImpl,
         interface: artifactStore.storeArtifact({
           namespace: 'hologram.contenttest.interface',
           parent: 'hologram.contenttest',
@@ -402,12 +386,12 @@ describe('MCP Server - Manifest Submission', () => {
       const artifacts = {
         spec: artifactStore.storeArtifact({
           $schema: 'http://json-schema.org/draft-07/schema#',
-          $id: 'hologram.mismatch.spec.json'
-        }),
-        implementation: artifactStore.storeArtifact({
-          namespace: 'hologram.different', // Wrong namespace
+          $id: 'hologram.mismatch.spec.json',
+          namespace: 'hologram.different', // Wrong namespace - should be hologram.mismatch
           parent: 'hologram',
-          conformance: false
+          conformance: false,
+          version: '0.1.0',
+          description: 'Test with namespace mismatch'
         }),
         interface: artifactStore.storeArtifact({
           namespace: 'hologram.mismatch.interface',

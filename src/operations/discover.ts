@@ -24,19 +24,19 @@ export async function getComponentModelOperation(): Promise<{ content: Array<{ t
     let guide = 'HOLOGRAM COMPONENT MODEL\n';
     guide += '========================\n\n';
 
-    guide += 'To create a complete Hologram component, you need exactly 6 files:\n\n';
+    const conformanceCount = Object.keys(componentModel.conformance_requirements || {}).filter(
+      key => (componentModel.conformance_requirements as any)[key].required
+    ).length;
+    const totalFiles = 1 + conformanceCount; // 1 spec + N conformance
+    guide += `To create a complete Hologram component, you need exactly ${totalFiles} files:\n\n`;
 
     guide += '1. SPECIFICATION FILE ({namespace}.spec.json):\n';
-    guide += '   - Purpose: JSON Schema that defines the structure\n';
-    guide += '   - Schema: Must be a valid JSON Schema\n';
-    guide += '   - Example: See hologram.component.spec.json\n\n';
+    guide += '   - Purpose: The component definition itself\n';
+    guide += '   - Contains: JSON Schema OR component properties\n';
+    guide += '   - Required fields: namespace, conformance (=false), version, description\n';
+    guide += '   - Note: The spec file IS the component when conformance=false\n\n';
 
-    guide += '2. IMPLEMENTATION FILE ({namespace}.json):\n';
-    guide += '   - Purpose: The actual component implementation\n';
-    guide += '   - Schema: Must validate against {namespace}.spec.json\n';
-    guide += '   - Required fields: namespace, parent, conformance\n\n';
-
-    guide += '3. REQUIRED CONFORMANCE FILES:\n';
+    guide += '2. REQUIRED CONFORMANCE FILES:\n';
 
     const conformanceDescriptions: Record<string, string> = {
       interface: 'Every component must define its public interface',
@@ -58,7 +58,7 @@ export async function getComponentModelOperation(): Promise<{ content: Array<{ t
     guide += '\nKEY RULES:\n';
     guide += '• All namespaces must follow pattern: hologram[.subcomponent]*\n';
     guide += '• Parent must reference the correct parent component\n';
-    guide += '• Conformance flag: false for implementations, true for conformance files\n';
+    guide += '• Conformance flag: false for spec/component files, true for conformance files\n';
     guide += '• Every conformance component (interface, docs, test, manager) must have its own full conformance\n';
     guide += '• Self-referential conformance is required (e.g., test.test.json)\n';
 
@@ -66,6 +66,15 @@ export async function getComponentModelOperation(): Promise<{ content: Array<{ t
     guide += '1. Use submitArtifact for each file (validates individually)\n';
     guide += '2. Collect CIDs from each submission\n';
     guide += '3. Use submitManifest with namespace and CIDs to create complete component\n';
+
+    guide += '\n⚠️ IMPORTANT SEQUENCING:\n';
+    guide += '• When adding new conformance requirements:\n';
+    guide += '  1. FIRST: Add conformance files to all existing components\n';
+    guide += '  2. THEN: Update the spec to require the new conformance\n';
+    guide += '• Update operations validate the ENTIRE component\n';
+    guide += '• Cannot require conformance that doesn\'t exist yet\n';
+    guide += '• Use validateArtifact to preview validation before saving\n';
+    guide += '• Use explainValidation to understand what checks are performed\n';
 
     return {
       content: [{
@@ -87,28 +96,59 @@ export async function getComponentModelOperation(): Promise<{ content: Array<{ t
  * Get a specific schema to understand structure requirements
  */
 export async function getSchemaOperation(
-  schemaName: string
+  schemaName: string,
+  specDir: string = path.join(process.cwd(), 'spec')
 ): Promise<{ content: Array<{ type: string; text: string }> }> {
-  const specDir = path.join(process.cwd(), 'spec');
-
   try {
-    // Add .spec.json if not provided
-    const fileName = schemaName.endsWith('.json')
-      ? schemaName
-      : `${schemaName}.spec.json`;
+    // Handle different schema naming patterns
+    let schemaPath: string | undefined;
+    let actualFile: string | undefined;
 
-    const schemaPath = path.join(specDir, fileName);
+    // First try: exact match with .json
+    if (schemaName.endsWith('.json')) {
+      const testPath = path.join(specDir, schemaName);
+      if (fs.existsSync(testPath)) {
+        schemaPath = testPath;
+        actualFile = schemaName;
+      }
+    }
 
-    if (!fs.existsSync(schemaPath)) {
+    // Second try: add .spec.json
+    if (!schemaPath) {
+      const fileName = `${schemaName}.spec.json`;
+      const testPath = path.join(specDir, fileName);
+      if (fs.existsSync(testPath)) {
+        schemaPath = testPath;
+        actualFile = fileName;
+      }
+    }
+
+    // Third try: look for index.json to find spec artifact
+    if (!schemaPath && !schemaName.includes('.spec')) {
+      const indexPath = path.join(specDir, `${schemaName}.index.json`);
+      if (fs.existsSync(indexPath)) {
+        const index = JSON.parse(fs.readFileSync(indexPath, 'utf-8'));
+        if (index.artifacts?.spec) {
+          actualFile = `${index.artifacts.spec}.json`;
+          schemaPath = path.join(specDir, actualFile);
+        }
+      }
+    }
+
+    if (!schemaPath || !fs.existsSync(schemaPath)) {
       // List available schemas to help
-      const files = fs.readdirSync(specDir)
+      const specFiles = fs.readdirSync(specDir)
         .filter(f => f.endsWith('.spec.json'))
         .map(f => f.replace('.spec.json', ''));
+
+      const indexFiles = fs.readdirSync(specDir)
+        .filter(f => f.endsWith('.index.json'))
+        .map(f => f.replace('.index.json', ''));
 
       return {
         content: [{
           type: 'text',
-          text: `Schema '${schemaName}' not found.\n\nAvailable schemas:\n${files.map(f => `  - ${f}`).join('\n')}\n\nUse: getSchema("hologram.interface") to see interface schema`
+          text: `Schema '${schemaName}' not found.\n\nAvailable schemas:\n${specFiles.map(f => `  - ${f}`).join('\n')}\n\nComponents with specs:\n${indexFiles.map(f => `  - ${f}`).join('\n')}\n\nExamples:\n  getSchema("hologram.interface")\n  getSchema("hologram.component.spec")`
         }]
       };
     }
@@ -116,7 +156,7 @@ export async function getSchemaOperation(
     const schema = JSON.parse(fs.readFileSync(schemaPath, 'utf-8'));
 
     // Add helpful context
-    let response = `SCHEMA: ${fileName}\n`;
+    let response = `SCHEMA: ${actualFile}\n`;
     response += '=' .repeat(50) + '\n\n';
     response += JSON.stringify(schema, null, 2);
     response += '\n\n';
@@ -210,6 +250,74 @@ export async function listComponentsOperation(): Promise<{ content: Array<{ type
 }
 
 /**
+ * List all available schemas
+ */
+export async function listSchemasOperation(
+  specDir: string = path.join(process.cwd(), 'spec')
+): Promise<{ content: Array<{ type: string; text: string }> }> {
+
+  try {
+    // Find all spec files
+    const specFiles = fs.readdirSync(specDir)
+      .filter(f => f.endsWith('.spec.json'))
+      .map(f => f.replace('.spec.json', ''));
+
+    // Find all components with specs via index files
+    const componentsWithSpecs: string[] = [];
+    const indexFiles = fs.readdirSync(specDir)
+      .filter(f => f.endsWith('.index.json'));
+
+    for (const indexFile of indexFiles) {
+      const namespace = indexFile.replace('.index.json', '');
+      const indexPath = path.join(specDir, indexFile);
+      try {
+        const index = JSON.parse(fs.readFileSync(indexPath, 'utf-8'));
+        if (index.artifacts?.spec) {
+          componentsWithSpecs.push(namespace);
+        }
+      } catch (e) {
+        // Skip invalid index files
+      }
+    }
+
+    let response = 'AVAILABLE SCHEMAS\n';
+    response += '=' .repeat(50) + '\n\n';
+
+    response += 'Direct Schema Files:\n';
+    for (const spec of specFiles.sort()) {
+      response += `  • ${spec}\n`;
+    }
+
+    response += '\nComponent Schemas (access via namespace):\n';
+    for (const comp of componentsWithSpecs.sort()) {
+      response += `  • ${comp}\n`;
+    }
+
+    response += '\nUsage Examples:\n';
+    response += '  getSchema("hologram.component.spec")\n';
+    response += '  getSchema("hologram.interface")\n';
+    response += '  getSchema("hologram.view")\n';
+
+    response += '\nNote: For conformance components, use the namespace\n';
+    response += '(e.g., "hologram.test") to get the spec schema.';
+
+    return {
+      content: [{
+        type: 'text',
+        text: response
+      }]
+    };
+  } catch (error) {
+    return {
+      content: [{
+        type: 'text',
+        text: `Error listing schemas: ${error instanceof Error ? error.message : 'Unknown error'}`
+      }]
+    };
+  }
+}
+
+/**
  * Get an example component structure to use as a template
  */
 export async function getComponentExampleOperation(
@@ -244,7 +352,7 @@ export async function getComponentExampleOperation(
         "required": ["namespace", "parent", "conformance", "newconformance"]
       }, null, 2);
 
-      example += '\n\n2. Implementation (hologram.newconformance.json):\n';
+      example += '\n\n2. Component Definition (hologram.newconformance.json):\n';
       example += JSON.stringify({
         "namespace": "hologram.newconformance",
         "parent": "hologram",
@@ -270,21 +378,17 @@ export async function getComponentExampleOperation(
       example += 'This is a complete, valid component you can use as a template:\n\n';
 
       example += '1. SPEC FILE (hologram.example.spec.json):\n';
+      example += '// Note: This IS the component itself when conformance=false\n';
       example += JSON.stringify({
         "$schema": "http://json-schema.org/draft-07/schema#",
         "$id": "hologram.example.spec.json",
-        "title": "Example Component",
-        "description": "A simple example component to demonstrate structure",
+        "namespace": "hologram.example",
+        "parent": "hologram",
+        "conformance": false,
+        "version": "0.1.0",
+        "description": "Example component - this spec file IS the component",
         "type": "object",
         "properties": {
-          "namespace": {
-            "type": "string",
-            "pattern": "^hologram\\.example(\\.\\w+)*$"
-          },
-          "parent": { "type": "string" },
-          "conformance": { "type": "boolean" },
-          "version": { "type": "string" },
-          "description": { "type": "string" },
           "config": {
             "type": "object",
             "properties": {
@@ -292,24 +396,10 @@ export async function getComponentExampleOperation(
               "settings": { "type": "object" }
             }
           }
-        },
-        "required": ["namespace", "parent", "conformance"]
-      }, null, 2);
-
-      example += '\n\n2. IMPLEMENTATION (hologram.example.json):\n';
-      example += JSON.stringify({
-        "namespace": "hologram.example",
-        "parent": "hologram",
-        "conformance": false,
-        "version": "0.1.0",
-        "description": "Example component implementation",
-        "config": {
-          "enabled": true,
-          "settings": {}
         }
       }, null, 2);
 
-      example += '\n\n3. INTERFACE (hologram.example.interface.json):\n';
+      example += '\n\n2. INTERFACE (hologram.example.interface.json):\n';
       example += JSON.stringify({
         "namespace": "hologram.example.interface",
         "parent": "hologram.example",
@@ -332,7 +422,7 @@ export async function getComponentExampleOperation(
         }
       }, null, 2);
 
-      example += '\n\n4. DOCS (hologram.example.docs.json):\n';
+      example += '\n\n3. DOCS (hologram.example.docs.json):\n';
       example += JSON.stringify({
         "namespace": "hologram.example.docs",
         "parent": "hologram.example",
@@ -353,7 +443,7 @@ export async function getComponentExampleOperation(
         }
       }, null, 2);
 
-      example += '\n\n5. TEST (hologram.example.test.json):\n';
+      example += '\n\n4. TEST (hologram.example.test.json):\n';
       example += JSON.stringify({
         "namespace": "hologram.example.test",
         "parent": "hologram.example",
@@ -376,7 +466,7 @@ export async function getComponentExampleOperation(
         }
       }, null, 2);
 
-      example += '\n\n6. MANAGER (hologram.example.manager.json):\n';
+      example += '\n\n5. MANAGER (hologram.example.manager.json):\n';
       example += JSON.stringify({
         "namespace": "hologram.example.manager",
         "parent": "hologram.example",
@@ -402,11 +492,14 @@ export async function getComponentExampleOperation(
         "namespace": "hologram.example",
         "artifacts": {
           "spec": "cid:...",
-          "implementation": "cid:...",
           "interface": "cid:...",
           "docs": "cid:...",
           "test": "cid:...",
-          "manager": "cid:..."
+          "manager": "cid:...",
+          "dependency": "cid:...",
+          "build": "cid:...",
+          "log": "cid:...",
+          "view": "cid:..."
         }
       }, null, 2);
       break;

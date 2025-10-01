@@ -7,7 +7,7 @@ const artifactStore = new ArtifactStore();
 
 export async function submitArtifactOperation(
   content: any,
-  type: 'spec' | 'implementation' | 'conformance',
+  type: 'spec' | 'conformance',
   specDir: string = path.join(process.cwd(), 'spec')
 ): Promise<{ content: Array<{ type: string; text: string }> }> {
   const validator = new SchemaValidator(specDir);
@@ -30,14 +30,6 @@ export async function submitArtifactOperation(
     let schemaId: string | null = null;
     const namespace = content.namespace || content.$id?.replace('.spec.json', '');
 
-    // Only require namespace for non-spec files
-    if (!namespace && type !== 'spec') {
-      errors.push({
-        file: 'artifact',
-        message: 'Missing namespace field',
-      });
-    }
-
     // Determine appropriate schema
     if (type === 'spec') {
       // Spec files should be valid JSON schemas
@@ -54,14 +46,14 @@ export async function submitArtifactOperation(
         });
       }
     } else {
-      // Implementation and conformance files validate against base schema
+      // Conformance files validate against base schema
       const baseValidation = await validator.validateBaseSchema(content);
       if (!baseValidation.valid) {
         errors.push(...baseValidation.errors);
       }
 
-      // Additional validation based on type
-      // NOTE: Implementation and conformance validation against their specs
+      // Schema validation will check for required fields like namespace
+      // NOTE: Conformance validation against their specs
       // happens in the manifest phase, not here, because those specs might
       // only exist in the artifact store and not in the filesystem yet.
       // This allows for atomic component creation where all artifacts are
