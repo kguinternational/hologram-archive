@@ -16,6 +16,34 @@
     color: #333;
 }
 
+/* Dark mode text colors */
+.navy .content,
+.coal .content,
+.ayu .content {
+    color: #e8e8e8;
+}
+
+.navy .content h1,
+.navy .content h2,
+.navy .content h3,
+.navy .content h4,
+.navy .content h5,
+.navy .content h6,
+.coal .content h1,
+.coal .content h2,
+.coal .content h3,
+.coal .content h4,
+.coal .content h5,
+.coal .content h6,
+.ayu .content h1,
+.ayu .content h2,
+.ayu .content h3,
+.ayu .content h4,
+.ayu .content h5,
+.ayu .content h6 {
+    color: #88d4f5;
+}
+
 .content h1, .content h2, .content h3, .content h4, .content h5, .content h6 {
     font-family: 'Montserrat', sans-serif;
     font-weight: 600;
