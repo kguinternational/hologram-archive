@@ -20,7 +20,22 @@
 .navy .content,
 .coal .content,
 .ayu .content {
-    color: #e8e8e8;
+    color: #e8e8e8 !important;
+}
+
+.navy .content p,
+.navy .content li,
+.navy .content td,
+.navy .content dd,
+.coal .content p,
+.coal .content li,
+.coal .content td,
+.coal .content dd,
+.ayu .content p,
+.ayu .content li,
+.ayu .content td,
+.ayu .content dd {
+    color: #e8e8e8 !important;
 }
 
 .navy .content h1,
@@ -41,7 +56,7 @@
 .ayu .content h4,
 .ayu .content h5,
 .ayu .content h6 {
-    color: #88d4f5;
+    color: #88d4f5 !important;
 }
 
 .content h1, .content h2, .content h3, .content h4, .content h5, .content h6 {
