@@ -20,7 +20,7 @@ from .atlas.graph import AtlasGraph
 from .atlas.labels import derive_unity_indices
 from .e8.roots import E8RootSystem
 from .embedding.search import find_embedding
-from .main import main, search_embedding, verify_embedding, generate_certificate
+from .main import main, search_embedding, verify_embedding_mapping
 
 __version__ = "1.0.0"
 
@@ -41,6 +41,5 @@ __all__ = [
     # Pipeline functions
     "main",
     "search_embedding",
-    "verify_embedding",
-    "generate_certificate",
+    "verify_embedding_mapping",
 ]
