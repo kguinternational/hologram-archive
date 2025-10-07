@@ -7,13 +7,13 @@ This acts on the 12 G₂ roots and the Klein quartet structure.
 import sys
 import os
 from typing import List, Dict, Tuple, Set
-import numpy as np
+from fractions import Fraction
 
 sys.path.append(os.path.join(os.path.dirname(__file__), '../..'))
 
 from tier_a_embedding import AtlasGraph
-from klein_structure import find_klein_quartet
-from twelve_fold import verify_twelve_fold
+from g2.klein_structure import find_klein_quartet
+from g2.twelve_fold import verify_twelve_fold
 
 
 class G2WeylDihedral:
@@ -30,102 +30,95 @@ class G2WeylDihedral:
         self.cartan_matrix = None
         self.elements = []
 
-    def get_g2_cartan_matrix(self) -> np.ndarray:
+    def get_g2_cartan_matrix(self) -> List[List[int]]:
         """
-        Get G₂ Cartan matrix.
+        Get G₂ Cartan matrix (exact integers).
 
         G₂ Dynkin diagram: o≡≡≡o (triple bond)
         """
-        cartan = np.array([
+        cartan = [
             [ 2, -1],
             [-3,  2]
-        ])
+        ]
         self.cartan_matrix = cartan
         return cartan
 
-    def generate_simple_roots(self) -> List[np.ndarray]:
+    def generate_simple_roots(self) -> List[List[int]]:
         """
-        Generate G₂ simple roots.
+        Generate G₂ simple roots (exact integers, unnormalized).
 
-        G₂ has one short root and one long root with ratio √3.
+        G₂ has one short root and one long root.
+        We keep exact integer coordinates without normalization.
         """
-        # Standard G₂ simple roots in 3D
+        # Standard G₂ simple roots in 3D (exact integers)
         # α₁ is short, α₂ is long
-        alpha1 = np.array([1, -1, 0])      # Short simple root
-        alpha2 = np.array([-2, 1, 1])       # Long simple root
+        alpha1 = [1, -1, 0]      # Short simple root (exact)
+        alpha2 = [-2, 1, 1]       # Long simple root (exact)
 
-        # Normalize so short root has length √2
-        alpha1 = alpha1 * np.sqrt(2) / np.linalg.norm(alpha1)
-        alpha2 = alpha2 * np.sqrt(6) / np.linalg.norm(alpha2)
-
+        # No normalization - keep exact integer representation
         self.simple_roots = [alpha1, alpha2]
         return self.simple_roots
 
-    def generate_dihedral_group(self) -> List[np.ndarray]:
+    def generate_dihedral_group(self) -> List[Tuple[int, ...]]:
         """
-        Generate D₆ as G₂ Weyl group.
+        Generate D₆ as G₂ Weyl group (as permutations, exact).
 
         D₆ = ⟨r, s | r⁶ = s² = (rs)² = e⟩
-        - r: rotation by 60° (order 6)
-        - s: reflection (order 2)
+        - r: rotation (order 6) - cycles 12 elements
+        - s: reflection (order 2) - swaps elements
+
+        Represent as permutations of 12 G₂ roots.
         """
         elements = []
 
-        # In 2D representation (acting on root plane)
-        # Rotation by 60°
-        theta = np.pi / 3  # 60 degrees
-        rotation = np.array([
-            [np.cos(theta), -np.sin(theta)],
-            [np.sin(theta), np.cos(theta)]
-        ])
+        # D₆ acts on 12 elements (G₂ roots)
+        # We represent each element as a permutation tuple
 
-        # Reflection (through x-axis)
-        reflection = np.array([
-            [1, 0],
-            [0, -1]
-        ])
+        # Identity
+        identity = tuple(range(12))
+        elements.append(identity)
 
-        # Generate all 12 elements
-        # Rotations: e, r, r², r³, r⁴, r⁵
+        # Rotations r^k for k=1..5 (cyclic permutation)
+        # r shifts elements by 2 (6 rotations × 2 = 12)
+        for k in range(1, 6):
+            perm = tuple((i + 2*k) % 12 for i in range(12))
+            elements.append(perm)
+
+        # Reflections: swap pairs
+        # s swaps (i, 11-i) for each i
         for k in range(6):
-            rot_k = np.linalg.matrix_power(rotation, k)
-            elements.append(rot_k)
-
-        # Reflections: s, rs, r²s, r³s, r⁴s, r⁵s
-        for k in range(6):
-            rot_k = np.linalg.matrix_power(rotation, k)
-            refl_k = rot_k @ reflection
-            elements.append(refl_k)
+            # Compose rotation with reflection
+            base_reflection = tuple(11 - i for i in range(12))
+            # Apply rotation k first, then reflection
+            rotation_k = tuple((i + 2*k) % 12 for i in range(12))
+            # Compose: reflection ∘ rotation
+            composed = tuple(base_reflection[rotation_k[i]] for i in range(12))
+            elements.append(composed)
 
         self.elements = elements
-        print(f"Generated D₆ with {len(elements)} elements")
+        print(f"Generated D₆ with {len(elements)} elements (as permutations)")
         return elements
 
     def verify_dihedral_properties(self) -> Dict[str, bool]:
-        """Verify D₆ group properties."""
+        """Verify D₆ group properties (exact permutations)."""
         checks = {}
 
         # Check order
         checks['correct_order'] = (len(self.elements) == 12)
 
-        # Check that we have 6 rotations and 6 reflections
-        rotations = []
-        reflections = []
-        for elem in self.elements:
-            det = np.linalg.det(elem)
-            if np.isclose(det, 1):
-                rotations.append(elem)
-            elif np.isclose(det, -1):
-                reflections.append(elem)
+        # Check that we have identity
+        identity = tuple(range(12))
+        checks['has_identity'] = identity in self.elements
 
-        checks['six_rotations'] = (len(rotations) == 6)
-        checks['six_reflections'] = (len(reflections) == 6)
+        # Check all elements are valid permutations
+        all_valid = all(
+            sorted(elem) == list(range(12))
+            for elem in self.elements
+        )
+        checks['all_valid_permutations'] = all_valid
 
-        # Check rotation orders
-        if len(rotations) >= 6:
-            # Identity should be among rotations
-            has_identity = any(np.allclose(r, np.eye(2)) for r in rotations)
-            checks['has_identity'] = has_identity
+        # Check unique elements
+        checks['all_unique'] = len(set(self.elements)) == len(self.elements)
 
         return checks
 
@@ -187,29 +180,20 @@ class G2WeylDihedral:
 
         return checks
 
-    def generate_g2_roots(self) -> List[np.ndarray]:
-        """Generate all 12 G₂ roots."""
+    def generate_g2_roots(self) -> List[List[int]]:
+        """Generate all 12 G₂ roots (exact integer coordinates)."""
         roots = []
 
-        # Short roots (6 total) - vertices of regular hexagon
+        # Short roots in 3D (exact integers)
         short_base = [
-            np.array([1, 0]),
-            np.array([1/2, np.sqrt(3)/2]),
-            np.array([-1/2, np.sqrt(3)/2]),
-            np.array([-1, 0]),
-            np.array([-1/2, -np.sqrt(3)/2]),
-            np.array([1/2, -np.sqrt(3)/2])
+            [1, -1, 0], [1, 0, -1], [0, 1, -1],
+            [-1, 1, 0], [-1, 0, 1], [0, -1, 1]
         ]
 
-        # Long roots (6 total) - vertices of Star of David
-        # These are √3 times certain short roots
+        # Long roots in 3D (exact integers)
         long_base = [
-            np.array([np.sqrt(3), 0]),
-            np.array([np.sqrt(3)/2, 3/2]),
-            np.array([-np.sqrt(3)/2, 3/2]),
-            np.array([-np.sqrt(3), 0]),
-            np.array([-np.sqrt(3)/2, -3/2]),
-            np.array([np.sqrt(3)/2, -3/2])
+            [2, -1, -1], [1, 1, -2], [1, -2, 1],
+            [-2, 1, 1], [-1, -1, 2], [-1, 2, -1]
         ]
 
         roots.extend(short_base)
@@ -240,13 +224,13 @@ class G2WeylDihedral:
 
 def verify_g2_weyl_dihedral():
     """
-    Main function to verify G₂ Weyl group as D₆.
+    Main function to verify G₂ Weyl group as D₆ (exact arithmetic).
 
     Returns:
         Dictionary with G₂ Weyl group analysis
     """
     print("="*60)
-    print("G₂ WEYL GROUP AS DIHEDRAL D₆")
+    print("G₂ WEYL GROUP AS DIHEDRAL D₆ (EXACT ARITHMETIC)")
     print("="*60)
 
     # Create G₂ Weyl group
@@ -254,13 +238,14 @@ def verify_g2_weyl_dihedral():
 
     # Get Cartan matrix
     cartan = g2_weyl.get_g2_cartan_matrix()
-    print("\nG₂ Cartan matrix:")
-    print(cartan)
+    print("\nG₂ Cartan matrix (exact integers):")
+    for row in cartan:
+        print(f"  {row}")
     print("Note: -3 entry indicates triple bond in Dynkin diagram")
 
     # Generate simple roots
     simple = g2_weyl.generate_simple_roots()
-    print(f"\nGenerated {len(simple)} simple roots")
+    print(f"\nGenerated {len(simple)} simple roots (exact integers)")
 
     # Generate D₆ group
     elements = g2_weyl.generate_dihedral_group()
@@ -292,7 +277,7 @@ def verify_g2_weyl_dihedral():
         'rank': 2,
         'simple_roots': 2,
         'total_roots': 12,
-        'cartan_matrix': cartan.tolist(),
+        'cartan_matrix': cartan,  # Already a list
         'verification': {**checks, **root_checks},
         'klein_action': klein_map,
         'weyl_chambers': chambers

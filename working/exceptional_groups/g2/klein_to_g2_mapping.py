@@ -6,7 +6,6 @@ Establish precise correspondence between Klein V₄ and G₂ root system.
 import sys
 import os
 from typing import List, Dict, Tuple
-import numpy as np
 from dataclasses import dataclass
 
 sys.path.append(os.path.join(os.path.dirname(__file__), '../..'))
@@ -20,9 +19,9 @@ from .twelve_fold import G2PeriodicityAnalyzer, verify_twelve_fold
 class KleinG2Mapping:
     """Complete Klein → G₂ mapping."""
     klein_elements: Dict[str, int]  # V₄ elements labeled
-    g2_roots: List[np.ndarray]      # 12 G₂ root vectors
+    g2_roots: List[List[int]]       # 12 G₂ root vectors (exact integers)
     klein_to_g2: Dict[int, List[int]]  # Klein element → G₂ roots
-    action_table: np.ndarray        # 4×3 action table
+    action_table: List[List[int]]   # 4×3 action table (exact integers)
     verification: Dict[str, bool]
 
 
@@ -35,34 +34,30 @@ class KleinG2Mapper:
         self.klein_analyzer = G2KleinAnalyzer()
         self.periodicity_analyzer = G2PeriodicityAnalyzer()
 
-    def generate_g2_roots(self) -> List[np.ndarray]:
+    def generate_g2_roots(self) -> List[List[int]]:
         """
-        Generate the 12 G₂ roots in standard form.
+        Generate the 12 G₂ roots (exact integer coordinates).
 
         G₂ roots in 3D representation:
         - 6 short roots: permutations of (1,-1,0)
-        - 6 long roots: permutations of (2,-1,-1) / √3
+        - 6 long roots: permutations of (2,-1,-1)
         """
         roots = []
 
-        # Short roots (length √2)
-        short_base = [(1, -1, 0), (1, 0, -1), (0, 1, -1),
-                      (-1, 1, 0), (-1, 0, 1), (0, -1, 1)]
+        # Short roots (exact integers)
+        short_base = [[1, -1, 0], [1, 0, -1], [0, 1, -1],
+                      [-1, 1, 0], [-1, 0, 1], [0, -1, 1]]
 
-        for coords in short_base:
-            roots.append(np.array(coords, dtype=float))
+        roots.extend(short_base)
 
-        # Long roots (length √6)
-        long_base = [(2, -1, -1), (1, 1, -2), (1, -2, 1),
-                     (-2, 1, 1), (-1, -1, 2), (-1, 2, -1)]
+        # Long roots (exact integers, no normalization needed)
+        # These have different length but that's fine - we keep exact representation
+        long_base = [[2, -1, -1], [1, 1, -2], [1, -2, 1],
+                     [-2, 1, 1], [-1, -1, 2], [-1, 2, -1]]
 
-        for coords in long_base:
-            # Normalize to same length as short roots for simplicity
-            v = np.array(coords, dtype=float)
-            v = v * np.sqrt(2) / np.sqrt(6)  # Scale to length √2
-            roots.append(v)
+        roots.extend(long_base)
 
-        print(f"Generated {len(roots)} G₂ roots")
+        print(f"Generated {len(roots)} G₂ roots (exact integer coordinates)")
         print(f"  Short roots: {len(short_base)}")
         print(f"  Long roots: {len(long_base)}")
 
@@ -97,17 +92,17 @@ class KleinG2Mapper:
 
         return labels
 
-    def compute_klein_action(self, klein_labels: Dict[str, int]) -> np.ndarray:
+    def compute_klein_action(self, klein_labels: Dict[str, int]) -> List[List[int]]:
         """
-        Compute how Klein acts to generate 12 elements.
+        Compute how Klein acts to generate 12 elements (exact integers).
 
         Klein V₄ acts on Z/3 cosets to give 12 = 4 × 3 elements.
         """
         # The 3 cosets are given by offsets {0, 256, 512}
         cosets = [0, 256, 512]
 
-        # Action table: 4 Klein elements × 3 cosets
-        action = np.zeros((4, 3), dtype=int)
+        # Action table: 4 Klein elements × 3 cosets (exact integers)
+        action = [[0 for _ in range(3)] for _ in range(4)]
 
         klein_order = ['e', 'a', 'b', 'ab']
         for i, k_name in enumerate(klein_order):
@@ -115,25 +110,25 @@ class KleinG2Mapper:
             for j, coset in enumerate(cosets):
                 # The action produces vertex + coset (mod 768)
                 result = (k_vertex + coset) % 768
-                action[i, j] = result
+                action[i][j] = result
 
-        print("\nKlein × Z/3 action table:")
+        print("\nKlein × Z/3 action table (exact integers):")
         print("       Z/3 →   0   256   512")
         for i, k_name in enumerate(klein_order):
-            print(f"  {k_name:2}      : {action[i, 0]:3}  {action[i, 1]:3}  {action[i, 2]:3}")
+            print(f"  {k_name:2}      : {action[i][0]:3}  {action[i][1]:3}  {action[i][2]:3}")
 
         return action
 
-    def map_action_to_roots(self, action: np.ndarray, g2_roots: List[np.ndarray]) -> Dict[int, List[int]]:
+    def map_action_to_roots(self, action: List[List[int]], g2_roots: List[List[int]]) -> Dict[int, List[int]]:
         """
-        Map Klein action results to G₂ roots.
+        Map Klein action results to G₂ roots (exact integers).
 
         Each Klein element generates 3 G₂ roots via the coset action.
         """
         mapping = {}
 
         # Flatten action table to get all 12 positions
-        positions = action.flatten()
+        positions = [val for row in action for val in row]
 
         # Map positions to roots (hypothesis based on ordering)
         for i, pos in enumerate(positions):
@@ -152,7 +147,7 @@ class KleinG2Mapper:
 
     def verify_mapping_properties(self,
                                  klein_labels: Dict[str, int],
-                                 g2_roots: List[np.ndarray],
+                                 g2_roots: List[List[int]],
                                  mapping: Dict[int, List[int]]) -> Dict[str, bool]:
         """
         Verify the Klein → G₂ mapping satisfies expected properties.

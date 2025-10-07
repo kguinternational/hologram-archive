@@ -151,9 +151,10 @@ class F4SignClassAnalyzer:
         # Check total roots
         checks.append(('Total roots = 48', len(f4.sign_classes) == 48))
 
-        # Check long/short distribution (might not be exact due to our hypothesis)
-        ratio_check = len(f4.short_roots) / len(f4.long_roots) if f4.long_roots else 0
-        checks.append(('Root ratio approximately 2:1', abs(ratio_check - 2.0) < 0.1))
+        # Check long/short distribution (exact integer ratio)
+        # F₄ should have 24 short : 24 long = 1:1 OR 32:16 = 2:1
+        ratio_exact = len(f4.short_roots) == 2 * len(f4.long_roots) if f4.long_roots else False
+        checks.append(('Root ratio exactly 2:1', ratio_exact))
 
         # Triangle-free property (discovered in our analysis)
         checks.append(('Triangle-free', self._check_triangle_free(f4.adjacency_matrix)))

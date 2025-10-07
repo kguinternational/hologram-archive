@@ -97,6 +97,29 @@ Once added, the MCP server provides these tools:
 4. Content is addressed by SHA256 hash
 5. Operations are atomic (all-or-nothing)
 
+## Atlas Implementation Principles
+
+**CRITICAL: Mathematical Rigor Required**
+
+- **Floats and imprecise methods are PROHIBITED** in all Atlas work
+- Use exact rational arithmetic (fractions.Fraction) or exact integer arithmetic only
+- For coordinates in ℤ ∪ ½ℤ, use half-integer quantization (multiples of 1/2)
+- **All Atlas implementation must build from first principles**
+- Do not impose external Lie theory assumptions
+- Let structures emerge from categorical framework naturally
+- No floating point comparisons, approximations, or numerical tolerances
+
+## Workspace Hygiene
+
+**IMPORTANT: Do not clutter the workspace**
+
+- **Never create summary files, status reports, or documentation** unless explicitly requested
+- **Never create JSON files** that are not machine-generated artifacts
+- **Never create markdown files** for tracking, planning, or summarizing work
+- **Never create scripts or content** in locations not intended for them
+- Use existing tools and workflows; don't invent new documentation patterns
+- Keep the workspace clean and focused on actual implementation
+
 ## Maintenance
 
 - `.artifacts/` is temporary and can be cleared

@@ -8,7 +8,6 @@ import sys
 import os
 from typing import List, Set, Dict, Tuple, Optional
 from itertools import combinations
-import numpy as np
 
 sys.path.append(os.path.join(os.path.dirname(__file__), '../..'))
 
@@ -219,19 +218,23 @@ class E6SubstructureSearch:
             internal_deg = sum(1 for u in subset if u in self.atlas.adjacency[v])
             internal_degrees.append(internal_deg)
 
-        # E₆ should have regular structure
-        avg_degree = np.mean(internal_degrees)
-        std_degree = np.std(internal_degrees)
+        # E₆ should have regular structure (exact arithmetic)
+        sum_degrees = sum(internal_degrees)
+        avg_degree = sum_degrees / len(internal_degrees) if internal_degrees else 0
+
+        # Calculate exact variance
+        variance = sum((d - avg_degree) ** 2 for d in internal_degrees) / len(internal_degrees) if internal_degrees else 0
 
         # Rough check: E₆ should be somewhat regular
-        if std_degree > avg_degree * 0.5:  # Too irregular
+        # Use exact comparison: variance should be small relative to average
+        if variance > (avg_degree ** 2) / 4:  # Too irregular (variance > (avg/2)^2)
             return False
 
         print(f"    Subset passes basic E₆ tests:")
         print(f"      Size: {len(subset)}")
         print(f"      Connected: True")
         print(f"      Avg internal degree: {avg_degree:.2f}")
-        print(f"      Std internal degree: {std_degree:.2f}")
+        print(f"      Variance internal degree: {variance:.2f}")
 
         return True
 

@@ -7,13 +7,77 @@ F₄ Dynkin diagram: o---o==>o---o (with double bond).
 import sys
 import os
 from typing import List, Set, Tuple, Dict
-import numpy as np
+from fractions import Fraction
 from itertools import product
 
 sys.path.append(os.path.join(os.path.dirname(__file__), '../..'))
 
 from tier_a_embedding import AtlasGraph
-from sign_class_analysis import extract_f4_from_sign_classes
+from f4.sign_class_analysis import extract_f4_from_sign_classes
+
+
+class ExactMatrix:
+    """Matrix with exact rational entries."""
+    def __init__(self, data: List[List[Fraction]]):
+        self.data = [[Fraction(x) for x in row] for row in data]
+        self.rows = len(data)
+        self.cols = len(data[0]) if data else 0
+
+    @staticmethod
+    def eye(n: int) -> 'ExactMatrix':
+        """Identity matrix."""
+        data = [[Fraction(1) if i == j else Fraction(0) for j in range(n)] for i in range(n)]
+        return ExactMatrix(data)
+
+    def __matmul__(self, other: 'ExactMatrix') -> 'ExactMatrix':
+        """Matrix multiplication."""
+        if self.cols != other.rows:
+            raise ValueError("Incompatible dimensions")
+        result = [[Fraction(0) for _ in range(other.cols)] for _ in range(self.rows)]
+        for i in range(self.rows):
+            for j in range(other.cols):
+                result[i][j] = sum(self.data[i][k] * other.data[k][j] for k in range(self.cols))
+        return ExactMatrix(result)
+
+    def __eq__(self, other: 'ExactMatrix') -> bool:
+        """Exact equality check."""
+        if self.rows != other.rows or self.cols != other.cols:
+            return False
+        return all(self.data[i][j] == other.data[i][j]
+                  for i in range(self.rows) for j in range(self.cols))
+
+    def to_tuple(self) -> Tuple:
+        """Convert to tuple for hashing."""
+        return tuple(tuple(row) for row in self.data)
+
+    def __hash__(self):
+        return hash(self.to_tuple())
+
+
+class ExactVector:
+    """Vector with exact rational coordinates."""
+    def __init__(self, coords: List):
+        self.coords = [Fraction(c) for c in coords]
+        self.dim = len(coords)
+
+    def dot(self, other: 'ExactVector') -> Fraction:
+        """Exact dot product."""
+        if self.dim != other.dim:
+            raise ValueError("Incompatible dimensions")
+        return sum(a * b for a, b in zip(self.coords, other.coords))
+
+    def __sub__(self, other: 'ExactVector') -> 'ExactVector':
+        """Vector subtraction."""
+        return ExactVector([a - b for a, b in zip(self.coords, other.coords)])
+
+    def __mul__(self, scalar: Fraction) -> 'ExactVector':
+        """Scalar multiplication."""
+        scalar = Fraction(scalar)
+        return ExactVector([scalar * c for c in self.coords])
+
+    def __rmul__(self, scalar: Fraction) -> 'ExactVector':
+        """Right scalar multiplication."""
+        return self.__mul__(scalar)
 
 
 class F4WeylGroup:
@@ -28,68 +92,69 @@ class F4WeylGroup:
         self.generators = []
         self.elements = set()
 
-    def get_f4_cartan_matrix(self) -> np.ndarray:
+    def get_f4_cartan_matrix(self) -> List[List[int]]:
         """
-        Get the standard F₄ Cartan matrix.
+        Get the standard F₄ Cartan matrix (exact integers).
 
         F₄ Dynkin: o---o==>o---o
         Double bond between roots 2 and 3.
         """
-        cartan = np.array([
+        cartan = [
             [ 2, -1,  0,  0],
             [-1,  2, -2,  0],  # -2 indicates double bond
             [ 0, -1,  2, -1],
             [ 0,  0, -1,  2]
-        ])
+        ]
         self.cartan_matrix = cartan
         return cartan
 
-    def generate_simple_roots(self) -> List[np.ndarray]:
+    def generate_simple_roots(self) -> List[ExactVector]:
         """
-        Generate F₄ simple roots.
+        Generate F₄ simple roots with exact rational coordinates.
 
         F₄ has 4 simple roots with specific length relationships.
         Using standard basis where roots satisfy Cartan matrix.
         """
-        # Standard F₄ simple roots
-        # These should satisfy the F₄ Cartan matrix relations
-        alpha1 = np.array([1, -1, 0, 0])           # α₁
-        alpha2 = np.array([0, 1, -1, 0])           # α₂
-        alpha3 = np.array([0, 0, 1, 0])            # α₃ (long)
-        alpha4 = np.array([-1/2, -1/2, -1/2, -1/2]) # α₄ (short)
-
-        # Alternative basis that might work better
-        # Using the explicit F₄ root system
-        alpha1 = np.array([0, 1, -1, 0])
-        alpha2 = np.array([0, 0, 1, -1])
-        alpha3 = np.array([0, 0, 0, 1])
-        alpha4 = np.array([1/2, -1/2, -1/2, -1/2])
+        # Standard F₄ simple roots (exact rational coordinates)
+        # Using the explicit F₄ root system with half-integers
+        alpha1 = ExactVector([0, 1, -1, 0])
+        alpha2 = ExactVector([0, 0, 1, -1])
+        alpha3 = ExactVector([0, 0, 0, 1])
+        alpha4 = ExactVector([Fraction(1,2), Fraction(-1,2), Fraction(-1,2), Fraction(-1,2)])
 
         self.simple_roots = [alpha1, alpha2, alpha3, alpha4]
         return self.simple_roots
 
-    def simple_reflection(self, root: np.ndarray) -> np.ndarray:
+    def simple_reflection(self, root: ExactVector) -> ExactMatrix:
         """
-        Create reflection matrix for a root.
+        Create exact reflection matrix for a root.
 
         Reflection through hyperplane perpendicular to root:
         s_α(v) = v - 2⟨v,α⟩/⟨α,α⟩ * α
         """
-        root_norm_sq = np.dot(root, root)
+        root_norm_sq = root.dot(root)
         if root_norm_sq == 0:
             raise ValueError("Cannot reflect through zero root")
 
-        # Create reflection matrix
-        n = len(root)
-        reflection = np.eye(n) - 2 * np.outer(root, root) / root_norm_sq
-        return reflection
+        # Create reflection matrix: I - 2(α ⊗ α)/⟨α,α⟩
+        n = root.dim
+        reflection_data = []
+        for i in range(n):
+            row = []
+            for j in range(n):
+                # I[i,j] - 2*α[i]*α[j]/⟨α,α⟩
+                delta = Fraction(1) if i == j else Fraction(0)
+                entry = delta - 2 * root.coords[i] * root.coords[j] / root_norm_sq
+                row.append(entry)
+            reflection_data.append(row)
+        return ExactMatrix(reflection_data)
 
-    def generate_weyl_group(self, max_length: int = 20) -> Set[Tuple]:
+    def generate_weyl_group(self, max_length: int = 30) -> Set[ExactMatrix]:
         """
-        Generate Weyl group elements up to given word length.
+        Generate Weyl group elements up to given word length (exact arithmetic).
 
         Uses breadth-first search from identity.
-        Each element stored as tuple of matrix entries.
+        Each element is an ExactMatrix (exact rational entries).
         """
         if self.simple_roots is None:
             self.generate_simple_roots()
@@ -101,25 +166,25 @@ class F4WeylGroup:
         self.generators = reflections
 
         # Start with identity
-        identity = np.eye(4)
-        elements = {tuple(identity.flatten()): identity}
+        identity = ExactMatrix.eye(4)
+        elements = {identity: identity}  # Use matrix as key (hashable)
         frontier = [identity]
 
         print(f"Generating F₄ Weyl group (expected order: {self.expected_order})")
 
-        # BFS to generate group
+        # BFS to generate group - stop when no new elements found
         for length in range(1, max_length + 1):
             new_frontier = []
+            prev_count = len(elements)
 
             for elem in frontier:
                 for refl in reflections:
-                    # Apply reflection
+                    # Apply reflection (exact matrix multiplication)
                     new_elem = refl @ elem
 
-                    # Check if new
-                    key = tuple(np.round(new_elem, 8).flatten())
-                    if key not in elements:
-                        elements[key] = new_elem
+                    # Check if new (exact equality)
+                    if new_elem not in elements:
+                        elements[new_elem] = new_elem
                         new_frontier.append(new_elem)
 
             frontier = new_frontier
@@ -130,15 +195,16 @@ class F4WeylGroup:
             if len(elements) == self.expected_order:
                 print(f"✓ Generated full F₄ Weyl group!")
                 break
-            elif len(frontier) == 0:
-                print(f"⚠ Generation stopped at {len(elements)} elements")
+            elif len(frontier) == 0 or len(elements) == prev_count:
+                # No new elements found - group is complete
+                print(f"⚠ Generation stopped at {len(elements)} elements (expected {self.expected_order})")
                 break
 
         self.elements = elements
         return elements
 
     def verify_group_properties(self) -> Dict[str, bool]:
-        """Verify F₄ Weyl group properties."""
+        """Verify F₄ Weyl group properties (exact arithmetic)."""
         checks = {}
 
         # Check order
@@ -146,14 +212,15 @@ class F4WeylGroup:
 
         # Check generators have order 2 (reflections)
         gens_order_2 = True
+        identity = ExactMatrix.eye(4)
         for gen in self.generators:
             gen_squared = gen @ gen
-            if not np.allclose(gen_squared, np.eye(4)):
+            if gen_squared != identity:  # Exact equality
                 gens_order_2 = False
                 break
         checks['generators_order_2'] = gens_order_2
 
-        # Check Cartan matrix consistency
+        # Check Cartan matrix consistency (exact)
         if self.cartan_matrix is not None and self.simple_roots is not None:
             cartan_consistent = True
             n = len(self.simple_roots)
@@ -162,20 +229,20 @@ class F4WeylGroup:
                     alpha_i = self.simple_roots[i]
                     alpha_j = self.simple_roots[j]
 
-                    # Cartan entry: 2⟨α_i, α_j⟩/⟨α_j, α_j⟩
-                    computed = 2 * np.dot(alpha_i, alpha_j) / np.dot(alpha_j, alpha_j)
-                    expected = self.cartan_matrix[i, j]
+                    # Cartan entry: 2⟨α_i, α_j⟩/⟨α_j, α_j⟩ (exact rational)
+                    computed = 2 * alpha_i.dot(alpha_j) / alpha_j.dot(alpha_j)
+                    expected = Fraction(self.cartan_matrix[i][j])
 
-                    if not np.isclose(computed, expected, atol=0.1):
+                    if computed != expected:  # Exact equality
                         cartan_consistent = False
-                        print(f"  Cartan mismatch at [{i},{j}]: {computed:.2f} vs {expected}")
+                        print(f"  Cartan mismatch at [{i},{j}]: {computed} vs {expected}")
         else:
             cartan_consistent = False
         checks['cartan_consistent'] = cartan_consistent
 
         return checks
 
-    def find_longest_element(self) -> Tuple[np.ndarray, int]:
+    def find_longest_element(self) -> Tuple[ExactMatrix, int]:
         """
         Find the longest element of F₄ Weyl group.
 
@@ -185,13 +252,12 @@ class F4WeylGroup:
         max_length = 0
         longest = None
 
-        for key, elem in self.elements.items():
-            # Compute length as minimal word in generators
-            # For now, use trace as proxy (longest element has specific trace)
-            trace = np.trace(elem)
+        for elem in self.elements:
+            # Compute trace (exact)
+            trace = sum(elem.data[i][i] for i in range(elem.rows))
 
-            # In F₄, longest element has trace -4
-            if np.isclose(trace, -4):
+            # In F₄, longest element has trace -4 (exact)
+            if trace == Fraction(-4):
                 longest = elem
                 max_length = 24  # Known length
                 break
@@ -201,13 +267,13 @@ class F4WeylGroup:
 
 def verify_f4_weyl_group():
     """
-    Main function to generate and verify F₄ Weyl group.
+    Main function to generate and verify F₄ Weyl group (exact arithmetic).
 
     Returns:
         Dictionary with Weyl group data and verification results
     """
     print("="*60)
-    print("F₄ WEYL GROUP GENERATION")
+    print("F₄ WEYL GROUP GENERATION (EXACT ARITHMETIC)")
     print("="*60)
 
     # Create F₄ Weyl group
@@ -215,12 +281,13 @@ def verify_f4_weyl_group():
 
     # Get Cartan matrix
     cartan = weyl.get_f4_cartan_matrix()
-    print("\nF₄ Cartan matrix:")
-    print(cartan)
+    print("\nF₄ Cartan matrix (exact integers):")
+    for row in cartan:
+        print(f"  {row}")
 
     # Generate simple roots
     simple_roots = weyl.generate_simple_roots()
-    print(f"\nGenerated {len(simple_roots)} simple roots")
+    print(f"\nGenerated {len(simple_roots)} simple roots (exact rationals)")
 
     # Generate full Weyl group
     elements = weyl.generate_weyl_group()
@@ -243,7 +310,7 @@ def verify_f4_weyl_group():
         'expected_order': weyl.expected_order,
         'rank': weyl.rank,
         'num_generators': len(weyl.generators),
-        'cartan_matrix': cartan.tolist(),
+        'cartan_matrix': cartan,  # Already a list
         'verification': checks,
         'has_longest_element': longest is not None
     }

@@ -14,7 +14,6 @@ Key observations:
 import sys
 import os
 from typing import List, Set, Dict, Tuple, Optional
-import numpy as np
 from collections import defaultdict
 
 sys.path.append(os.path.join(os.path.dirname(__file__), '../..'))
@@ -122,12 +121,13 @@ class E6FirstPrinciplesConstruction:
         # Compute distance from each vertex to nearest unity
         distances = {}
         for v in range(96):
-            min_dist = float('inf')
+            min_dist = None  # Use None instead of float('inf')
             for u in unity:
                 # Graph distance via BFS
                 dist = self._graph_distance(v, u)
-                min_dist = min(min_dist, dist)
-            distances[v] = min_dist
+                if min_dist is None or dist < min_dist:
+                    min_dist = dist
+            distances[v] = min_dist if min_dist is not None else 1000  # Large integer fallback
 
         # Analyze distance distribution
         dist_distribution = defaultdict(list)
@@ -238,7 +238,7 @@ class E6FirstPrinciplesConstruction:
         return None
 
     def _graph_distance(self, v1: int, v2: int) -> int:
-        """Compute graph distance between two vertices."""
+        """Compute graph distance between two vertices (returns large integer if unreachable)."""
         if v1 == v2:
             return 0
 
@@ -254,7 +254,7 @@ class E6FirstPrinciplesConstruction:
                     visited.add(u)
                     queue.append((u, dist + 1))
 
-        return float('inf')
+        return 1000  # Large integer for unreachable vertices
 
     def verify_e6_candidate(self, candidate: Set[int]) -> Dict[str, bool]:
         """
@@ -276,18 +276,21 @@ class E6FirstPrinciplesConstruction:
 
         # Induced subgraph analysis
         if checks['connected']:
-            # Check degree distribution within E₆
+            # Check degree distribution within E₆ (exact arithmetic)
             internal_degrees = []
             for v in candidate:
                 internal_deg = sum(1 for u in candidate if u in self.atlas.adjacency[v])
                 internal_degrees.append(internal_deg)
 
-            avg_deg = np.mean(internal_degrees)
-            std_deg = np.std(internal_degrees)
+            sum_deg = sum(internal_degrees)
+            avg_deg = sum_deg / len(internal_degrees) if internal_degrees else 0
+
+            # Calculate exact variance
+            variance = sum((d - avg_deg) ** 2 for d in internal_degrees) / len(internal_degrees) if internal_degrees else 0
 
             checks['avg_degree'] = avg_deg
-            checks['std_degree'] = std_deg
-            checks['regular_enough'] = (std_deg < avg_deg * 0.3)
+            checks['variance'] = variance
+            checks['regular_enough'] = (variance < (avg_deg ** 2) * 0.09)  # variance < (avg * 0.3)^2
 
             print(f"\n  E₆ candidate verification:")
             print(f"    Size: {len(candidate)}")

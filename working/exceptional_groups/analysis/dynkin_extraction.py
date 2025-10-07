@@ -6,7 +6,7 @@ Extract simple roots and build Dynkin diagrams from our structures.
 import sys
 import os
 from typing import List, Dict, Tuple
-import numpy as np
+from fractions import Fraction
 from dataclasses import dataclass
 
 sys.path.append(os.path.join(os.path.dirname(__file__), '../..'))
@@ -20,8 +20,8 @@ class DynkinDiagram:
     """Container for Dynkin diagram data."""
     group: str
     rank: int
-    simple_roots: List[np.ndarray]
-    cartan_matrix: np.ndarray
+    simple_roots: List[List[Fraction]]  # Exact rational coordinates
+    cartan_matrix: List[List[int]]      # Exact integer Cartan matrix
     diagram_ascii: str
     bonds: List[Tuple[int, int, int]]  # (i, j, multiplicity)
 
@@ -33,6 +33,11 @@ class DynkinExtractor:
         """Initialize with Atlas."""
         self.atlas = AtlasGraph()
 
+    @staticmethod
+    def dot_product(v1: List[Fraction], v2: List[Fraction]) -> Fraction:
+        """Compute exact dot product of two vectors."""
+        return sum(a * b for a, b in zip(v1, v2))
+
     def extract_g2_dynkin(self) -> DynkinDiagram:
         """
         Extract G₂ Dynkin diagram.
@@ -40,16 +45,16 @@ class DynkinExtractor:
         G₂: o≡≡≡o (triple bond)
         Cartan matrix: [[2, -1], [-3, 2]]
         """
-        # G₂ Cartan matrix
-        cartan = np.array([
+        # G₂ Cartan matrix (exact integers)
+        cartan = [
             [ 2, -1],
             [-3,  2]
-        ])
+        ]
 
-        # G₂ simple roots (standard realization)
-        # α₁ is short, α₂ is long (ratio √3)
-        alpha1 = np.array([1, -1, 0])      # Short root
-        alpha2 = np.array([-2, 1, 1])       # Long root
+        # G₂ simple roots (exact integer coordinates)
+        # α₁ is short, α₂ is long (length ratio √3)
+        alpha1 = [Fraction(1), Fraction(-1), Fraction(0)]      # Short root
+        alpha2 = [Fraction(-2), Fraction(1), Fraction(1)]       # Long root
 
         simple_roots = [alpha1, alpha2]
 
@@ -86,20 +91,20 @@ Triple bond indicates:
         F₄: o---o==>o---o (double bond)
         Cartan matrix: [[2,-1,0,0], [-1,2,-2,0], [0,-1,2,-1], [0,0,-1,2]]
         """
-        # F₄ Cartan matrix
-        cartan = np.array([
+        # F₄ Cartan matrix (exact integers)
+        cartan = [
             [ 2, -1,  0,  0],
             [-1,  2, -2,  0],
             [ 0, -1,  2, -1],
             [ 0,  0, -1,  2]
-        ])
+        ]
 
-        # F₄ simple roots
+        # F₄ simple roots (exact rational coordinates)
         # Using standard 4D realization
-        alpha1 = np.array([0, 1, -1, 0])       # α₁
-        alpha2 = np.array([0, 0, 1, -1])       # α₂
-        alpha3 = np.array([0, 0, 0, 1])        # α₃ (long)
-        alpha4 = np.array([1/2, -1/2, -1/2, -1/2])  # α₄ (short)
+        alpha1 = [Fraction(0), Fraction(1), Fraction(-1), Fraction(0)]       # α₁
+        alpha2 = [Fraction(0), Fraction(0), Fraction(1), Fraction(-1)]       # α₂
+        alpha3 = [Fraction(0), Fraction(0), Fraction(0), Fraction(1)]        # α₃ (long)
+        alpha4 = [Fraction(1, 2), Fraction(-1, 2), Fraction(-1, 2), Fraction(-1, 2)]  # α₄ (short)
 
         simple_roots = [alpha1, alpha2, alpha3, alpha4]
 
@@ -133,44 +138,54 @@ Double bond (=>) indicates:
             bonds=bonds
         )
 
-    def verify_cartan_from_roots(self, simple_roots: List[np.ndarray],
-                                 expected_cartan: np.ndarray) -> bool:
+    def verify_cartan_from_roots(self, simple_roots: List[List[Fraction]],
+                                 expected_cartan: List[List[int]]) -> bool:
         """
-        Verify Cartan matrix computed from simple roots.
+        Verify Cartan matrix computed from simple roots (exact arithmetic).
 
         C_ij = 2⟨α_i, α_j⟩ / ⟨α_j, α_j⟩
         """
         n = len(simple_roots)
-        computed_cartan = np.zeros((n, n))
+        computed_cartan = [[Fraction(0) for _ in range(n)] for _ in range(n)]
 
         for i in range(n):
             for j in range(n):
                 alpha_i = simple_roots[i]
                 alpha_j = simple_roots[j]
 
-                # Compute Cartan entry
-                numerator = 2 * np.dot(alpha_i, alpha_j)
-                denominator = np.dot(alpha_j, alpha_j)
+                # Compute Cartan entry using exact arithmetic
+                numerator = 2 * self.dot_product(alpha_i, alpha_j)
+                denominator = self.dot_product(alpha_j, alpha_j)
 
-                computed_cartan[i, j] = numerator / denominator
+                computed_cartan[i][j] = numerator / denominator
 
-        # Check if close to expected
-        close = np.allclose(computed_cartan, expected_cartan, atol=0.1)
+        # Check exact equality (Cartan entries should be exact integers)
+        matches = True
+        for i in range(n):
+            for j in range(n):
+                # Convert to int and check
+                computed_int = int(computed_cartan[i][j])
+                if computed_cartan[i][j] != Fraction(computed_int) or computed_int != expected_cartan[i][j]:
+                    matches = False
+                    break
 
-        if not close:
+        if not matches:
             print("\nCartan matrix verification:")
-            print("Computed:")
-            print(np.round(computed_cartan, 2))
+            print("Computed (as fractions):")
+            for row in computed_cartan:
+                print(f"  {[str(x) for x in row]}")
             print("Expected:")
-            print(expected_cartan)
+            for row in expected_cartan:
+                print(f"  {row}")
 
-        return close
+        return matches
 
-    def analyze_root_angles(self, simple_roots: List[np.ndarray]) -> Dict[Tuple[int, int], float]:
+    def analyze_root_angles(self, simple_roots: List[List[Fraction]]) -> Dict[Tuple[int, int], str]:
         """
-        Compute angles between simple roots.
+        Analyze angles between simple roots (symbolic, no float approximations).
 
-        Helps verify Dynkin diagram structure.
+        Returns symbolic descriptions based on Cartan matrix entries.
+        For exact angle computation, use symbolic mathematics.
         """
         n = len(simple_roots)
         angles = {}
@@ -180,13 +195,33 @@ Double bond (=>) indicates:
                 alpha_i = simple_roots[i]
                 alpha_j = simple_roots[j]
 
-                # Compute angle
-                cos_angle = np.dot(alpha_i, alpha_j) / (
-                    np.linalg.norm(alpha_i) * np.linalg.norm(alpha_j)
-                )
-                angle_deg = np.arccos(np.clip(cos_angle, -1, 1)) * 180 / np.pi
+                # Compute exact dot products
+                dot_ij = self.dot_product(alpha_i, alpha_j)
+                norm_i_sq = self.dot_product(alpha_i, alpha_i)
+                norm_j_sq = self.dot_product(alpha_j, alpha_j)
 
-                angles[(i, j)] = angle_deg
+                # cos(θ) = ⟨α_i, α_j⟩ / (||α_i|| ||α_j||)
+                # We keep this symbolic to avoid float arithmetic
+
+                # For common angles in Lie theory:
+                # cos(90°) = 0, cos(120°) = -1/2, cos(135°) = -√2/2, cos(150°) = -√3/2
+
+                if dot_ij == 0:
+                    angles[(i, j)] = "90° (orthogonal)"
+                elif dot_ij < 0:
+                    # Obtuse angle - common in root systems
+                    ratio = (dot_ij * dot_ij) / (norm_i_sq * norm_j_sq)
+                    if ratio == Fraction(1, 4):
+                        angles[(i, j)] = "120°"
+                    elif ratio == Fraction(1, 2):
+                        angles[(i, j)] = "135°"
+                    elif ratio == Fraction(3, 4):
+                        angles[(i, j)] = "150°"
+                    else:
+                        angles[(i, j)] = f"obtuse (cos²θ = {ratio})"
+                else:
+                    # Acute angle
+                    angles[(i, j)] = f"acute (⟨·,·⟩ = {dot_ij})"
 
         return angles
 
@@ -246,20 +281,20 @@ def extract_all_dynkin_diagrams():
     )
     print(f"\nF₄ Cartan verification: {f4_verified}")
 
-    # Analyze angles
+    # Analyze angles (symbolic, no float approximations)
     print("\n" + "="*60)
-    print("ROOT ANGLE ANALYSIS")
+    print("ROOT ANGLE ANALYSIS (SYMBOLIC)")
     print("="*60)
 
     print("\nG₂ root angles:")
     g2_angles = extractor.analyze_root_angles(g2_dynkin.simple_roots)
-    for (i, j), angle in g2_angles.items():
-        print(f"  α{i} ∠ α{j}: {angle:.1f}°")
+    for (i, j), angle_desc in g2_angles.items():
+        print(f"  α{i} ∠ α{j}: {angle_desc}")
 
     print("\nF₄ root angles:")
     f4_angles = extractor.analyze_root_angles(f4_dynkin.simple_roots)
-    for (i, j), angle in f4_angles.items():
-        print(f"  α{i} ∠ α{j}: {angle:.1f}°")
+    for (i, j), angle_desc in f4_angles.items():
+        print(f"  α{i} ∠ α{j}: {angle_desc}")
 
     # Result
     result = {

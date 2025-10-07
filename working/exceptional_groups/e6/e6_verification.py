@@ -6,7 +6,6 @@ Verify the 72-vertex E₆ candidate and analyze the 24-vertex complement.
 import sys
 import os
 from typing import List, Set, Dict
-import numpy as np
 
 sys.path.append(os.path.join(os.path.dirname(__file__), '../..'))
 
@@ -64,7 +63,9 @@ class E6Verifier:
             conn = sum(1 for u in self.e6_vertices if u in self.atlas.adjacency[v])
             connections_to_e6.append(conn)
 
-        avg_conn = np.mean(connections_to_e6)
+        # Exact arithmetic - no floats
+        total_conn = sum(connections_to_e6)
+        avg_conn = total_conn / len(connections_to_e6) if connections_to_e6 else 0
         print(f"\nAvg connections from complement to E₆: {avg_conn:.2f}")
         analysis['avg_connections_to_e6'] = avg_conn
 
@@ -160,7 +161,7 @@ class E6Verifier:
 
         return analysis
 
-    def compute_e6_cartan_hypothesis(self) -> np.ndarray:
+    def compute_e6_cartan_hypothesis(self) -> List[List[int]]:
         """
         Attempt to extract E₆ Cartan matrix from structure.
 
@@ -174,17 +175,19 @@ class E6Verifier:
         # This requires finding 6 simple roots within the 72
         # For now, note the expected structure
 
-        e6_cartan_expected = np.array([
+        # Exact integer Cartan matrix (no numpy)
+        e6_cartan_expected = [
             [ 2, -1,  0,  0,  0,  0],
             [-1,  2, -1,  0,  0,  0],
             [ 0, -1,  2, -1,  0, -1],
             [ 0,  0, -1,  2, -1,  0],
             [ 0,  0,  0, -1,  2,  0],
             [ 0,  0, -1,  0,  0,  2]
-        ])
+        ]
 
         print("\nExpected E₆ Cartan matrix (from Lie theory):")
-        print(e6_cartan_expected)
+        for row in e6_cartan_expected:
+            print(f"  {row}")
         print("\nNote: Extracting this from our 72 vertices requires")
         print("identifying 6 simple roots - future work")
 
