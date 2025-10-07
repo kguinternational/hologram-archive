@@ -115,6 +115,9 @@ Once added, the MCP server provides these tools:
 
 - **Never create summary files, status reports, or documentation** unless explicitly requested
 - **Never create JSON files** that are not machine-generated artifacts
+  - ❌ NO manually written JSON files (certificates, configs, etc.)
+  - ✅ ONLY JSON output from running programs/scripts
+  - Exception: spec/ directory managed by MCP server only
 - **Never create markdown files** for tracking, planning, or summarizing work
 - **Never create scripts or content** in locations not intended for them
 - Use existing tools and workflows; don't invent new documentation patterns
