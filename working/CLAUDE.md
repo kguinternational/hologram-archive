@@ -78,6 +78,7 @@ working/
 - ❌ **Certificates** outside `docs/exceptional_groups/certificates/`
 - ❌ **Analysis results** outside proper analysis/ directories
 - ❌ **"scratch" or "temp" directories**
+- ❌ **Reports, analyses, or documentation** - NEVER create unless explicitly requested by user
 
 ### REQUIRED - File Creation Rules:
 

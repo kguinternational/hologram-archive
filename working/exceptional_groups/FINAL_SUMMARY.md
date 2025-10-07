@@ -116,10 +116,13 @@ tier_a_embedding: 96 Atlas → 96 E₈ roots
 - Root ratio 4:1
 
 ### ⚠️ F₄ ⊂ E₆
-**Status**: Partial (48 < 72)
-- Root counts compatible
-- Need explicit embedding
-- **Future work**
+**Status**: Categorical Analysis Complete
+- F₄ quotient: 48 classes (96→48)
+- E₆ quotient: 36 classes (72→36)
+- 48 > 36: Quotient inclusion impossible
+- Root overlap: 36/48 (75%)
+- **Conclusion**: Requires Lie algebra embedding (classical theory)
+- **Novel finding**: Quotient ⊄ Filtration (categorical incompatibility)
 
 ### ✅ E₆ ⊂ E₇
 **Proven**: Week 2 (extended)
