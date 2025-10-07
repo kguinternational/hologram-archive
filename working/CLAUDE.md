@@ -50,15 +50,67 @@
 3. Use tolerance-based convergence
 4. Treat Atlas as a numerical optimization problem
 
-## This Workspace
+## Workspace Organization
 
-All code in `/workspaces/Hologram/working/` must adhere to these principles.
+**CRITICAL: This workspace is intentional and organized. Do NOT create random content.**
 
-**Existing violations:**
-- `action_framework/` - Currently uses numpy/float, needs redesign for exact arithmetic
-- Any file importing `numpy` is INVALID for Atlas work
+### Directory Structure
 
-**Valid approaches:**
-- `exceptional_groups/` - First-principles algebraic construction
-- Symbolic Lagrangian formulation (no numerical minimization)
-- Categorical/functorial definitions
+All code in `/workspaces/Hologram/working/` follows a strict organization:
+
+```
+working/
+├── action_framework/      # Action framework (exact arithmetic)
+├── exceptional_groups/    # Atlas embedding (first principles)
+├── tier_a_embedding/      # E₈ foundation
+├── docs/                  # ALL documentation (organized by topic)
+├── context/               # Supporting theory papers
+└── README.md              # Main documentation
+```
+
+### PROHIBITED - Do NOT Create:
+
+- ❌ **Random markdown files** in root directory
+- ❌ **Temporary status reports** (use existing docs/ structure)
+- ❌ **Duplicate documentation** (organize in docs/)
+- ❌ **Ad-hoc scripts** outside proper modules
+- ❌ **Test files** in random locations (use proper test/ directories)
+- ❌ **Certificates** outside `docs/exceptional_groups/certificates/`
+- ❌ **Analysis results** outside proper analysis/ directories
+- ❌ **"scratch" or "temp" directories**
+
+### REQUIRED - File Creation Rules:
+
+- ✅ **Implementation code** goes in proper module directories only
+- ✅ **Documentation** goes in `docs/` with clear organization
+- ✅ **Tests** go in module-specific `tests/` directories
+- ✅ **Certificates** go in `docs/exceptional_groups/certificates/`
+- ✅ **New modules** require planning and proper structure
+- ✅ **Every file** has a clear purpose and location
+
+### Valid Module Locations:
+
+**Implementation**:
+- `action_framework/` - Exact arithmetic, action functionals
+- `exceptional_groups/` - First-principles Atlas embedding
+- `tier_a_embedding/` - E₈ embedding foundation
+
+**Documentation** (ALL docs go here):
+- `docs/action_framework/` - Action framework reports
+- `docs/exceptional_groups/` - Atlas embedding reports
+- `docs/reports/` - Status and progress reports
+
+### Before Creating ANY File:
+
+1. **Ask**: Does this belong in an existing directory?
+2. **Check**: Is there already similar content?
+3. **Organize**: Use proper docs/ structure for documentation
+4. **Clean**: Remove when obsolete (don't leave clutter)
+
+### Workspace Hygiene:
+
+- **No `__pycache__`** - Covered by `.gitignore`
+- **No `.pyc` files** - Covered by `.gitignore`
+- **No duplicate files** - Consolidate or delete
+- **No temporary content** - Use proper locations or delete when done
+- **Regular cleanup** - Keep workspace intentional and minimal
